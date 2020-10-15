@@ -136,7 +136,7 @@ function processLoading(text) {
   .buttonRow{padding:5px 0;}
   .forward{float:right;}
   table#googleFiles { margin-left: 0; border-collapse:collapse; border:1px solid #036; font-size: small; width: 100%; }
-  table#googleFiles th { background-color:#036; border-bottom:1px double #fff; color: #fff; text-align:center; padding:8px; }
+  table#googleFiles th { background-color:#036; border-bottom:1px double #fff; color: #fff; text-align:left; padding:8px; }
   table#googleFiles td { border:1px solid #036; vertical-align:top; padding:5px 10px; }
   #contentwrapper{float:left;width:100%;}
   .container{margin:0 10px 10px;}
@@ -150,15 +150,15 @@ function processLoading(text) {
 <div class="container-fluid">
       <!-- body_text //-->
       <div class="row">
-     <h1><?php echo HEADING_TITLE; ?></h1>
+     <h1><?php echo HEADING_TITLE. ' ' . GOOGLE_PRODUCTS_VERSION; ?></h1>
           <br>
 <div>
       <form method="get" action="<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . ".php"; ?>" name="google" target="googlefeed" onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=600, height=400, top=0, left=50, scrollbars=yes');setTimeout('location.reload();', 5000);"><?php //runs script in shop root in the popup, then reloads the admin page to display the newly-created file ?>
-        <label for="feed">Feed Type:</label>
+        <label for="feed"><?php echo TEXT_FEED_TYPE ?></label>
         <select name="feed" id="feed">
-          <option value="fy_un_tp">Products</option>
-          <option value="fy_un_td">Documents</option>
-          <option value="fy_un_tn">News</option>
+          <option value="fy_un_tp"><?php echo TEXT_FEED_PRODUCTS ?></option>
+          <option value="fy_un_td"><?php echo TEXT_FEED_DOCUMENTS ?></option>
+          <option value="fy_un_tn"><?php echo TEXT_FEED_NEWS ?></option>
         </select>
         <br class="clearBoth" />
         <label for="limit"><?php echo TEXT_ENTRY_LIMIT; ?></label>
@@ -175,12 +175,12 @@ function processLoading(text) {
 </div>
           <hr>
           <div>
-      <h2>Available Files</h2> 
+      <h2><?php echo TEXT_FEED_FILES; ?></h2> 
       <table id="googleFiles">
         <tr>
-          <th>Date (DD/MM/YYYY)</th>
-          <th>Download Link</th>
-          <th>Action</th>
+          <th><?php echo TEXT_DATE_CREATED ?></th>
+          <th><?php echo TEXT_DOWNLOAD_LINK ?></th>
+          <th><?php echo TEXT_ACTION ?></th>
         </tr>
         <?php
         if ($handle = opendir(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
@@ -193,8 +193,8 @@ function processLoading(text) {
                 <td><?php echo $date; ?></td>
                 <td><a href="<?php echo HTTP_SERVER . DIR_WS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file; ?>" target="_blank"><?php echo $file;?></a></td>
                 <td>
-                  <a href="<?php echo zen_href_link(FILENAME_GOOGLEFROOGLE, 'file='.$file.'&action=delete');?>">Delete</a>&nbsp;
-                  <a href="#" onclick="window.open('<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE; ?>.php?feed=fn_uy&upload_file=<?php echo $file; ?>&key=<?php echo GOOGLE_PRODUCTS_KEY; ?>', 'googlefrooglefeed', 'resizable=1, statusbar=5, width=600, height=400, top=0, left=50, scrollbars=yes'); return false;">Upload</a>
+                  <a href="<?php echo zen_href_link(FILENAME_GOOGLEFROOGLE, 'file='.$file.'&action=delete');?>"><?php echo IMAGE_DELETE;?></a>&nbsp;
+                  <a href="#" onclick="window.open('<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE; ?>.php?feed=fn_uy&upload_file=<?php echo $file; ?>&key=<?php echo GOOGLE_PRODUCTS_KEY; ?>', 'googlefrooglefeed', 'resizable=1, statusbar=5, width=600, height=400, top=0, left=50, scrollbars=yes'); return false;"><?php echo IMAGE_UPLOAD;?></a>
                 </td>
               </tr>
               <?php
