@@ -28,7 +28,7 @@ if (!function_exists('google_cfg_pull_down_country_iso3_list')){
 	function google_cfg_pull_down_country_iso3_list($countries_id, $key = '') {
 		global $db;
 		$name = (($key) ? 'configuration[' . $key . ']' : 'configuration_value');
-		$countries = $db->execute("select countries_id, countries_iso_code_3 from " . TABLE_COUNTRIES);
+		$countries = $db->execute("select countries_id, countries_iso_code_3 from " . TABLE_COUNTRIES . " order by countries_iso_code_3");//steve added ordering
 		$countries_array = array();
 		while (!$countries->EOF) {
 			$countries_array[] = array('id' => $countries->fields['countries_id'],
