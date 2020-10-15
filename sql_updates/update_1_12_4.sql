@@ -1,0 +1,2 @@
+DELETE FROM configuration WHERE configuration_key = 'GOOGLE_PRODUCTS_IN_STOCK' LIMIT 1;
+DELETE FROM configuration WHERE configuration_key = 'GOOGLE_PRODUCTS_DEFAULT_QUANTITY' LIMIT 1;

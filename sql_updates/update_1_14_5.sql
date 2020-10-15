@@ -1,0 +1,1 @@
+UPDATE configuration SET configuration_value = '1.14.5' WHERE configuration_key = 'GOOGLE_PRODUCTS_VERSION' LIMIT 1;

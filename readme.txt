@@ -1,0 +1,1 @@
+See documentation in /docs/google_merchant_center/readme.html

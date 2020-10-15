@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Google Merchant Center Documentation</title>
+  <link href="css/stylesheet.css" rel="stylesheet" type="text/css" />
+  <link href="css/sh_style.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.1.min.js"></script>
+  <script type="text/javascript" src="js/sh_main.min.js"></script>
+  <script type="text/javascript" src="js/sh_html.min.js"></script>
+  <script type="text/javascript" src="js/sh_php.min.js"></script>
+  <script type="text/javascript" src="js/sh_javascript.min.js"></script>
+  <script type="text/javascript" src="js/sh_sql.min.js"></script>
+  <script type="text/javascript" src="js/sh_css.min.js"></script>
+  <script type="text/javascript" src="js/documentation.js"></script>
+</head>
+<body>
+  <!--BOF Header-->
+  <div id="headerContainer">
+    <a name="top"></a>
+    <div id="headerWrapper">
+      <div class="contentWrapper">
+        <img src="images/logo.png" alt="Numinix.com" title="Numinix" id="logo" class="headerContent" />
+        <span id="header" class="headerContent forward">Installation Instructions For Google Merchant Center Feeder</span>
+        <br class="clearBoth" />
+      </div>
+    </div>
+    <!--BOF Links-->
+    <div class="contentWrapper" id="headerButton">
+      <a href="#zen137" class="btn install" title="Installation (Zen Cart 1.3.7)">Installation</a>
+      <a href="#tips" class="btn tips" title="Tips">Tips</a>
+      <a href="#uninstall" class="btn uninstall" title="Uninstall">Uninstall</a>
+      <a href="#help" class="btn help" title="Help">Help</a>
+    </div>
+    <!--EOF Links-->
+  </div>
+  <!--EOF Header-->
+  <div class="contentWrapper">
+    <!--BOF About Us-->
+    <div class="numHeader bodyHeader">
+      <span class="bodyHeaderTxt back">ABOUT US</span>
+      <div class="forward"><a href="#top"><img src="images/backToTop.png" width="115" height="22" alt="backtotop" /></a></div>
+    </div>
+    <div class="bodyWrapper">
+      <div class="spacer">
+        <div class="bodyRow"><span class="bodyStrong">Title:</span><span class="content">Google Merchant Center Feeder</span></div>
+        <div class="bodyRow"><span class="bodyStrong">Author:</span><span class="content">Numinix</span></div>
+        <div class="bodyRow"><span class="bodyStrong">Description:</span><span class="content">Generates a Google Product Feed for Zen Cart stores.</span></div>
+        <div class="bodyRow"><span class="bodyStrong">Installation Level:</span><span class="content">Easy</span></div>
+        <div class="bodyRow"><span class="bodyStrong">Installation Time:</span><span class="content">&lt; 5 minutes</span></div>
+        <div class="bodyRow"><span class="bodyStrong">Author Notes:</span><span class="content">Zen Cart is the copyright of the Zen Cart Development Team.</span></div>
+      </div>
+    </div>
+    <!--EOF About Us-->
+    <!--BOF Disclalimer-->
+    <div class="bodyHeaderContainer">
+      <div class="numHeader bodyHeader">
+        <span class="bodyHeaderTxt back">DISCLAIMER</span>
+        <div class="forward"><a href="#top"><img src="images/backToTop.png" width="115" height="22" alt="backtotop" /></a></div>
+      </div>
+      <div class="bodyWrapper">
+        <div class="spacer">
+          This module is installed at your own risk.  If you are unsure of how to complete the installation procedure documented below, please view our help section for additional information.  Numinix Web Development LLC takes no responsibility for problems related to the installation of this module.
+        </div>
+      </div>
+    </div>
+    <!--EOF Disclaimer-->
+    <!--BOF License-->
+    <div class="bodyHeaderContainer">
+      <div class="numHeader bodyHeader">
+        <span class="bodyHeaderTxt back">LICENSE</span>
+        <div class="forward"><a href="#top"><img src="images/backToTop.png" width="115" height="22" alt="backtotop" /></a></div>
+      </div>
+      <div class="bodyWrapper">
+        <div class="spacer">
+          Before installing this module, you agree to abide by these <a href="../../license.txt" target="_blank">license terms</a>.
+          <br />
+          <div class="centered" id="licenseAgreement">
+            <input type="radio" value="1" name="license" /><label for="license">I agree</label>
+            <input type="radio" value="0" name="license" /><label for="license">I disagree</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--EOF License-->
+    <div id="licenseAgreed">
+      <a name="zen137"></a>
+      <!--BOF INSTALLATION (ZEN CART 1.3.7)-->
+      <div class="bodyHeaderContainer">
+        <div class="bodyHeader" id="yellow">
+          <span class="bodyHeaderTxt back">INSTALLATION</span>
+          <div class="forward"><a href="#top"><img src="images/backToTop.png" width="115" height="22" alt="backtotop" /></a></div>
+        </div>
+
+        <div class="bodyWrapper">
+            <ol>
+                <li>
+                    Copy the files in GMCF.ZIP/google_merchant_center/catalog/* to $ZC_ROOT <br> <br>
+                    NOTE: Normally an FTP program will conveniently allow you to merge in the new files inside GMCF.ZIP/google_merchant_center/catalog/* automatically.  If not, you will need to manually add the files & directories in GMCF.ZIP/google_merchant_center/catalog/* to your $ZC_ROOT.  Please note that doing this manually is error-prone and NOT RECOMMENDED.
+                </li>
+                <li>Copy the files in GMCF.ZIP/google_merchant_center/catalog/YOUR_ADMIN/* to --> $ZC_ADMIN</li>
+                <li>Desired results: <br>
+                    <ul>
+                      <li>$ZC_ROOT/googlefroogle.php</li>
+                      <li>$ZC_ROOT/feed/* < permissions modified ></li>
+                      <li>$ZC_ROOT/includes/* < additional files added from GMCF archive to ZC ‘includes’ directory></li>
+                    </ul>
+                </li>
+                <li>
+                    Grant permissions to GMCF <br> <br>
+                    In order to operate successfully, GMCF must write to the ‘$ZC_HOME/feed’ subdirectory, so necessary permissions must be granted.
+                    <ul>
+                        <li>Give rwx (read/write/execute aka ‘777’) permissions to ‘$ZC_HOME/feed’</li>
+                        <ol type="I">
+                            <li>NOTE: It is better to perform this permissions change via your FTP client as cPanel does not have a recursion feature for changing permissions, so if you DO use cPanel, *you* will have to recurse into the feed directory YOURSELF and perform these steps on EVERY SINGLE FILE AND DIRECTORY.</li>
+                            <li>To do this via cPanel:</li>
+                            <li>Log into cPanel</li>
+                            <li>“Files” frame --> File Manager</li>
+                            <li>Navigate to the $ZC_HOME/feed directory</li>
+                            <li>In the control frame (usually on top), click on “Change Permissions”</li>
+                            <li>A grid will be shown with check-boxes shown and a row at the bottom entitled “Permission”</li>
+                            <li>Check every unchecked box</li>
+                            <li>The “Permissions” row should read 7 in each box</li>
+                            <li>--> “Change Permissions”</li>
+                        </ul>
+                    </ul>
+                </li>
+                <li>
+                    Installing the GMCF addin to ZenCart’s SQL database <br><br>
+                    NOTE: install.sql installs the GMCF for the first time.  updateXX.sql are for UPDATING from a previous version
+                    <ul>
+                      <li>COPY/PASTE: Go to ZenCart Admin-->Tools-->Install SQL Patches
+                          <ol type="I">
+                              <li>Copy/paste the contents of the install.sql into the SQL script box</li>
+                              <li>--> “Send”</li>
+                              <li>If you encounter errors, you can try uploading instead</li>
+                          </ol>
+                      </li>
+                      <li>UPLOAD: Go to ZenCart Admin-->Tools-->Install SQL Patches Upload-->Browse.  A window will open a Windows File Browser on your home machine, so you’ll need to find the install.sql file on your home machine</li>
+                      <li>When successful, the screen will refresh and you will see script which was just executed on your screen WITHOUT any ERROR messages.</li>
+                    </ul>
+                    
+                </li>
+                <li>Congratulations, GMCF is now installed into ZC!</li>
+            </ol>
+        </div>
+      </div>
+      <!--EOF INSTALLATION (ZEN CART 1.3.7)-->
+      <a name="tips"></a>
+      <!--BOF TIPS-->
+      <div class="bodyHeaderContainer">
+        <div class="bodyHeader" id="blue">
+          <span class="bodyHeaderTxt back">TIPS</span>
+          <div class="forward"><a href="#top"><img src="images/backToTop.png" width="115" height="22" alt="backtotop" /></a></div>
+        </div>
+        <div class="bodyWrapper">
+          <ul>
+            <li class="bodyText">To have this update and automatically upload to Google Merchant Center, you will need to set up a Cron job via your host's control panel.</li>
+            <li class="bodyText">To run it as a cron job (i.e. at 5:00am), put something in your crontab like the following:
+              <ul>
+                <li>0 5 * * * GET 'http://your_http_catalog/googlefroogle.php?feed=fy_uy_tp&amp;key=YOURKEYHERE'</li>
+                <li>0 5 * * * wget 'http://your_http_catalog/googlefroogle.php?feed=fy_uy_tp&amp;key=YOURKEYHERE'</li>
+                <li>0 5 * * * curl -s 'http://your_http_catalog/googlefroogle.php?feed=fy_uy_tp&amp;key=YOURKEYHERE'</li>
+              </ul>
+            </li>
+            <li>If your host has disabled cron jobs, try webcron services such as http://www.webcron.org/</li>
+            <li>This module supports adding required fields as attributes to your products (you can set them to display only and then modify your template to not show <strong>display only</strong> attributes).  Supported attributes are: Size, Color, Age Group, Gender, Material, Pattern, UPC, ISBN, EAN, and Google Product Category.  Please use these exact names when creating your Option Names in Zen Cart.
+              <ol>
+                <li>First, create an attribute option name (i.e. Size)</li>
+                <li>Next, create an option value for the option name created in step 1 (i.e. Small)</li>
+                <li>Go to ADMIN->CATALOG->ATTRIBUTES CONTROLLER and assign the option to a product being sure to select <strong>display only</strong></li>
+                <li>When the tool is run, it will automatically use this data</li>
+                <li>Alternatively, if you have Stock by Attributes (SBA) installed and you need for a single product to support multiple options (i.e. Small, Medium, Large, XL, XXL), create stock combinations in SBA and GMCF will automatically create variants for each stock combination</li>
+              </ol>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!--EOF TIPS-->
+      <a name="uninstall"></a>
+      <!--BOF UNINSTALL-->
+      <div class="bodyHeaderContainer">
+        <div class="bodyHeader" id="red">
+          <span class="bodyHeaderTxt back">UNINSTALL</span>
+          <div class="forward"><a href="#top"><img src="images/backToTop.png" width="115" height="22" alt="backtotop" /></a></div>
+        </div>
+        <div class="bodyWrapper">
+          <ol>
+            <li class="bodyText"><span class="bodyTxt">Delete all uploaded files;</span></li>
+            <li class="bodyText"><span class="bodyTxt">Run the uninstall.sql (if you simply want to deactivate but keep the installation, read tips below);</span></li>
+            <li class="bodyText"><span class="bodyTxt">NOTE: You may ALSO need to go into cPanel’s SQL and run this query:
+“DELETE FROM configuration WHERE configuration_key like 'GOOGLE_PRODUCTS%';“</span></li>
+          </ol>
+        </div>
+      </div>
+      <!--EOF UNINSTALL-->
+    </div>
+    <a name="help"></a>
+    <!--BOF HELP-->
+    <div class="bodyHeaderContainer">
+      <div class="bodyHeader" id="orange">
+        <span class="bodyHeaderTxt back">HELP</span>
+        <div class="forward"><a href="#top"><img src="images/backToTop.png" width="115" height="22" alt="backtotop" /></a></div>
+      </div>
+      <div class="bodyWrapper">
+        <ul>
+          <li>If your script is timing out, edit the configurable area of /googlefroogle.php and increase the values as appropriate.</li>
+          <li>If you are seeing constants in the ADMIN-&gt;CONFIGURATION or ADMIN-&gt;TOOLS (i.e. BOX_GOOGLEFROOGLE), then you are missing a definitions file.<br />Reupload the files by overwriting the old ones.</li>
+          <li>If you are having issues with the FTP function, please contact your host to make sure all the required ports for PHP FTP functions are open.  It is recommended to set Google to crawl your feed on a schedule rather than submit it yourself (only set the cron to generate the feed in this case).</li>
+          <li>If the FTP function is timing out, as indicated by a timeout error, increase the timeout length in admin-&gt;googlefroogle.php near the beginning of the file.</li>
+          <li>Promotional text and shipping information in your descriptions will cause your feed to be rejected.  Instead store this information in a custom field (i.e. create new fields with Numinix Product Fields).</li>        
+        </ul>
+        <div class="spacer">
+          <div class="bodyRow"><span class="bodyStrong">Updates, Support, Bug Reports:</span><span class="content"><a href="https://www.numinix.com/downloads/zen-cart-modules/marketing/google-merchant-center-feeder" target="_blank">https://www.numinix.com/downloads/zen-cart-modules/marketing/google-merchant-center-feeder</a></span></div>
+        </div>
+      </div>
+    </div>
+    <!--EOF HELP-->
+  </div>
+  <div id="footerContainer" class="bodyHeaderContainer">Copyright &copy; 2006-2011 Numinix Web Development LLC. Web design by Numinix</div>
+</body>
+</html>

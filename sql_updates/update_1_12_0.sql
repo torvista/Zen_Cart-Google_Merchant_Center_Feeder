@@ -1,0 +1,1 @@
+DELETE FROM configuration WHERE configuration_key = 'GOOGLE_PRODUCTS_ZERO_QUANTITY' LIMIT 1;
