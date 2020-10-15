@@ -8,6 +8,5 @@
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
  * @version $Id: googlefroogle.php 57 2011-05-17 00:35:31Z numinix $
  */
- 
-define('BOX_GOOGLEFROOGLE', 'Google Merchant Center Feeder');
-//eof
+define('BOX_CONFIGURATION_GOOGLEMERCHANTFEED', 'Google Merchant Center Feeder');//Configuration Menu
+define('BOX_GOOGLEFROOGLE', BOX_CONFIGURATION_GOOGLEMERCHANTFEED);//Tools Menu TODO alter constant name to _TOOLS_

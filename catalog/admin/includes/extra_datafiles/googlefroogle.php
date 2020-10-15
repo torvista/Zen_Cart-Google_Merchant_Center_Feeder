@@ -10,4 +10,4 @@
  */
 
 define('FILENAME_GOOGLEFROOGLE', 'googlefroogle');
-define('BOX_CONFIGURATION_GOOGLEMERCHANTFEED', 'Google Merchant Center Feeder Configuration');
+
