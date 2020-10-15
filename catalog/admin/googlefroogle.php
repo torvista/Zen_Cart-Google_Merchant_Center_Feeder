@@ -139,26 +139,20 @@ function processLoading(text) {
   table#googleFiles th { background-color:#036; border-bottom:1px double #fff; color: #fff; text-align:center; padding:8px; }
   table#googleFiles td { border:1px solid #036; vertical-align:top; padding:5px 10px; }
   #contentwrapper{float:left;width:100%;}
-
   .container{margin:0 10px 10px;}
-
 </style>
 </head>
 <body onload="init()">
 <!-- header //-->
 <?php require(DIR_WS_INCLUDES . 'header.php'); ?>
 <!-- header_eof //-->
-
 <!-- body //-->
-<div id="contentwrapper">
-  <div id="columnLeft">
-    <div class="container">
-      <h1><?php echo HEADING_TITLE; ?></h1>
-	  	  <br>
-	  <div><img src="images/googlebase.gif" width="230" height="30" alt="Google Merchant Center logo"></div>
-	  <div class="smallText"><?php echo TEXT_GOOGLE_PRODUCTS_LOGIN_HEAD; ?></div>
-	  <div class="smallText"><?php echo TEXT_GOOGLE_PRODUCTS_LOGIN; ?></div>
-	  <br><br>
+<div class="container-fluid">
+      <!-- body_text //-->
+      <div class="row">
+     <h1><?php echo HEADING_TITLE; ?></h1>
+          <br>
+<div>
       <form method="get" action="<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . ".php"; ?>" name="google" target="googlefeed" onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=600, height=400, top=0, left=50, scrollbars=yes');setTimeout('location.reload(true);', 5000);">
         <label for="feed">Feed Type:</label>
         <select name="feed" id="feed">
@@ -174,11 +168,13 @@ function processLoading(text) {
         <?php echo zen_draw_input_field('offset', (int)GOOGLE_PRODUCTS_START_PRODUCTS, 'class="limiters" id="offset"'); ?>
         <br class="clearBoth" />
         <?php
-          echo '<div class="buttonRow back">' . zen_image_submit('button_confirm.gif', IMAGE_CONFIRM, 'id="submitButton"') . '</div><br class="clearBoth" />'; 
+          echo '<div class="buttonRow back">' . zen_image_submit('button_confirm.gif', IMAGE_CONFIRM, 'id="submitButton"') . '</div>';
         ?>
         <input type="hidden" name="key" value="<?php echo GOOGLE_PRODUCTS_KEY; ?>" />
       </form>
-      <br />
+</div>
+          <hr>
+          <div>
       <h2>Available Files</h2> 
       <table id="googleFiles">
         <tr>
@@ -208,12 +204,18 @@ function processLoading(text) {
         }
         ?>
       </table>
+          </div>
+          <hr>
+    <div>
+        <img src="images/google_merchant_center_logo.gif" width="174" height="80" alt="Google Merchant Center logo">
+        <?php echo TEXT_GOOGLE_PRODUCTS_LOGIN_HEAD;
+        echo TEXT_GOOGLE_PRODUCTS_LOGIN; ?>
     </div>
-  </div>
+    </div>
 </div>
-
 <!-- body_eof //-->
-
+    <!-- body_text_eof //-->
+</div>
 <!-- footer //-->
 <?php require(DIR_WS_INCLUDES . 'footer.php'); ?>
 <!-- footer_eof //-->
