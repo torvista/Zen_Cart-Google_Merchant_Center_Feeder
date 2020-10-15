@@ -12,13 +12,25 @@
 
   require('includes/application_top.php');
 
-	function ftp_get_rawlist($url, $login, $password, $ftp_dir='', $ssl=false, $port=21, $timeout=30) {
+/**
+ * @param $url
+ * @param $login
+ * @param $password
+ * @param string $ftp_dir
+ * @param false $ssl
+ * @param int $port
+ * @param int $timeout
+ * @return string
+ */
+function ftp_get_rawlist($url, $login, $password, $ftp_dir = '', $ssl = false, $port = 21, $timeout = 30) {
 		$out = '';
 		$out .= FTP_CONNECTION_OK . ' ' . $url . '<br>';
-		if($ssl)
-			$cd = @ftp_ssl_connect($url);
-		else
-			$cd = @ftp_connect($url, $port, $timeout);
+		if ($ssl) {
+            $cd = @ftp_ssl_connect($url);
+        }
+		else {
+            $cd = @ftp_connect($url, $port, $timeout);
+        }
 		if (!$cd) {
 			return $out . FTP_CONNECTION_FAILED . ' ' . $url . '<br>';
 		}
@@ -28,23 +40,23 @@
 			ftp_close($cd);
 			return $out . FTP_LOGIN_FAILED . FTP_USERNAME . ' ' . $login . FTP_PASSWORD . ' ' . $password . '<br>';
 		}
-		if ($ftp_dir != "") {
+		if ($ftp_dir !== "") {
 			if (!@ftp_chdir($cd, $ftp_dir)) {
 				ftp_close($cd);
 				return $out . FTP_CANT_CHANGE_DIRECTORY . '&nbsp;' . $url . '<br>';
 			}
 		}
 		$out .= ftp_pwd($cd) . '<br>';
-		$raw = ftp_rawlist($cd, $ftp_file, true);
-		for($i=0,$n=sizeof($raw);$i<$n;$i++){
+		$raw = ftp_rawlist($cd, $ftp_file, true);//todo $ftp_file undefined
+		for($i=0, $n=count($raw); $i<$n; $i++){
 			$out .= $raw[$i] . '<br>';
 		}
 		ftp_close($cd);
 		return $out;
 	}
 ?>
-<?php
-if(isset($_GET['action']) && $_GET['action'] == 'ftpdir') {
+<?php //steve todo: never used?
+if (isset($_GET['action']) && $_GET['action'] === 'ftpdir') {
 	ob_start();
 	echo TEXT_GOOGLE_PRODUCTS_FTP_FILES . '<br>';
 	echo ftp_get_rawlist(GOOGLE_PRODUCTS_SERVER, GOOGLE_PRODUCTS_USERNAME, GOOGLE_PRODUCTS_PASSWORD);
@@ -53,7 +65,9 @@ if(isset($_GET['action']) && $_GET['action'] == 'ftpdir') {
 	echo '<pre>';
 	echo $out;
 	exit();
-} elseif(isset($_GET['action']) && ($_GET['action'] == 'delete')) {
+}
+
+if(isset($_GET['action']) && ($_GET['action'] === 'delete')) {
   if (file_exists(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $_GET['file'])) {
     unlink(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $_GET['file']);
   }
@@ -134,12 +148,9 @@ function processLoading(text) {
   label{display:block;width:200px;float:left;}
   .limiters{width:200px;}
   .buttonRow{padding:5px 0;}
-  .forward{float:right;}
-  table#googleFiles { margin-left: 0; border-collapse:collapse; border:1px solid #036; font-size: small; width: 100%; }
+  table#googleFiles { margin-left:0; border-collapse:collapse; border:1px solid #036; font-size: small; }
   table#googleFiles th { background-color:#036; border-bottom:1px double #fff; color: #fff; text-align:left; padding:8px; }
   table#googleFiles td { border:1px solid #036; vertical-align:top; padding:5px 10px; }
-  #contentwrapper{float:left;width:100%;}
-  .container{margin:0 10px 10px;}
 </style>
 </head>
 <body onload="init()">
@@ -184,8 +195,8 @@ function processLoading(text) {
         </tr>
         <?php
         if ($handle = opendir(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
-          while (false !== ($file = readdir($handle))) {
-            if ($file != "." && $file != ".." && $file != 'index.html') {
+          while (($file = readdir($handle)) !== false) {
+            if ($file !== "." && $file !== ".." && $file !== 'index.html') {
             $filetime = filemtime(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file);
             $date = date('j/m/Y H:i:s',$filetime);//steve
         ?>
@@ -210,7 +221,6 @@ function processLoading(text) {
         <img src="images/google_merchant_center_logo.gif" width="174" height="80" alt="Google Merchant Center logo">
         <?php echo TEXT_GOOGLE_PRODUCTS_LOGIN_HEAD;
         echo TEXT_GOOGLE_PRODUCTS_LOGIN; ?>
-    </div>
     </div>
 </div>
 <!-- body_eof //-->
