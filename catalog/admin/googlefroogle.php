@@ -14,30 +14,30 @@
 
 	function ftp_get_rawlist($url, $login, $password, $ftp_dir='', $ssl=false, $port=21, $timeout=30) {
 		$out = '';
-		$out .= FTP_CONNECTION_OK . ' ' . $url . '<br />';
+		$out .= FTP_CONNECTION_OK . ' ' . $url . '<br>';
 		if($ssl)
 			$cd = @ftp_ssl_connect($url);
 		else
 			$cd = @ftp_connect($url, $port, $timeout);
 		if (!$cd) {
-			return $out . FTP_CONNECTION_FAILED . ' ' . $url . '<br />';
+			return $out . FTP_CONNECTION_FAILED . ' ' . $url . '<br>';
 		}
 		ftp_set_option($cd, FTP_TIMEOUT_SEC, $timeout);
 		$login_result = @ftp_login($cd, $login, $password);
 		if (!$login_result) {
 			ftp_close($cd);
-			return $out . FTP_LOGIN_FAILED . FTP_USERNAME . ' ' . $login . FTP_PASSWORD . ' ' . $password . '<br />';
+			return $out . FTP_LOGIN_FAILED . FTP_USERNAME . ' ' . $login . FTP_PASSWORD . ' ' . $password . '<br>';
 		}
 		if ($ftp_dir != "") {
 			if (!@ftp_chdir($cd, $ftp_dir)) {
 				ftp_close($cd);
-				return $out . FTP_CANT_CHANGE_DIRECTORY . '&nbsp;' . $url . '<br />';
+				return $out . FTP_CANT_CHANGE_DIRECTORY . '&nbsp;' . $url . '<br>';
 			}
 		}
-		$out .= ftp_pwd($cd) . '<br />';
+		$out .= ftp_pwd($cd) . '<br>';
 		$raw = ftp_rawlist($cd, $ftp_file, true);
 		for($i=0,$n=sizeof($raw);$i<$n;$i++){
-			$out .= $raw[$i] . '<br />';
+			$out .= $raw[$i] . '<br>';
 		}
 		ftp_close($cd);
 		return $out;
@@ -46,7 +46,7 @@
 <?php
 if(isset($_GET['action']) && $_GET['action'] == 'ftpdir') {
 	ob_start();
-	echo TEXT_GOOGLE_PRODUCTS_FTP_FILES . '<br />';
+	echo TEXT_GOOGLE_PRODUCTS_FTP_FILES . '<br>';
 	echo ftp_get_rawlist(GOOGLE_PRODUCTS_SERVER, GOOGLE_PRODUCTS_USERNAME, GOOGLE_PRODUCTS_PASSWORD);
 	$out = ob_get_contents();
 	ob_end_clean();
