@@ -60,16 +60,16 @@ if(isset($_GET['action']) && $_GET['action'] == 'ftpdir') {
   zen_redirect(zen_href_link(FILENAME_GOOGLEFROOGLE));
 }
 ?>
-<!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html <?php echo HTML_PARAMS; ?>>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=<?php echo CHARSET; ?>">
 <title><?php echo TITLE; ?></title>
 <link rel="stylesheet" type="text/css" href="includes/stylesheet.css">
 <link rel="stylesheet" type="text/css" href="includes/cssjsmenuhover.css" media="all" id="hoverJS">
-<script type="text/javascript" src="includes/menu.js"></script>
-<script type="text/javascript" src="includes/general.js"></script>
-<script type="text/javascript">
+<script src="includes/menu.js"></script>
+<script src="includes/general.js"></script>
+<script>
   <!--
   function init()
   {
@@ -82,7 +82,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'ftpdir') {
   }
   // -->
 </script>
-<script type="text/javascript"><!--
+<script><!--
 function getObject(name) {
    var ns4 = (document.layers) ? true : false;
    var w3c = (document.getElementById) ? true : false;
@@ -94,7 +94,7 @@ function getObject(name) {
    return false;
 }
 //--></script>
-<script type="text/javascript"><!--
+<script><!--
 
 var req, name;
 
@@ -130,12 +130,12 @@ function processLoading(text) {
   getObject(name).innerHTML = text;
 }
 //--></script>
-<style type="text/css">
+<style>
   label{display:block;width:200px;float:left;}
   .limiters{width:200px;}
   .buttonRow{padding:5px 0;}
   .forward{float:right;}
-  table#googleFiles { margin-left: 0px; border-collapse:collapse; border:1px solid #036; font-size: small; width: 100%; }
+  table#googleFiles { margin-left: 0; border-collapse:collapse; border:1px solid #036; font-size: small; width: 100%; }
   table#googleFiles th { background-color:#036; border-bottom:1px double #fff; color: #fff; text-align:center; padding:8px; }
   table#googleFiles td { border:1px solid #036; vertical-align:top; padding:5px 10px; }
   #contentwrapper{float:left;width:100%;}
@@ -155,23 +155,23 @@ function processLoading(text) {
     <div class="container">
       <h1><?php echo HEADING_TITLE; ?></h1>
 	  	  <br>
-	  <div><img src="images/googlebase.gif" width="230" height="30"></div>
+	  <div><img src="images/googlebase.gif" width="230" height="30" alt="Google Merchant Center logo"></div>
 	  <div class="smallText"><?php echo TEXT_GOOGLE_PRODUCTS_LOGIN_HEAD; ?></div>
 	  <div class="smallText"><?php echo TEXT_GOOGLE_PRODUCTS_LOGIN; ?></div>
 	  <br><br>
       <form method="get" action="<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . ".php"; ?>" name="google" target="googlefeed" onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=600, height=400, top=0, left=50, scrollbars=yes');setTimeout('location.reload(true);', 5000);">
         <label for="feed">Feed Type:</label>
-        <select name="feed">
+        <select name="feed" id="feed">
           <option value="fy_un_tp">Products</option>
           <option value="fy_un_td">Documents</option>
           <option value="fy_un_tn">News</option>
         </select>
         <br class="clearBoth" />
         <label for="limit"><?php echo TEXT_ENTRY_LIMIT; ?></label>
-        <?php echo zen_draw_input_field('limit', (int)GOOGLE_PRODUCTS_MAX_PRODUCTS, 'class="limiters"'); ?>
+        <?php echo zen_draw_input_field('limit', (int)GOOGLE_PRODUCTS_MAX_PRODUCTS, 'class="limiters" id="limit"'); ?>
         <br class="clearBoth" />
         <label for="offset"><?php echo TEXT_ENTRY_OFFSET; ?></label>
-        <?php echo zen_draw_input_field('offset', (int)GOOGLE_PRODUCTS_START_PRODUCTS, 'class="limiters"'); ?>
+        <?php echo zen_draw_input_field('offset', (int)GOOGLE_PRODUCTS_START_PRODUCTS, 'class="limiters" id="offset"'); ?>
         <br class="clearBoth" />
         <?php
           echo '<div class="buttonRow back">' . zen_image_submit('button_confirm.gif', IMAGE_CONFIRM, 'id="submitButton"') . '</div><br class="clearBoth" />'; 
