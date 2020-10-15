@@ -187,7 +187,7 @@ function processLoading(text) {
           while (false !== ($file = readdir($handle))) {
             if ($file != "." && $file != ".." && $file != 'index.html') {
             $filetime = filemtime(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file);
-            $date = date('j/m/Y');
+            $date = date('j/m/Y H:i:s',$filetime);//steve
         ?>
               <tr>
                 <td><?php echo $date; ?></td>
