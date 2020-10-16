@@ -46,7 +46,7 @@
   define('NL', "<br>\n");
   
   $stock_attributes = false;
-  if (GOOGLE_PRODUCTS_SWITCH_STOCK_PLUGIN !== 'none') {//a 3rd party plugin is in use
+  if (GOOGLE_PRODUCTS_SWITCH_STOCK_PLUGIN !== 'none') {//a 3rd party plugin is in use for attribute-stocks
     $stock_attributes = true;
   }
   
@@ -65,19 +65,26 @@
   $languages_query = "SELECT code, languages_id, directory FROM " . TABLE_LANGUAGES . " WHERE languages_id = " . (int)GOOGLE_PRODUCTS_LANGUAGE . " LIMIT 1";
   $languages = $db->Execute($languages_query);
   if (isset($_GET['upload_file'])) {
+    $outfile = '';
     $upload_file = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $_GET['upload_file'];
   } else {
+      $upload_file = '';
     // sql limiters
-      $query_limit = 0;
       if ((int)GOOGLE_PRODUCTS_MAX_PRODUCTS > 0 || (isset($_GET['limit']) && (int)$_GET['limit'] > 0)) {
       $query_limit = (isset($_GET['limit']) && (int)$_GET['limit'] > 0) ? (int)$_GET['limit'] : (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
       $limit = ' LIMIT ' . $query_limit; 
+    } else {
+        $query_limit = 0;
+        $limit = '';
     }
-      $query_offset = 0;
+
     if ((int)GOOGLE_PRODUCTS_START_PRODUCTS > 0 || (isset($_GET['offset']) && (int)$_GET['offset'] > 0)) {
       $query_offset = (isset($_GET['offset']) && (int)$_GET['offset'] > 0) ? (int)$_GET['offset'] : (int)GOOGLE_PRODUCTS_START_PRODUCTS;
       $offset = ' OFFSET ' . $query_offset;
-    }   
+    } else {
+        $query_offset = 0;
+        $offset = '';
+    }
     $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . "_" . $type . "_" . $languages->fields['code'];
     if ($query_limit > 0) {
         $outfile .= '_' . $query_limit;
@@ -88,7 +95,6 @@
     $outfile .= '.xml'; //example domain_products.xml
   }
 
-  
   if (GOOGLE_PRODUCTS_MAGIC_SEO_URLS === 'true') {
     require_once(DIR_WS_CLASSES . 'msu_ao.php');
     include(DIR_WS_INCLUDES . 'modules/msu_ao_1.php');
@@ -96,12 +102,39 @@
   ob_start();
   $product_url_add = (GOOGLE_PRODUCTS_LANGUAGE_DISPLAY === 'true' && $languages->RecordCount() > 0 ? "&language=" . $languages->fields['code'] : '') . (GOOGLE_PRODUCTS_CURRENCY_DISPLAY === 'true' ? "&currency=" . GOOGLE_PRODUCTS_CURRENCY : '');
   //require(DIR_WS_LANGUAGES . $languages->fields['directory'] .'/googlefroogle.php');
-  echo '<p>' . sprintf(TEXT_GOOGLE_PRODUCTS_STARTED, $google_base->google_base_version()) . '</p>';
-  echo '<p>' . TEXT_GOOGLE_PRODUCTS_FILE_LOCATION . (($upload_file !== '') ? $upload_file : $outfile) . '</p>';
-  echo "<p>Processing: Feed - " . (isset($feed) && $feed === "yes" ? "Yes" : "No") . ", Upload - " . (isset($upload) && $upload === "yes" ? "Yes" : "No") . '</p>';
+?>
+<!DOCTYPE html>
+<html <?php echo HTML_PARAMS; ?>>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!--<link href="includes/templates/responsive_classic/css/stylesheet.css" rel="stylesheet" type="text/css" />-->
+    <style>
+        body {
+            margin-left: 5px;
+            font-family: Verdana, sans-serif;
+        }
+        h1 {
+            font-size: medium;
+        }
+        p {
+            font-size: small;
+        }
+    </style>
+<title>Google Merchant Feeder v<?php echo $google_base->google_base_version()?></title>
+</head>
+
+<body>
+<h1><?php echo sprintf(TEXT_GOOGLE_PRODUCTS_STARTED, $google_base->google_base_version()); ?></h1>
+<p><?php echo TEXT_GOOGLE_PRODUCTS_FEED . (isset($feed) && $feed === "yes" ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?><br>
+    <?php echo TEXT_GOOGLE_PRODUCTS_UPLOAD . (isset($upload) && $upload === "yes" ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?></p>
+<p><?php echo TEXT_GOOGLE_PRODUCTS_FILE_LOCATION . NL . (($upload_file !== '') ? $upload_file : $outfile); ?></p>
+<p><?php echo TEXT_GOOGLE_PRODUCTS_PROCESSING; ?></p>
+
+<?php
   ob_flush();
-  flush(); 
-  
+  flush();
+
+  //check output file location permissions
   if (isset($feed) && $feed === "yes") {
     if (is_dir(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
       if (!is_writable(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
@@ -131,6 +164,7 @@
     $additional_attributes = '';
     $additional_tables = '';
     $gb_map_enabled = false;
+
     // upc
     if (GOOGLE_PRODUCTS_ASA_UPC === 'true') {
       $additional_attributes .= ", p.products_upc, p.products_isbn, p.products_ean";
@@ -182,17 +216,14 @@
         $products = $db->Execute($products_query);
         $total_products = $products->RecordCount();
         //die('record count: ' . $products->RecordCount());
+
         while (!$products->EOF) { // run until end of file or until maximum number of products reached
           $google_base_start_counter++;
           /* BEGIN GLOBAL ELEMENTS USED IN ALL ITEMS */
           // reset tax array
           $tax_rate = [];
           [$categories_list, $cPath] = $google_base->google_base_get_category($products->fields['products_id']);
-          if (GOOGLE_PRODUCTS_DEBUG === 'true') {
-            if (!$google_base->check_product($products->fields['products_id'])) {
-                echo $products->fields['products_id'] . ' skipped due to user restrictions<br />';
-            }
-          }
+
           if ($google_base->check_product($products->fields['products_id'])) {
             if ($gb_map_enabled && $products->fields['map_enabled'] === '1') {
               $price = $products->fields['map_price'];
@@ -206,16 +237,26 @@
             $price = $currencies->value($price, true, GOOGLE_PRODUCTS_CURRENCY, $currencies->get_value(GOOGLE_PRODUCTS_CURRENCY));
                           
             $products_description = $products->fields['products_description'];
+            //Numinix Product Fields additional description
             if (GOOGLE_PRODUCTS_ASA_DESCRIPTION_2 === 'true') {
               $products_description .= $products->fields['products_description2'];
             }
+
+//torvista: my site only, using boilerplate text!
+        if (function_exists('mv_get_boilerplate') && !empty($descr_stringlist)) {
+            $products_description = mv_get_boilerplate($products_description, $descr_stringlist, $products->fields['products_id']);
+        }
+//eof boilerplate text
+
             $products_description = trim(substr($google_base->google_base_xml_sanitizer($products_description, $products->fields['products_id']),0,1000));
-            if ( (GOOGLE_PRODUCTS_META_TITLE === 'true') && ($products->fields['metatags_title'] != '') ) {
+
+        if ( (GOOGLE_PRODUCTS_META_TITLE === 'true') && ($products->fields['metatags_title'] != '') ) {
               $productstitle = $google_base->google_base_xml_sanitizer($products->fields['metatags_title']);
             } else {
               $productstitle = $google_base->google_base_xml_sanitizer($products->fields['products_name']); 
             }
-            if (GOOGLE_PRODUCTS_DEBUG === 'true') {
+
+        if (GOOGLE_PRODUCTS_DEBUG === 'true') {
               $success = false;
               echo '<p>id: ' . $products->fields['products_id'] . ', price: ' . round($price, 2) . ', description length: ' . strlen($products_description) . ' ';
               if ($price <= 0) {
@@ -265,6 +306,7 @@
                   break;
               } 
             }
+
             if (GOOGLE_PRODUCTS_PRODUCT_TYPE === 'default' && GOOGLE_PRODUCTS_DEFAULT_PRODUCT_TYPE !== '') {
               $product_type = htmlentities(GOOGLE_PRODUCTS_DEFAULT_PRODUCT_TYPE);
             } else {
@@ -292,12 +334,12 @@
                   if (GOOGLE_PRODUCTS_SWITCH_STOCK_PLUGIN === 'numinixproductvariants') {
                     $stock_attributes = $db->Execute("SELECT stock_id, quantity FROM " . TABLE_PRODUCTS_VARIANTS_ATTRIBUTES_STOCK . "
                                                     WHERE products_id = " . $products->fields['products_id'] . "
-                                                    ORDER BY stock_id ASC;");
+                                                    ORDER BY stock_id");
                     
                   } else {
                     $stock_attributes = $db->Execute("SELECT stock_id, stock_attributes, quantity FROM " . TABLE_PRODUCTS_WITH_ATTRIBUTES_STOCK . "
                                                     WHERE products_id = " . $products->fields['products_id'] . "
-                                                    ORDER BY stock_id ASC;");
+                                                    ORDER BY stock_id");
                   }
                   if ($stock_attributes->RecordCount() > 0) {
                     // check for acceptable variant attributes
@@ -317,7 +359,7 @@
                       }
                       $variant = false;
                       // add read only attributes to the array
-                      $attributes = $db->Execute("SELECT products_attributes_id FROM " . TABLE_PRODUCTS_ATTRIBUTES . " WHERE attributes_display_only = 1 AND products_id = " . $products->fields['products_id'] . " ORDER BY products_attributes_id ASC;");
+                      $attributes = $db->Execute("SELECT products_attributes_id FROM " . TABLE_PRODUCTS_ATTRIBUTES . " WHERE attributes_display_only = 1 AND products_id = " . $products->fields['products_id'] . " ORDER BY products_attributes_id");
                       if ($attributes->RecordCount() > 0) {
                         while (!$attributes->EOF) {
                           if (!in_array($attributes->fields['products_attributes_id'], $attribute_ids)) {
@@ -334,6 +376,7 @@
                                                  LEFT JOIN " . TABLE_PRODUCTS_OPTIONS . " po ON (po.products_options_id = pa.options_id)
                                                  WHERE pa.products_attributes_id = " . (int)$attribute_id . " 
                                                  LIMIT 1;");
+
                         // create variants
                         if ($options->RecordCount() > 0 && in_array(strtolower($options->fields['products_options_name']), ['color', 'colour', 'material', 'pattern', 'size', 'age group', 'gender', 'google product category', 'upc', 'ean', 'isbn'])) { // require at least one to create a variant
                           if (in_array(strtolower($options->fields['products_options_name']), ['color', 'colour', 'material', 'pattern', 'size'])) {
@@ -524,7 +567,10 @@
               }
               echo '</p>';
             }
-          }
+          } elseif (GOOGLE_PRODUCTS_DEBUG === 'true'){
+              if (!$google_base->check_product($products->fields['products_id'])) {
+              echo $products->fields['products_id'] . ' skipped due to user restrictions<br>';
+          }}
           ob_flush();
           flush();
           $products->MoveNext();
@@ -547,9 +593,11 @@
       break;
     }
     
-    $timer_feed = $google_base->microtime_float()-$stimer_feed;
-    
-    echo '<p>' . TEXT_GOOGLE_PRODUCTS_FEED_COMPLETE . ' ' . GOOGLE_PRODUCTS_TIME_TAKEN . ' ' . sprintf("%f " . TEXT_GOOGLE_PRODUCTS_FEED_SECONDS, number_format($timer_feed, 6) ) . ' ' . $anti_timeout_counter . ' of ' . $total_products . ' ' . TEXT_GOOGLE_PRODUCTS_FEED_RECORDS . '</p>';  
+    $timer_feed = $google_base->microtime_float()-$stimer_feed; ?>
+    <p><?php echo sprintf(TEXT_GOOGLE_PRODUCTS_FEED_COMPLETE, number_format($timer_feed, 1)); ?><br>
+    <?php echo sprintf(TEXT_GOOGLE_PRODUCTS_FEED_RECORDS, $anti_timeout_counter, $products->RecordCount(), $products->RecordCount()-$anti_timeout_counter); ?></p>
+ </body></html>
+<?php
   }
 
   if (isset($upload) && $upload === "yes") {

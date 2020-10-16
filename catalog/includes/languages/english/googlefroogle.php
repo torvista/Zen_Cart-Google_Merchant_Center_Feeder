@@ -10,13 +10,12 @@
  * @version $Id: googlefroogle.php 57 2011-05-17 00:35:31Z numinix $
  */
  
-define('TEXT_GOOGLE_PRODUCTS_STARTED', 'Google Merchant Center Feeder v%s started ' . date("Y/m/d H:i:s"));
-define('TEXT_GOOGLE_PRODUCTS_FILE_LOCATION', 'Feed file - ');
-define('TEXT_GOOGLE_PRODUCTS_FEED_COMPLETE', 'Google Merchant Center File Complete');
-define('TEXT_GOOGLE_PRODUCTS_FEED_TIMER', 'Time:');
-define('TEXT_GOOGLE_PRODUCTS_FEED_SECONDS', 'Seconds');
-define('TEXT_GOOGLE_PRODUCTS_FEED_RECORDS', ' Records');
-define('GOOGLE_PRODUCTS_TIME_TAKEN', 'In');
+define('TEXT_GOOGLE_PRODUCTS_STARTED', 'Google Merchant Center Feeder v%s:<br>started ' . date("d/m/Y H:i:s"));
+define('TEXT_GOOGLE_PRODUCTS_FILE_LOCATION', 'File location:');
+define('TEXT_GOOGLE_PRODUCTS_FEED_COMPLETE', 'Feed File completed in %s seconds.');
+
+define('TEXT_GOOGLE_PRODUCTS_FEED_RECORDS', '%1$s entries created from %2$s records (%3$s record(s) skipped).');
+define('GOOGLE_PRODUCTS_TIME_TAKEN', 'in');
 define('GOOGLE_PRODUCTS_VIEW_FILE', 'View File:');
 define('ERROR_GOOGLE_PRODUCTS_DIRECTORY_NOT_WRITEABLE', 'Your Google Merchant Center folder is not writeable! Please chmod the /' . GOOGLE_PRODUCTS_DIRECTORY . ' folder to 755 or 777 depending on your host.');
 define('ERROR_GOOGLE_PRODUCTS_DIRECTORY_DOES_NOT_EXIST', 'Your Google Merchant Center output directory does not exist! Please create an /' . GOOGLE_PRODUCTS_DIRECTORY . ' directory and chmod to 755 or 777 depending on your host.');
@@ -40,4 +39,8 @@ define('FTP_UPLOAD_SUCCESS', 'Uploaded Successfully');
 define('FTP_SERVER_NAME', ' Server Name: ');
 define('FTP_USERNAME', ' Username: ');
 define('FTP_PASSWORD', ' Password: ');
-//eof
+define('TEXT_GOOGLE_PRODUCTS_PROCESSING', 'Processing...');
+define('TEXT_GOOGLE_PRODUCTS_FEED', 'Feed Creation: ');
+define('TEXT_GOOGLE_PRODUCTS_YES', 'Yes');
+define('TEXT_GOOGLE_PRODUCTS_NO', 'No');
+define('TEXT_GOOGLE_PRODUCTS_UPLOAD', 'Feed FTP Upload: ');
