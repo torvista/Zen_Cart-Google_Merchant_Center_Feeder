@@ -74,7 +74,8 @@ INSERT INTO configuration (configuration_id, configuration_title, configuration_
 (NULL, 'Payments Accepted', 'GOOGLE_PRODUCTS_PAYMENT_METHODS', 'Cash,Check,Visa,MasterCard,AmericanExpress,Discover,WireTransfer', 'What payment methods do you accept?', @configuration_group_id, 80, NOW(), NULL, NULL),
 (NULL, 'Payment Notes', 'GOOGLE_PRODUCTS_PAYMENT_NOTES', 'GoogleCheckout', 'Add payment notes (use this for showing you accept Google Checkout)', @configuration_group_id, 81, NOW(), NULL, NULL),
 
-(NULL, 'Select Shipping Method', 'GOOGLE_PRODUCTS_SHIPPING_METHOD', 'none', 'Select a shipping method from the drop-down list that is used in your store, or leave as none', @configuration_group_id, 90, NOW(), NULL, 'zen_cfg_select_option(array(\'zones table rate\', \'flat rate\', \'per item\', \'per weight unit\', \'table rate\', \'zones\', \'percategory\', \'free shipping\', \'free rules shipping\', \'none\'),'),
+(NULL, 'Select Shipping Method', 'GOOGLE_PRODUCTS_SHIPPING_METHOD', 'none', 'Select the name of the shipping module used in your store (as shown in Modules->Shipping), or leave as \'none\'.', @configuration_group_id, 90, NOW(), NULL, 'zen_cfg_select_option(array(\'none\', \'flat\', \'freeshipper\', \'item\', \'perweightunit\', \'table\', \'zones\', \'advshipper\', \'freerules\', \'percategory\', \'zonetable\'),'),
+
 (NULL, 'Table Zone ID', 'GOOGLE_PRODUCTS_RATE_ZONE', '', 'Enter the table rate ID if using a shipping method that uses table rates:', @configuration_group_id, 91, NOW(), NULL, NULL),  
 (NULL, 'Shipping Country', 'GOOGLE_PRODUCTS_SHIPPING_COUNTRY', '', 'Select the destination country for the shipping rates:', @configuration_group_id, 92, NOW(), NULL, 'google_cfg_pull_down_country_iso3_list('),
 (NULL, 'Shipping Region', 'GOOGLE_PRODUCTS_SHIPPING_REGION', '', 'Enter the destination region within the selected country (state code, or zip with wildcard *):', @configuration_group_id, 93, NOW(), NULL, NULL),

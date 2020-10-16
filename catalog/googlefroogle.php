@@ -25,10 +25,10 @@
   
   $keepAlive = 100;  // perform a keep alive every x number of products  
   // include shipping class
-  if (GOOGLE_PRODUCTS_SHIPPING_METHOD == 'percategory') { 
+  if (GOOGLE_PRODUCTS_SHIPPING_METHOD == 'percategory') {//Numinix shipping method
     include(DIR_WS_MODULES . 'shipping/percategory.php');
     $percategory = new percategory();
-  } elseif (GOOGLE_PRODUCTS_SHIPPING_METHOD == 'free rules shipping') {
+  } elseif (GOOGLE_PRODUCTS_SHIPPING_METHOD == 'freerules') {//Numinix shipping method
     include(DIR_WS_MODULES . 'shipping/freerules.php');
     $freerules = new freerules();
   }

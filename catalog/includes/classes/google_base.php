@@ -570,74 +570,91 @@
     return $countries_iso_code_2;
   }
 
-  function shipping_rate($method, $percategory='', $freerules='', $table_zone = '', $products_weight = '', $products_price = '', $products_id = '') {
-    global $currencies, $percategory, $freerules;
-    // skip the calculation for products that are always free shipping
-    if (zen_get_product_is_always_free_shipping($products_id)) {
-      $rate = 0;
-    } else {
-      switch ($method) {
-        case "zones table rate":
-          $rate = $this->numinix_zones_table_rate($products_weight, $table_zone);
-          break;
-        case "flat rate":
-          $rate = MODULE_SHIPPING_FLAT_COST;
-          break;
-        case "per item":
-          $rate = MODULE_SHIPPING_ITEM_COST + MODULE_SHIPPING_ITEM_HANDLING;
-          break;
-        case "per weight unit":
-          $rate = (MODULE_SHIPPING_PERWEIGHTUNIT_COST * $products_weight) + MODULE_SHIPPING_PERWEIGHTUNIT_HANDLING;
-          break;
-        case "table rate":
-          $rate = $this->numinix_table_rate($products_weight, $products_price);
-          break;
-        case "zones":
-          $rate = $this->numinix_zones_rate($products_weight, $products_price, $table_zone);
-          break;
-        case "percategory":
-          if (is_object($percategory)) {
-            $products_array = array();
-            $products_array[0]['id'] = $products_id;
-            $rate = $percategory->calculation($products_array, $table_zone, (int)MODULE_SHIPPING_PERCATEGORY_GROUPS);
-          }
-          break;
-        case "free shipping":
-          $rate = 0;
-          break;
-        case "free rules shipping":
-          if (is_object($freerules)) {
-            if ($freerules->test($products_id)) {
-              $rate = 0;
-            } else {
-              $rate = -1;
+    function shipping_rate($method, $percategory = '', $freerules = '', $table_zone = '', $products_weight = '', $products_price = '', $products_id = '')
+    {
+        global $currencies, $percategory, $freerules;
+        // skip the calculation for products that are always free shipping
+        $rate = 0;
+        if (zen_get_product_is_always_free_shipping($products_id)) {
+            $rate = 0;
+        } else {
+            switch ($method) {
+//Zen Cart built-in shipping methods
+                case "flat":
+                    $rate = MODULE_SHIPPING_FLAT_COST;
+                    break;
+                /*
+                 case "freeoptions":
+                    $rate = 0;
+                    break;
+                 */
+                case "freeshipper":
+                    $rate = 0;
+                    break;
+                case "item":
+                    $rate = MODULE_SHIPPING_ITEM_COST + MODULE_SHIPPING_ITEM_HANDLING;
+                    break;
+                case "perweightunit":
+                    $rate = (MODULE_SHIPPING_PERWEIGHTUNIT_COST * $products_weight) + MODULE_SHIPPING_PERWEIGHTUNIT_HANDLING;
+                    break;
+                /*
+                 case "storepickup":
+                    $rate = 0;
+                    break;
+                 */
+                case "table":
+                    $rate = $this->numinix_table_rate($products_weight, $products_price);
+                    break;
+                case "zones":
+                    $rate = $this->numinix_zones_rate($products_weight, $products_price, $table_zone);
+                    break;
+//eof Zen Cart built-in shipping methods
+//Third party shipping modules
+                case "advshipper"://CEON Advanced Shipper: https://ceon.net/shipping-modules/ceon-advanced-shipper-module
+                    $rate = '99';//todo!!
+                    break;
+                //Numinix shipping module: https://www.numinix.com/zen-cart-plugins-shipping-c-179_250_373_163/free-shipping-rules-dl-755
+                case "freerules":
+                    if (is_object($freerules)) {
+                        if ($freerules->test($products_id)) {
+                            $rate = 0;
+                        } else {
+                            $rate = -1;
+                        }
+                    }
+                    break;
+                case "percategory"://Numinix shipping module: https://www.numinix.com/zen-cart-plugins-shipping-c-179_250_373_163/per-category-shipping-standard-dl-771
+                    if (is_object($percategory)) {
+                        $products_array = [];
+                        $products_array[0]['id'] = $products_id;
+                        $rate = $percategory->calculation($products_array, $table_zone, (int)MODULE_SHIPPING_PERCATEGORY_GROUPS);
+                    }
+                    break;
+                case "zonetable"://Plugin Zones Table Rate (for Multiple Zones): https://www.zen-cart.com/downloads.php?do=file&id=478
+                    $rate = $this->numinix_zones_table_rate($products_weight, $table_zone);
+                    break;
+//eof Third party shipping modules
+
+                default: // also 'none'
+                    $rate = -1;
+                    break;
             }
-          }
-          break;
-        // this shouldn't be possible
-        case "none":
-          $rate = -1;
-          break; 
-        default:
-          $rate = -1;
-          break;
-      }
+        }
+        if ($rate >= 0 && GOOGLE_PRODUCTS_CURRENCY !== '' && $currencies->get_value(GOOGLE_PRODUCTS_CURRENCY) !== '') {
+            $rate = $currencies->value($rate, true, GOOGLE_PRODUCTS_CURRENCY, $currencies->get_value(GOOGLE_PRODUCTS_CURRENCY));
+        }
+        return $rate;
     }
-    if ($rate >= 0 && GOOGLE_PRODUCTS_CURRENCY != '' && $currencies->get_value(GOOGLE_PRODUCTS_CURRENCY) != '') {
-       $rate = $currencies->value($rate, true, GOOGLE_PRODUCTS_CURRENCY, $currencies->get_value(GOOGLE_PRODUCTS_CURRENCY)); 
-    }
-    return $rate;
-  }
   
-  function numinix_table_rate($products_weight, $products_price) {
+  function numinix_table_rate($products_weight, $products_price) {//Zen Cart shipping method: table
     global $currencies;
     
      switch (MODULE_SHIPPING_TABLE_MODE) {
+      case ('weight'):
+       $order_total = $products_weight;
+        break;
       case ('price'):
         $order_total = $products_price;
-        break;
-      case ('weight'):
-        $order_total = $products_weight;
         break;
       case ('item'):
         $order_total = 1;
@@ -660,15 +677,15 @@
     return $shipping;
   }
     
-  function numinix_zones_table_rate($products_weight, $table_zone) {
+  function numinix_zones_table_rate($products_weight, $table_zone) {//Plugin: Zones Table Rate (for Multiple Zones) https://www.zen-cart.com/downloads.php?do=file&id=478
     global $currencies;
     
     switch (MODULE_SHIPPING_ZONETABLE_MODE) {
+     case ('weight'):
+       $order_total = $products_weight;
+        break;
       case ('price'):
         $order_total = $products_price;
-        break;
-      case ('weight'):
-        $order_total = $products_weight;
         break;
       case ('item'):
         $order_total = 1;
@@ -687,15 +704,15 @@
     return $shipping;
   }
   
-  function numinix_zones_rate($products_weight, $products_price, $table_zone) {
+  function numinix_zones_rate($products_weight, $products_price, $table_zone) {//Zen Cart shipping method: zones
     global $currencies;
     
     switch (MODULE_SHIPPING_ZONES_METHOD) {
-      case ('Price'):
-        $order_total = $products_price;
-        break;
       case ('Weight'):
         $order_total = $products_weight;
+        break;
+      case ('Price'):
+        $order_total = $products_price;
         break;
       case ('Item'):
         $order_total = 1;
