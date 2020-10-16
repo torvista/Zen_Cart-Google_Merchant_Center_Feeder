@@ -40,6 +40,6 @@ define('TEXT_FEED_PRODUCTS', 'Products');
 define('TEXT_FEED_DOCUMENTS', 'Documents');
 define('TEXT_FEED_NEWS', 'News');
 define('TEXT_FEED_FILES', 'Generated Feeds');
-define('TEXT_DATE_CREATED', 'Date Created (DD/MM/YYYY)');
-define('TEXT_DOWNLOAD_LINK', 'Download Link');
+define('TEXT_DATE_CREATED', 'Created (DD/MM/YYYY)');
+define('TEXT_DOWNLOAD_LINK', 'Download');
 define('TEXT_ACTION', 'Action');
