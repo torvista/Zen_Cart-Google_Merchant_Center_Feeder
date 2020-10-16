@@ -18,8 +18,8 @@ UPDATE configuration_group SET sort_order = @configuration_group_id WHERE config
 SET @security_key = SUBSTR(MD5(RAND()),1,10);
 
 INSERT INTO configuration (configuration_id, configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function) VALUES
-(NULL, 'Version', 'GOOGLE_PRODUCTS_VERSION', '1.14.7', 'Version Installed:', @configuration_group_id, 0, NOW(), NULL, NULL),
-(NULL, 'Debug', 'GOOGLE_PRODUCTS_DEBUG', 'false', 'Turn on simple debug?', @configuration_group_id, 0, NOW(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),'), 
+(NULL, 'Version', 'GOOGLE_PRODUCTS_VERSION', '1.15.0', 'Version Installed:', @configuration_group_id, 0, NOW(), NULL, NULL),
+(NULL, 'Debugging', 'GOOGLE_PRODUCTS_DEBUG', 'false', 'Turn on debugging for verbose output?', @configuration_group_id, 0, NOW(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),'), 
 (NULL, 'Google Merchant Center FTP Username', 'GOOGLE_PRODUCTS_USERNAME', 'ftp_username', 'Enter your Google Merchant Center FTP username', @configuration_group_id, 1, NOW(), NULL, NULL),
 (NULL, 'Google Merchant Center FTP Password', 'GOOGLE_PRODUCTS_PASSWORD', 'ftp_password', 'Enter your Google Merchant Center FTP password', @configuration_group_id, 2, NOW(), NULL, NULL),
 (NULL, 'Google Merchant Center Server', 'GOOGLE_PRODUCTS_SERVER', 'uploads.google.com', 'Enter froogle server<br />default: hedwig.google.com', @configuration_group_id, 3, NOW(), NULL, NULL),

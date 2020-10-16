@@ -1,3 +1,6 @@
+#version
+UPDATE configuration SET configuration_value = '1.15.0' WHERE configuration_key = 'GOOGLE_PRODUCTS_VERSION' LIMIT 1;
+
 #Add option Products Options Stock to 3rd party attribute-stock plugins
 UPDATE configuration SET 
 configuration_title = 'Attribute-Stock Plugin',
