@@ -119,17 +119,18 @@
         p {
             font-size: small;
         }
+        .errorText {
+            color: #ff0000;
+        }
     </style>
 <title>Google Merchant Feeder v<?php echo $google_base->google_base_version()?></title>
 </head>
 
 <body>
-<h1><?php echo sprintf(TEXT_GOOGLE_PRODUCTS_STARTED, $google_base->google_base_version()); ?></h1>
+<h1>Google Merchant Feeder v<?php echo $google_base->google_base_version()?></h1>
+    <p><?php echo TEXT_GOOGLE_PRODUCTS_STARTED; ?></p>
 <p><?php echo TEXT_GOOGLE_PRODUCTS_FEED . (isset($feed) && $feed === "yes" ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?><br>
     <?php echo TEXT_GOOGLE_PRODUCTS_UPLOAD . (isset($upload) && $upload === "yes" ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?></p>
-<p><?php echo TEXT_GOOGLE_PRODUCTS_FILE_LOCATION . NL . (($upload_file !== '') ? $upload_file : $outfile); ?></p>
-<p><?php echo TEXT_GOOGLE_PRODUCTS_PROCESSING; ?></p>
-
 <?php
   ob_flush();
   flush();
@@ -138,14 +139,19 @@
   if (isset($feed) && $feed === "yes") {
     if (is_dir(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
       if (!is_writable(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
-        echo ERROR_GOOGLE_PRODUCTS_DIRECTORY_NOT_WRITEABLE . NL;
+          echo '<p class="errorText">' . sprintf(ERROR_GOOGLE_PRODUCTS_DIRECTORY_NOT_WRITEABLE, substr(sprintf('%o', fileperms(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)), -4)) . '</p>';
         die;
       }
     } else {
-      echo ERROR_GOOGLE_PRODUCTS_DIRECTORY_DOES_NOT_EXIST . NL;
+        echo '<p class="errorText">' . ERROR_GOOGLE_PRODUCTS_DIRECTORY_DOES_NOT_EXIST . '</p>';
       die;
     }
+    ?>
 
+<p><?php echo TEXT_GOOGLE_PRODUCTS_FILE_LOCATION . NL . (($upload_file !== '') ? $upload_file : $outfile); ?></p>
+<p><?php echo TEXT_GOOGLE_PRODUCTS_PROCESSING; ?></p>
+
+      <?php
     $stimer_feed = $google_base->microtime_float();
     
     $dom = new DOMDocument('1.0', 'utf-8');

@@ -67,7 +67,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'ftpdir') {
 	exit();
 }
 
-if(isset($_GET['action']) && ($_GET['action'] === 'delete')) {
+if (isset($_GET['action']) && ($_GET['action'] === 'delete')) {
   if (file_exists(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $_GET['file'])) {
     unlink(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $_GET['file']);
   }
@@ -123,7 +123,7 @@ function loadFroogleXMLDoc(request,field, loading) {
       catch(oc) { req = null; }
    }
 
-   // Mozailla/Safari
+   // Mozilla/Safari
    if (!req && typeof XMLHttpRequest != "undefined") { req = new XMLHttpRequest(); }
 
    // Call the processChange() function when the page has loaded
@@ -162,7 +162,20 @@ function processLoading(text) {
       <!-- body_text //-->
       <div class="row">
      <h1><?php echo HEADING_TITLE. ' ' . GOOGLE_PRODUCTS_VERSION; ?></h1>
-          <br>
+    <br>
+    <?php
+ //check output file location permissions
+    $error_file = true;
+                  if (is_dir(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
+                      if (is_writable(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
+                          $error_file = false;
+                      } else {
+                          echo '<p class="errorText">' . sprintf(ERROR_GOOGLE_PRODUCTS_DIRECTORY_NOT_WRITEABLE, substr(sprintf('%o', fileperms(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)), -4)) . '</p>';
+                      }
+                  } else {
+                      echo '<p class="errorText">' . ERROR_GOOGLE_PRODUCTS_DIRECTORY_DOES_NOT_EXIST . '</p>';
+                  }
+ if (!$error_file){ ?>
 <div>
       <form method="get" action="<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . ".php"; ?>" name="google" target="googlefeed" onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=600, height=400, top=0, left=50, scrollbars=yes');setTimeout('location.reload();', 5000);"><?php //runs script in shop root in the popup, then reloads the admin page to display the newly-created file ?>
         <label for="feed"><?php echo TEXT_FEED_TYPE ?></label>
@@ -186,36 +199,37 @@ function processLoading(text) {
 </div>
           <hr>
           <div>
-      <h2><?php echo TEXT_FEED_FILES; ?></h2> 
-      <table id="googleFiles">
-        <tr>
-          <th><?php echo TEXT_DATE_CREATED ?></th>
-          <th><?php echo TEXT_DOWNLOAD_LINK ?></th>
-          <th><?php echo TEXT_ACTION ?></th>
-        </tr>
-        <?php
-        if ($handle = opendir(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
-          while (($file = readdir($handle)) !== false) {
-            if ($file !== "." && $file !== ".." && $file !== 'index.html') {
-            $filetime = filemtime(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file);
-            $date = date('j/m/Y H:i:s',$filetime);//steve
-        ?>
-              <tr>
-                <td><?php echo $date; ?></td>
-                <td><a href="<?php echo HTTP_SERVER . DIR_WS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file; ?>" target="_blank"><?php echo $file;?></a></td>
-                <td>
-                  <a href="<?php echo zen_href_link(FILENAME_GOOGLEFROOGLE, 'file='.$file.'&action=delete');?>"><?php echo IMAGE_DELETE;?></a>&nbsp;
-                  <a href="#" onclick="window.open('<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE; ?>.php?feed=fn_uy&upload_file=<?php echo $file; ?>&key=<?php echo GOOGLE_PRODUCTS_KEY; ?>', 'googlefrooglefeed', 'resizable=1, statusbar=5, width=600, height=400, top=0, left=50, scrollbars=yes'); return false;"><?php echo IMAGE_UPLOAD;?></a>
-                </td>
-              </tr>
-              <?php
-            }
-          }
-          closedir($handle);
-        }
+      <h2><?php echo TEXT_FEED_FILES; ?></h2>
+              <table id="googleFiles">
+                  <tr>
+                      <th><?php echo TEXT_DATE_CREATED ?></th>
+                      <th><?php echo TEXT_DOWNLOAD_LINK ?></th>
+                      <th><?php echo TEXT_ACTION ?></th>
+                  </tr>
+
+                  <?php
+                  //check output file location permissions
+                        if ($handle = opendir(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
+                              while (($file = readdir($handle)) !== false) {
+                                  //echo "filename: $file : filetype: " . filetype($handle . $file) . "\n<br>";
+                                  if ($file !== "." && $file !== ".." && $file !== 'index.html') {
+                                      $filetime = filemtime(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file);
+                                      $date = date('j/m/Y H:i:s', $filetime);
+                                      ?>
+                                      <tr>
+                                          <td><?php echo $date; ?></td>
+                                          <td><a href="<?php echo HTTP_SERVER . DIR_WS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file; ?>" target="_blank"><?php echo $file; ?></a></td>
+                                          <td><a href="<?php echo zen_href_link(FILENAME_GOOGLEFROOGLE, 'file=' . $file . '&action=delete'); ?>"><?php echo IMAGE_DELETE; ?></a> <a href="#" onclick="window.open('<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE; ?>.php?feed=fn_uy&upload_file=<?php echo $file; ?>&key=<?php echo GOOGLE_PRODUCTS_KEY; ?>', 'googlefrooglefeed', 'resizable=1, statusbar=5, width=600, height=400, top=0, left=50, scrollbars=yes'); return false;"><?php echo IMAGE_UPLOAD; ?></a></td>
+                                      </tr>
+                                      <?php
+                                  }
+                              }
+                              closedir($handle);
+                          }
         ?>
       </table>
           </div>
+     <?php } ?>
           <hr>
     <div>
         <img src="images/google_merchant_center_logo.gif" width="174" height="80" alt="Google Merchant Center logo">
