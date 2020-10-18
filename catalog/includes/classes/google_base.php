@@ -12,8 +12,8 @@
   class google_base {
     
     function additional_images($products_image, $products_id) {
-      if ($products_image != '') {
-        $images_array = array();
+      if ($products_image !== '') {
+        $images_array = [];
         if (is_array($this->additional_images_array[$products_id])) {
           $images_array = $this->additional_images_array[$products_id];  
         } else {
@@ -29,7 +29,7 @@
           }
 
           $products_image_directory = str_replace($products_image, '', substr($products_image, strrpos($products_image, '/')));
-          if ($products_image_directory != '') {
+          if ($products_image_directory !== '') {
             $products_image_directory = DIR_WS_IMAGES . str_replace($products_image_directory, '', $products_image) . "/";
           } else {
             $products_image_directory = DIR_WS_IMAGES;
@@ -46,24 +46,26 @@
           }
           //print_r($this->image_files);
           //die();
-          if (is_array($image_files) && sizeof($image_files) > 0) {
+          if (is_array($image_files) && count($image_files) > 0) {
             foreach($this->image_files[$products_image_directory] as $file) {
               $file_extension = substr($file, strrpos($file, '.'));
               $file_base = str_replace($file_extension, '', $file);
               // skip the main image and make sure the base and extension match the main image
               if (($file != $products_image) && (preg_match("/" . $products_image_base . "/i", $file) == 1)) {
-                $images_array[] = $this->google_base_image_url(($products_image_directory != '' ? str_replace(DIR_WS_IMAGES, '', $products_image_directory) : ''). $file);
-                if (count($images_array) >= 9) break; // Google Supports up to 10 images
+                $images_array[] = $this->google_base_image_url(($products_image_directory !== '' ? str_replace(DIR_WS_IMAGES, '', $products_image_directory) : ''). $file);
+                if (count($images_array) >= 9) {
+                    break;
+                } // Google Supports up to 10 images
               }
             }
           }
           $this->additional_images_array[$products_id] = $images_array;
         }
         return $images_array;
-      } else {
-        // default
-        return false;
       }
+
+// default
+        return false;
     }   
    
     // writes out the code into the feed file
@@ -75,7 +77,9 @@
       //}
       //$fp = fopen($outfile, $mode);
       //$retval = fwrite($fp, $output, GOOGLE_PRODUCTS_OUTPUT_BUFFER_MAXSIZE);
-      if ($mode == 'a') $mode = 'FILE_APPEND';
+      if ($mode === 'a') {
+          $mode = 'FILE_APPEND';
+      }
       file_put_contents($outfile, $output, $mode);
       //return $retval;
     }
@@ -89,9 +93,8 @@
     function trim_array($x) {
       if (is_array($x)) {
          return array_map('trim_array', $x);
-      } else {
-       return trim($x);
       }
+        return trim($x);
     } 
 
     // determines if the feed should be generated
@@ -100,10 +103,7 @@
         case 'fy':
           $feed = 'yes';
           break;
-        case 'fn':
-          $feed = 'no';
-          break;
-        default:
+        default: //fn
           $feed = 'no';
           break;
       }
@@ -116,10 +116,7 @@
         case 'uy':
           $upload = 'yes';
           break;
-        case 'un':
-          $upload = 'no';
-          break;
-        default:
+        default: //un
           $upload = 'no';
           break;
       }
@@ -147,18 +144,14 @@
     
     // performs a set of functions to see if a product is valid
     function check_product($products_id) {
-      if ($this->included_categories_check(GOOGLE_PRODUCTS_POS_CATEGORIES, $products_id) && !$this->excluded_categories_check(GOOGLE_PRODUCTS_NEG_CATEGORIES, $products_id) && $this->included_manufacturers_check(GOOGLE_PRODUCTS_POS_MANUFACTURERS, $products_id) && !$this->excluded_manufacturers_check(GOOGLE_PRODUCTS_NEG_MANUFACTURERS, $products_id)) {
-        return true;
-      } else {
-        return false;
-      }
+        return $this->included_categories_check(GOOGLE_PRODUCTS_POS_CATEGORIES, $products_id) && !$this->excluded_categories_check(GOOGLE_PRODUCTS_NEG_CATEGORIES, $products_id) && $this->included_manufacturers_check(GOOGLE_PRODUCTS_POS_MANUFACTURERS, $products_id) && !$this->excluded_manufacturers_check(GOOGLE_PRODUCTS_NEG_MANUFACTURERS, $products_id);
     }
     
     // check to see if a product is inside an included category
     function included_categories_check($categories_list, $products_id) {
-      if ($categories_list == '') {
+      if ($categories_list === '') {
         return true;
-      } else {
+      }
         $categories_array = explode(',', $categories_list);
         $match = false;
         foreach($categories_array as $category_id) {
@@ -167,19 +160,15 @@
             break;
           }
         }
-        if ($match == true) {
-          return true;
-        } else {
-          return false;
-        }
-      }
+        return $match === true;
     }
     
     // check to see if a product is inside an excluded category
     function excluded_categories_check($categories_list, $products_id) {
-      if ($categories_list == '') {
+      if ($categories_list === '') {
         return false;
-      } else {
+      }
+
         $categories_array = explode(',', $categories_list);
         $match = false;
         foreach($categories_array as $category_id) {
@@ -188,41 +177,35 @@
             break;
           }
         }
-        if ($match == true) {
-          return true;
-        } else {
-          return false;
-        }
-      }
+        return $match === true;
     }
     
     // check to see if a product is from an included manufacturer
     function included_manufacturers_check($manufacturers_list, $products_id) {
-      if ($manufacturers_list == '') {
+      if ($manufacturers_list === '') {
         return true;
-      } else {
+      }
+
         $manufacturers_array = explode(',', $manufacturers_list);
         $products_manufacturers_id = zen_get_products_manufacturers_id($products_id);
         if (in_array($products_manufacturers_id, $manufacturers_array)) {
           return true;
-        } else {
-          return false;
         }
-      }
+        return false;
     }
     
     function excluded_manufacturers_check($manufacturers_list, $products_id) {
-      if ($manufacturers_list == '') {
+      if ($manufacturers_list === '') {
         return false;
-      } else {
+      }
+
         $manufacturers_array = explode(',', $manufacturers_list);
         $products_manufacturers_id = zen_get_products_manufacturers_id($products_id);
         if (in_array($products_manufacturers_id, $manufacturers_array)) {
           return true;
-        } else {
-          return false;
         }
-      }
+
+        return false;
     }
     
     function google_base_get_category($products_id) {
@@ -234,14 +217,14 @@
       
       // build the cPath
       $cPath_array = zen_generate_category_path($master_categories_id);
-      $category_names = array();
-      $cPath = array();
+      $category_names = [];
+      $cPath = [];
       $cPath_array[0] = array_reverse($cPath_array[0]);
       foreach ($cPath_array[0] as $category) {
         $category_names[] = zen_get_category_name($category['id'], (int)GOOGLE_PRODUCTS_LANGUAGE); // have to use this function just in case of a different language
         $cPath[] = $category['id'];
       }
-      return array($category_names, $cPath);  
+      return [$category_names, $cPath];  
     }
     
     // returns an array containing the category name and cPath
@@ -269,7 +252,7 @@
     */
     
     // builds the category tree
-    function google_base_category_tree($id_parent=0, $cPath='', $cName='', $cats=array()){
+    function google_base_category_tree($id_parent=0, $cPath='', $cName='', $cats= []){
       global $db, $languages;
       $cat = $db->Execute("SELECT c.categories_id, c.parent_id, cd.categories_name
                            FROM " . TABLE_CATEGORIES . " c
@@ -277,8 +260,8 @@
                            WHERE c.parent_id = '" . (int)$id_parent . "'
                            AND cd.language_id='" . (int)$languages->fields['languages_id'] . "'
                            AND c.categories_status= '1'",
-                           '', false, 150);
-      while (!$cat->EOF) {
+                           '', false, 150);//todo what's this
+      while (!$cat->EOF) {//todo foreach
         $cats[$cat->fields['categories_id']]['name'] = (zen_not_null($cName) ? $cName . ', ' : '') . trim($cat->fields['categories_name']); // previously used zen_froogle_sanita instead of trim
         $cats[$cat->fields['categories_id']]['cPath'] = (zen_not_null($cPath) ? $cPath . ',' : '') . $cat->fields['categories_id'];
         if (zen_has_category_subcategories($cat->fields['categories_id'])) {
@@ -301,25 +284,25 @@
       $item->appendChild($iD);      
       
 		$item->appendChild($dom->createElement('g:price', number_format($price, 2, '.', '') . ' ' . GOOGLE_PRODUCTS_CURRENCY));  
-      if (GOOGLE_PRODUCTS_TAX_DISPLAY == 'true' && GOOGLE_PRODUCTS_TAX_COUNTRY == 'US' && $tax_rate != '') {
+      if (GOOGLE_PRODUCTS_TAX_DISPLAY === 'true' && GOOGLE_PRODUCTS_TAX_COUNTRY === 'US' && $tax_rate != '') {
         $tax = $dom->createElement('g:tax');
         $tax->appendChild($dom->createElement('g:country', GOOGLE_PRODUCTS_TAX_COUNTRY));
-        if (GOOGLE_PRODUCTS_TAX_REGION != '') {
+        if (GOOGLE_PRODUCTS_TAX_REGION !== '') {
           $tax->appendChild($dom->createElement('g:region', GOOGLE_PRODUCTS_TAX_REGION));
         }
-        if (GOOGLE_PRODUCTS_TAX_SHIPPING == 'y') {
+        if (GOOGLE_PRODUCTS_TAX_SHIPPING === 'y') {
           $tax->appendChild($dom->createElement('g:tax_ship', GOOGLE_PRODUCTS_TAX_SHIPPING));
         }
         $tax->appendChild($dom->createElement('g:rate', $tax_rate));
         $item->appendChild($tax);
       }
-      if (STOCK_CHECK == 'true') {
+      if (STOCK_CHECK === 'true') {
         if ($products->fields['products_quantity'] > 0) {
           $item->appendChild($dom->createElement('g:availability', 'in stock'));
         } else {
           // are back orders allowed?
-          if (STOCK_ALLOW_CHECKOUT == 'true') {
-            if ($products->fields['products_date_available'] != 'NULL') {
+          if (STOCK_ALLOW_CHECKOUT === 'true') {
+            if ($products->fields['products_date_available'] != 'NULL') {//todo check
               $item->appendChild($dom->createElement('g:availability', 'available for order'));
             } else {
               $item->appendChild($dom->createElement('g:availability', 'preorder'));
@@ -331,21 +314,21 @@
       } else {
         $item->appendChild($dom->createElement('g:availability', 'in stock'));                  
       }
-      if(GOOGLE_PRODUCTS_WEIGHT == 'true' && $products->fields['products_weight'] != '') {
-        $item->appendChild($dom->createElement('g:shipping_weight', $products->fields['products_weight'] . ' ' . str_replace(array('pounds', 'kilograms'), array('lb', 'kg'), GOOGLE_PRODUCTS_UNITS)));
+      if(GOOGLE_PRODUCTS_WEIGHT === 'true' && $products->fields['products_weight'] !== '') {
+        $item->appendChild($dom->createElement('g:shipping_weight', $products->fields['products_weight'] . ' ' . str_replace(['pounds', 'kilograms'], ['lb', 'kg'], GOOGLE_PRODUCTS_UNITS)));
       } 
-      if (defined('GOOGLE_PRODUCTS_SHIPPING_METHOD') && (GOOGLE_PRODUCTS_SHIPPING_METHOD != '') && (GOOGLE_PRODUCTS_SHIPPING_METHOD != 'none')) {   
+      if (defined('GOOGLE_PRODUCTS_SHIPPING_METHOD') && (GOOGLE_PRODUCTS_SHIPPING_METHOD !== '') && (GOOGLE_PRODUCTS_SHIPPING_METHOD !== 'none')) {   
         $shipping_rate = $this->shipping_rate(GOOGLE_PRODUCTS_SHIPPING_METHOD, $percategory, $freerules, GOOGLE_PRODUCTS_RATE_ZONE, $products->fields['products_weight'], $price, $products->fields['products_id']);
         if ((float)$shipping_rate >= 0) {
           $shipping = $dom->createElement('g:shipping');
-          if (GOOGLE_PRODUCTS_SHIPPING_COUNTRY != '') {
+          if (GOOGLE_PRODUCTS_SHIPPING_COUNTRY !== '') {
             $shipping->appendChild($dom->createElement('g:country', $this->get_countries_iso_code_2(GOOGLE_PRODUCTS_SHIPPING_COUNTRY)));
           }
           
-          if (GOOGLE_PRODUCTS_SHIPPING_REGION != '') {
+          if (GOOGLE_PRODUCTS_SHIPPING_REGION !== '') {
             $shipping->appendChild($dom->createElement('g:region', GOOGLE_PRODUCTS_SHIPPING_REGION));
           }
-          if (GOOGLE_PRODUCTS_SHIPPING_SERVICE != '') {
+          if (GOOGLE_PRODUCTS_SHIPPING_SERVICE !== '') {
             $shipping->appendChild($dom->createElement('g:service', GOOGLE_PRODUCTS_SHIPPING_SERVICE));
           }
           $shipping->appendChild($dom->createElement('g:price', (float)$shipping_rate));
@@ -359,12 +342,12 @@
     // takes already created $item and adds universal attributes from $products
     function universal_attributes($products, $item, $dom) {
       global $link, $product_type, $payments_accepted, $google_product_category_check, $default_google_product_category, $products_description;
-      if ($products->fields['manufacturers_name'] != '') {
+      if ($products->fields['manufacturers_name'] !== '') {
         $manufacturers_name = $dom->createElement('g:brand');
         $manufacturers_name->appendChild($dom->createCDATASection($this->google_base_xml_sanitizer($products->fields['manufacturers_name'])));
         $item->appendChild($manufacturers_name);
       }
-      if (GOOGLE_PRODUCTS_PRODUCT_CONDITION == 'true' && $products->fields['products_condition'] != '') {
+      if (GOOGLE_PRODUCTS_PRODUCT_CONDITION === 'true' && $products->fields['products_condition'] !== '') {
         $item->appendChild($dom->createElement('g:condition', $products->fields['products_condition']));
       } else {
         $item->appendChild($dom->createElement('g:condition', GOOGLE_PRODUCTS_CONDITION));
@@ -373,15 +356,15 @@
       if ($product_type) {
         $item->appendChild($dom->createElement('g:product_type', $product_type));
       }
-      if ($products->fields['products_image'] != '') {
+      if ($products->fields['products_image'] !== '') {
         $item->appendChild($dom->createElement('g:image_link', $this->google_base_image_url($products->fields['products_image'])));
         $additional_images = $this->additional_images($products->fields['products_image'], $products->fields['products_id']);
-        if (is_array($additional_images) && sizeof($additional_images) > 0) {
+        if (is_array($additional_images) && count($additional_images) > 0) {
           $count = 0;
           foreach ($additional_images as $additional_image) {
             $count++;
             $item->appendChild($dom->createElement('g:additional_image_link', $additional_image));
-            if ($count == 9) break; // max 10 images including main image 
+            if ($count === 9) break; // max 10 images including main image 
           }
         }
       }
@@ -395,39 +378,39 @@
         $mpn->appendChild($dom->createCDATASection($this->google_base_xml_sanitizer($products->fields['products_model'])));
         $item->appendChild($mpn);
       }
-      if (GOOGLE_PRODUCTS_ASA_UPC == 'true') {
-        if ($products->fields['products_upc'] != '') {
+      if (GOOGLE_PRODUCTS_ASA_UPC === 'true') {
+        if ($products->fields['products_upc'] !== '') {
           $upc = $dom->createElement('g:upc');
           $upc->appendChild($dom->createCDATASection($this->google_base_xml_sanitizer($products->fields['products_upc'])));
           $item->appendChild($upc);
-        } elseif ($products->fields['products_isbn'] != '') {
+        } elseif ($products->fields['products_isbn'] !== '') {
           $isbn = $dom->createElement('g:isbn');
           $isbn->appendChild($dom->createCDATASection($this->google_base_xml_sanitizer($products->fields['products_isbn'])));
           $item->appendChild($isbn);
-        } elseif ($products->fields['products_ean'] != '') {
+        } elseif ($products->fields['products_ean'] !== '') {
           $ean = $dom->createElement('g:ean');
           $ean->appendChild($dom->createCDATASection($this->google_base_xml_sanitizer($products->fields['products_ean'])));
           $item->appendChild($ean);                  
         }
       }
-      if (GOOGLE_PRODUCTS_CURRENCY_DISPLAY == 'true') {
+      if (GOOGLE_PRODUCTS_CURRENCY_DISPLAY === 'true') {
         $item->appendChild($dom->createElement('g:currency', GOOGLE_PRODUCTS_CURRENCY));
       }
-      if(GOOGLE_PRODUCTS_PICKUP != 'do not display') {
+      if(GOOGLE_PRODUCTS_PICKUP !== 'do not display') {
         $item->appendChild($dom->createElement('g:pickup', GOOGLE_PRODUCTS_PICKUP));
       }
-      if (defined('GOOGLE_PRODUCTS_PAYMENT_METHODS') && GOOGLE_PRODUCTS_PAYMENT_METHODS != '') { 
+      if (defined('GOOGLE_PRODUCTS_PAYMENT_METHODS') && GOOGLE_PRODUCTS_PAYMENT_METHODS !== '') { 
         foreach($payments_accepted as $payment_accepted) {
           $item->appendChild($dom->createElement('g:payment_accepted', trim($payment_accepted)));
         }
       }
-      if (defined('GOOGLE_PRODUCTS_PAYMENT_NOTES') && GOOGLE_PRODUCTS_PAYMENT_NOTES != '') {
+      if (defined('GOOGLE_PRODUCTS_PAYMENT_NOTES') && GOOGLE_PRODUCTS_PAYMENT_NOTES !== '') {
         $item->appendChild($dom->createElement('g:payment_notes', trim(GOOGLE_PRODUCTS_PAYMENT_NOTES)));
       }
       $productsDescription = $dom->createElement('description');
       $productsDescription->appendChild($dom->createCDATASection(substr($products_description, 0, 9988))); // 10000 - 12 to account for cData
       $item->appendChild($productsDescription);
-      if ($google_product_category_check == false && GOOGLE_PRODUCTS_DEFAULT_PRODUCT_CATEGORY != '') {
+      if ($google_product_category_check === false && GOOGLE_PRODUCTS_DEFAULT_PRODUCT_CATEGORY !== '') {
         $google_product_category = $dom->createElement('g:google_product_category');
         $google_product_category->appendChild($dom->createCDATASection($default_google_product_category));
         $item->appendChild($google_product_category);
@@ -437,8 +420,7 @@
     
     function google_base_sanita($str, $rt=false) {
       //global $products;
-      $str = str_replace(array("\r\n", "\r", "\n", "&nbsp;"), ' ', $str);
-      $str = str_replace('’', "'", $str);
+      $str = str_replace(["\r\n", "\r", "\n", "&nbsp;", '’'], [' ', ' ', ' ', ' ', "'"], $str);
       $str = strip_tags($str);
       //$charset = 'UTF-8';
       //if (defined(CHARSET)) {
@@ -453,11 +435,11 @@
              
     function google_base_xml_sanitizer($str, $products_id = '') { // products id added for debugging purposes
       $str = $this->google_base_sanita($str);
-      if (GOOGLE_PRODUCTS_XML_SANITIZATION == 'true') {
+      if (GOOGLE_PRODUCTS_XML_SANITIZATION === 'true') {
         $str = $this->transcribe_cp1252_to_latin1($str); // transcribe windows characters
         $strout = null;
 
-        for ($i = 0; $i < strlen($str); $i++) {
+        for ($i = 0; $i < strlen($str); $i++) {//todo IDE
           $ord = ord($str[$i]);
           if (($ord > 0 && $ord < 32) || ($ord >= 127)) {
             $strout .= "&#{$ord};";
@@ -483,15 +465,15 @@
         }
         $str = null;
         return $strout;
-      } else {
-        return $str;
       }
+
+        return $str;
     }
     
     function transcribe_cp1252_to_latin1($cp1252) {
       return strtr(
         $cp1252,
-        array(
+        [
           "\x80" => "e",  "\x81" => " ",    "\x82" => "'", "\x83" => 'f',
           "\x84" => '"',  "\x85" => "...",  "\x86" => "+", "\x87" => "#",
           "\x88" => "^",  "\x89" => "0/00", "\x8A" => "S", "\x8B" => "<",
@@ -500,24 +482,26 @@
           "\x94" => '"',  "\x95" => "*",    "\x96" => "-", "\x97" => "--",
           "\x98" => "~",  "\x99" => "(TM)", "\x9A" => "s", "\x9B" => ">",
           "\x9C" => "oe", "\x9D" => " ",    "\x9E" => "z", "\x9F" => "Y"
-          )
+        ]
       );
     }
     
     // creates the url for the products_image
     function google_base_image_url($products_image) {
-      if($products_image == "") return "";
-      if (defined('GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL') && GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL != '') {
+      if ($products_image === "") {
+          return "";
+      }
+      if (defined('GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL') && GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL !== '') {
         if (strpos(GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL, HTTP_SERVER . '/' . DIR_WS_IMAGES) !== false) {
           $products_image = substr(GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL, strlen(HTTP_SERVER . '/' . DIR_WS_IMAGES)) . $products_image;
         } else {
           return GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL . rawurlencode($products_image);
         } 
       }
-      $products_image_extention = substr($products_image, strrpos($products_image, '.'));
-      $products_image_base = preg_replace("/" . $products_image_extention . "/", '', $products_image);
-      $products_image_medium = $products_image_base . IMAGE_SUFFIX_MEDIUM . $products_image_extention;
-      $products_image_large = $products_image_base . IMAGE_SUFFIX_LARGE . $products_image_extention;
+      $products_image_extension = substr($products_image, strrpos($products_image, '.'));
+      $products_image_base = preg_replace("/" . $products_image_extension . "/", '', $products_image);
+      $products_image_medium = $products_image_base . IMAGE_SUFFIX_MEDIUM . $products_image_extension;
+      $products_image_large = $products_image_base . IMAGE_SUFFIX_LARGE . $products_image_extension;
       
       // check for a large image else use medium else use small
       if (!file_exists(DIR_WS_IMAGES . 'large/' . $products_image_large)) {
@@ -529,15 +513,16 @@
       } else {
         $products_image_large = DIR_WS_IMAGES . 'large/' . $products_image_large;
       }
-      if ((function_exists('handle_image')) && (GOOGLE_PRODUCTS_IMAGE_HANDLER == 'true')) {
+      if ((function_exists('handle_image')) && (GOOGLE_PRODUCTS_IMAGE_HANDLER === 'true')) {
         $image_ih = handle_image($products_image_large, '', LARGE_IMAGE_MAX_WIDTH, LARGE_IMAGE_MAX_HEIGHT, '');
         $retval = (HTTP_SERVER . DIR_WS_CATALOG . $image_ih[0]);
       } else {
         $retval = (HTTP_SERVER . DIR_WS_CATALOG . rawurlencode($products_image_large));
-      }   
-      $retval = str_replace('%2F', '/', $retval);
-      $retval = str_replace('%28', '(', $retval);
-	  return str_replace('%29', ')', $retval);
+      }
+     // $retval = str_replace('%2F', '/', $retval);
+     // $retval = str_replace('%28', '(', $retval);
+	 // return str_replace('%29', ')', $retval);
+        return str_replace(['%2F', '%28', '%29'], ['/', '(', ')'], $retval);
     }
     
     // creates the url for a News and Articles Manager article
@@ -547,10 +532,12 @@
     }
     
     function google_base_expiration_date($base_date) {
-      if(GOOGLE_PRODUCTS_EXPIRATION_BASE == 'now')
-        $expiration_date = time();
-      else
-        $expiration_date = strtotime($base_date);
+      if (GOOGLE_PRODUCTS_EXPIRATION_BASE === 'now') {
+          $expiration_date = time();
+      }
+      else {
+          $expiration_date = strtotime($base_date);
+      }
       $expiration_date += GOOGLE_PRODUCTS_EXPIRATION_DAYS*24*60*60;
       $retval = (date('Y-m-d', $expiration_date));
       return $retval;
@@ -566,8 +553,7 @@
                         where countries_id = '" . $countries_id . "'
                         limit 1";
     $countries = $db->Execute($countries_query);
-    $countries_iso_code_2 = $countries->fields['countries_iso_code_2'];
-    return $countries_iso_code_2;
+      return $countries->fields['countries_iso_code_2'];
   }
 
     function shipping_rate($method, $percategory = '', $freerules = '', $table_zone = '', $products_weight = '', $products_price = '', $products_id = '')
@@ -662,10 +648,11 @@
     }
 
     $table_cost = $this->google_multi_explode(',', ':', MODULE_SHIPPING_TABLE_COST);
-    $size = sizeof($table_cost);
+    $size = count($table_cost);
     for ($i=0, $n=$size; $i<$n; $i+=2) {
       if (round($order_total,9) <= $table_cost[$i]) {
-        if (strstr($table_cost[$i+1], '%')) {
+        //if (strstr($table_cost[$i+1], '%')) {
+          if (strpos($table_cost[$i + 1], '%') !== false) {//todo check
           $shipping = ($table_cost[$i+1]/100) * $products_price;
         } else {
           $shipping = $table_cost[$i+1];
@@ -673,7 +660,7 @@
         break;
       }
     }
-    $shipping = $shipping + MODULE_SHIPPING_TABLE_HANDLING;
+    $shipping += MODULE_SHIPPING_TABLE_HANDLING;
     return $shipping;
   }
     
@@ -693,14 +680,14 @@
     }
     
     $table_cost = $this->google_multi_explode(',', ':', constant('MODULE_SHIPPING_ZONETABLE_COST_' . $table_zone));
-    $size = sizeof($table_cost);
+    $size = count($table_cost);
     for ($i=0, $n=$size; $i<$n; $i+=2) {
       if (round($order_total,9) <= $table_cost[$i]) {
         $shipping = $table_cost[$i+1];
         break;
       }
     }
-    $shipping = $shipping + constant('MODULE_SHIPPING_ZONETABLE_HANDLING_' . $table_zone);
+    $shipping += constant('MODULE_SHIPPING_ZONETABLE_HANDLING_' . $table_zone);
     return $shipping;
   }
   
@@ -721,10 +708,11 @@
     
     $zones_cost = constant('MODULE_SHIPPING_ZONES_COST_' . $table_zone);
     $zones_table = $this->google_multi_explode(',', ':', $zones_cost);
-    $size = sizeof($zones_table);
+    $size = count($zones_table);
     for ($i=0; $i<$size; $i+=2) {
       if (round($order_total,9) <= $zones_table[$i]) {
-        if (strstr($zones_table[$i+1], '%')) {
+        //if (strstr($zones_table[$i+1], '%')) {
+          if (strpos($zones_table[$i + 1], '%') !== false) {//todo check
           $shipping = ($zones_table[$i+1]/100) * $products_price;
         } else {
           $shipping = $zones_table[$i+1];
@@ -732,12 +720,12 @@
          break;
       }
     }
-    $shipping = $shipping + constant('MODULE_SHIPPING_ZONES_HANDLING_' . $table_zone);
+    $shipping += constant('MODULE_SHIPPING_ZONES_HANDLING_' . $table_zone);
     return $shipping;
   }
   
   function google_multi_explode($delim1, $delim2, $string) {
-  	$new_data = array();
+  	$new_data = [];
   	$data = explode($delim1, $string);
   	foreach ($data as $key => $value) {
   	  $new_data = array_merge($new_data, explode($delim2, $value));
@@ -750,7 +738,9 @@
 // Specials and Tax Included
   function google_get_products_actual_price($products_id) {
     global $db, $currencies;
-    $product_check = $db->Execute("select products_tax_class_id, products_price, products_priced_by_attribute, product_is_free, product_is_call from " . TABLE_PRODUCTS . " where products_id = '" . (int)$products_id . "'" . " limit 1");
+    $product_check = $db->Execute("SELECT products_tax_class_id, products_price, products_priced_by_attribute, product_is_free, product_is_call 
+                                   FROM " . TABLE_PRODUCTS . " 
+                                   WHERE products_id = '" . (int)$products_id . "'" . " LIMIT 1");
 
     $show_display_price = '';
     $display_normal_price = $this->google_get_products_base_price($products_id);
@@ -769,7 +759,7 @@
     }
 
     // If Free, Show it
-    if ($product_check->fields['product_is_free'] == '1') {
+    if ($product_check->fields['product_is_free'] === '1') {
       $products_actual_price = 0;
     }
     //die();
@@ -780,21 +770,29 @@
 // computes products_price + option groups lowest attributes price of each group when on
   function google_get_products_base_price($products_id) {
     global $db;
-      $product_check = $db->Execute("select products_price, products_priced_by_attribute from " . TABLE_PRODUCTS . " where products_id = '" . (int)$products_id . "'");
+      $product_check = $db->Execute("SELECT products_price, products_priced_by_attribute 
+                                     FROM " . TABLE_PRODUCTS . " 
+                                     WHERE products_id = " . (int)$products_id);
 
 // is there a products_price to add to attributes
       $products_price = $product_check->fields['products_price'];
 
       // do not select display only attributes and attributes_price_base_included is true
-      $product_att_query = $db->Execute("select options_id, price_prefix, options_values_price, attributes_display_only, attributes_price_base_included from " . TABLE_PRODUCTS_ATTRIBUTES . " where products_id = '" . (int)$products_id . "' and attributes_display_only != '1' and attributes_price_base_included='1' and options_values_price > 0". " order by options_id, price_prefix, options_values_price");
+      $product_att_query = $db->Execute("SELECT options_id, price_prefix, options_values_price, attributes_display_only, attributes_price_base_included 
+                                         FROM " . TABLE_PRODUCTS_ATTRIBUTES . " 
+                                         WHERE products_id = " . (int)$products_id . " 
+                                         AND attributes_display_only != '1' 
+                                         AND attributes_price_base_included ='1' 
+                                         AND options_values_price > 0". " 
+                                         ORDER BY options_id, price_prefix, options_values_price");
       //echo $products_id . ' ';
       //print_r($product_att_query);
       //die();
-      $the_options_id= 'x';
-      $the_base_price= 0;
+      $the_options_id = 'x';
+      $the_base_price = 0;
 // add attributes price to price
-      if ($product_check->fields['products_priced_by_attribute'] == '1' and $product_att_query->RecordCount() >= 1) {
-        while (!$product_att_query->EOF) {
+      if ($product_check->fields['products_priced_by_attribute'] === '1' && $product_att_query->RecordCount() >= 1) {
+        while (!$product_att_query->EOF) {//todo foreach
           if ( $the_options_id != $product_att_query->fields['options_id']) {
             $the_options_id = $product_att_query->fields['options_id'];
             $the_base_price += $product_att_query->fields['options_values_price'];
@@ -813,9 +811,9 @@
   }
   
 //get specials price or sale price
-  function google_get_products_special_price($product_id, $product_price, $specials_price_only=false) {
+  function google_get_products_special_price($product_id, $product_price, $specials_price_only = false) {
     global $db;
-    $product = $db->Execute("select products_price, products_model, products_priced_by_attribute from " . TABLE_PRODUCTS . " where products_id = '" . (int)$product_id . "'");
+    $product = $db->Execute("SELECT products_price, products_model, products_priced_by_attribute FROM " . TABLE_PRODUCTS . " WHERE products_id = " . (int)$product_id);
 
     //if ($product->RecordCount() > 0) {
 //      $product_price = $product->fields['products_price'];
@@ -824,7 +822,7 @@
       //return false;
     //}
 
-    $specials = $db->Execute("select specials_new_products_price from " . TABLE_SPECIALS . " where products_id = '" . (int)$product_id . "' and status='1'");
+    $specials = $db->Execute("select specials_new_products_price FROM " . TABLE_SPECIALS . " WHERE products_id = " . (int)$product_id . " AND status='1'");
     if ($specials->RecordCount() > 0) {
 //      if ($product->fields['products_priced_by_attribute'] == 1) {
         $special_price = $specials->fields['specials_new_products_price'];
@@ -832,40 +830,48 @@
       $special_price = false;
     }
 
-    if(substr($product->fields['products_model'], 0, 4) == 'GIFT') {    //Never apply a salededuction to Ian Wilson's Giftvouchers
+    if(strpos($product->fields['products_model'], 'GIFT') === 0) {    //Never apply a salededuction to Ian Wilson's Giftvouchers
       if (zen_not_null($special_price)) {
         return $special_price;
-      } else {
-        return false;
       }
+        return false;
     }
 
 // return special price only
-    if ($specials_price_only==true) {
+    if ($specials_price_only === true) {
       if (zen_not_null($special_price)) {
         return $special_price;
-      } else {
-        return false;
       }
-    } else {
+        return false;
+    }
+
 // get sale price
 
 // changed to use master_categories_id
 //      $product_to_categories = $db->Execute("select categories_id from " . TABLE_PRODUCTS_TO_CATEGORIES . " where products_id = '" . (int)$product_id . "'");
 //      $category = $product_to_categories->fields['categories_id'];
 
-      $product_to_categories = $db->Execute("select master_categories_id from " . TABLE_PRODUCTS . " where products_id = '" . $product_id . "'");
+      $product_to_categories = $db->Execute("SELECT master_categories_id FROM " . TABLE_PRODUCTS . " WHERE products_id = " . (int)$product_id);
       $category = $product_to_categories->fields['master_categories_id'];
 
-      $sale = $db->Execute("select sale_specials_condition, sale_deduction_value, sale_deduction_type from " . TABLE_SALEMAKER_SALES . " where sale_categories_all like '%," . $category . ",%' and sale_status = '1' and (sale_date_start <= now() or sale_date_start = '0001-01-01') and (sale_date_end >= now() or sale_date_end = '0001-01-01') and (sale_pricerange_from <= '" . $product_price . "' or sale_pricerange_from = '0') and (sale_pricerange_to >= '" . $product_price . "' or sale_pricerange_to = '0')");
+      $sale = $db->Execute("SELECT sale_specials_condition, sale_deduction_value, sale_deduction_type 
+                            FROM " . TABLE_SALEMAKER_SALES . " 
+                            WHERE sale_categories_all 
+                            LIKE '%," . $category . ",%' 
+                            AND sale_status = '1' 
+                            AND (sale_date_start <= now() OR sale_date_start = '0001-01-01') 
+                            AND (sale_date_end >= now() OR sale_date_end = '0001-01-01') 
+                            AND (sale_pricerange_from <= '" . $product_price . "' OR sale_pricerange_from = '0') 
+                            AND (sale_pricerange_to >= '" . $product_price . "' OR sale_pricerange_to = '0')");
+
       if ($sale->RecordCount() < 1) {
          return $special_price;
       }
 
-      if (!$special_price) {
-        $tmp_special_price = $product_price;
-      } else {
+      if ($special_price) {
         $tmp_special_price = $special_price;
+      } else {
+        $tmp_special_price = $product_price;
       }
       switch ($sale->fields['sale_deduction_type']) {
         case 0:
@@ -894,38 +900,41 @@
 
       if (!$special_price) {
         return number_format($sale_product_price, 4, '.', '');
-      } else {
-        switch($sale->fields['sale_specials_condition']){
-          case 0:
-            return number_format($sale_product_price, 4, '.', '');
-            break;
-          case 1:
-            return number_format($special_price, 4, '.', '');
-            break;
-          case 2:
-            return number_format($sale_special_price, 4, '.', '');
-            break;
-          default:
-            return number_format($special_price, 4, '.', '');
-        }
       }
-    }
+
+      switch($sale->fields['sale_specials_condition']){
+        case 0:
+          return number_format($sale_product_price, 4, '.', '');
+          break;
+        case 1:
+          return number_format($special_price, 4, '.', '');
+          break;
+        case 2:
+          return number_format($sale_special_price, 4, '.', '');
+          break;
+        default:
+          return number_format($special_price, 4, '.', '');
+      }
   }
 
 // FTP FUNCTIONS //
     
-    function ftp_file_upload($url, $login, $password, $local_file, $ftp_dir='', $ftp_file=false, $ssl=false, $ftp_mode=FTP_ASCII) {
-      if(!is_callable('ftp_connect')) {
+    function ftp_file_upload($url, $login, $password, $local_file, $ftp_dir = '', $ftp_file = false, $ssl = false, $ftp_mode = FTP_ASCII) {
+      if (!is_callable('ftp_connect')) {
         echo FTP_FAILED . NL;
         return false;
       }
-      if(!$ftp_file)
-        $ftp_file = basename($local_file);
+      if (!$ftp_file) {
+          $ftp_file = basename($local_file);//todo check change from boolean to string
+          //echo '$ftp_file=' . $ftp_file;die;//todo remove
+      }
       ob_start();
-      if($ssl)
-        $cd = ftp_ssl_connect($url);
-      else
-        $cd = ftp_connect($url);
+      if ($ssl) {
+          $cd = ftp_ssl_connect($url);
+      }
+      else {
+          $cd = ftp_connect($url);
+      }
       if (!$cd) {
         $out = $this->ftp_get_error_from_ob();
         echo FTP_CONNECTION_FAILED . ' ' . $url . NL;
@@ -941,10 +950,11 @@
         echo $out . NL;
         ftp_close($cd);
         return false;
-      } else {
-  //    echo FTP_LOGIN_OK . FTP_USERNAME . ' ' . $login . FTP_PASSWORD . ' ' . $password . NL;
+      }
+
+//    echo FTP_LOGIN_OK . FTP_USERNAME . ' ' . $login . FTP_PASSWORD . ' ' . $password . NL;
         echo FTP_LOGIN_OK . NL;
-        if ($ftp_dir != "") {
+        if ($ftp_dir !== "") {
           if (!ftp_chdir($cd, $ftp_dir)) {
             $out = $this->ftp_get_error_from_ob();
             echo FTP_CANT_CHANGE_DIRECTORY . '&nbsp;' . $url . NL;
@@ -954,7 +964,7 @@
           }
         }
         echo FTP_CURRENT_DIRECTORY . '&nbsp;' . ftp_pwd($cd) . NL;
-        if (GOOGLE_PRODUCTS_PASV == 'true') {
+        if (GOOGLE_PRODUCTS_PASV === 'true') {
           $pasv = true;
         } else {
           $pasv = false;
@@ -963,29 +973,32 @@
         $upload = ftp_put($cd, $ftp_file, $local_file, $ftp_mode);
         $out = $this->ftp_get_error_from_ob();
         $raw = ftp_rawlist($cd, $ftp_file, true);
-        for($i=0,$n=sizeof($raw);$i<$n;$i++){
-          $out .= $raw[$i] . '<br/>';
+        if ($raw !== false) {
+            for ($i = 0, $n = count($raw); $i < $n; $i++) {//todo foreach IDE
+                $out .= $raw[$i] . '<br>';
+            }
         }
         if (!$upload) {
           echo FTP_UPLOAD_FAILED . NL;
-          if(isset($raw[0])) echo $raw[0] . NL;
+          if (isset($raw[0])) {
+              echo $raw[0] . NL;
+          }
           echo $out . NL;
           ftp_close($cd);
           return false;
-        } else {
-          echo FTP_UPLOAD_SUCCESS . NL;
-          echo $raw[0] . NL;
-          echo $out . NL;
         }
+
+        echo FTP_UPLOAD_SUCCESS . NL;
+        echo $raw[0] . NL;
+        echo $out . NL;
         ftp_close($cd);
         return true;
-      }
     }
 
     function ftp_get_error_from_ob() {
-      $out = ob_get_contents();
+      $out = ob_get_contents();//todo IDE
       ob_end_clean();
-      $out = str_replace(array('\\', '<!--error-->', '<br>', '<br />', "\n", 'in <b>'),array('/', '', '', '', '', ''),$out);
+      $out = str_replace(['\\', '<!--error-->', '<br>', '<br />', "\n", 'in <b>'], ['/', '', '', '', '', ''],$out);
       if(strpos($out, DIR_FS_CATALOG) !== false){
         $out = substr($out, 0, strpos($out, DIR_FS_CATALOG));
       }
@@ -993,9 +1006,7 @@
     }
 
     function microtime_float() {
-       list($usec, $sec) = explode(" ", microtime());
+       [$usec, $sec] = explode(" ", microtime());
        return ((float)$usec + (float)$sec);
     }
   }
-
-  //eof
