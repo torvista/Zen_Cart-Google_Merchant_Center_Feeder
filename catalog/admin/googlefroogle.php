@@ -55,7 +55,7 @@ function ftp_get_rawlist($url, $login, $password, $ftp_dir = '', $ssl = false, $
 		return $out;
 	}
 ?>
-<?php //steve todo: never used?
+<?php //todo: never used?
 if (isset($_GET['action']) && $_GET['action'] === 'ftpdir') {
 	ob_start();
 	echo TEXT_GOOGLE_PRODUCTS_FTP_FILES . '<br>';
@@ -145,8 +145,8 @@ function processLoading(text) {
 }
 //--></script>
 <style>
-  label{display:block;width:200px;float:left;}
-  .limiters{width:200px;}
+  /*label{display:block;width:200px;float:left;}*/
+  .limiters{width:100px;}
   .buttonRow{padding:5px 0;}
   table#googleFiles { margin-left:0; border-collapse:collapse; border:1px solid #036; font-size: small; }
   table#googleFiles th { background-color:#036; border-bottom:1px double #fff; color: #fff; text-align:left; padding:8px; }
@@ -177,20 +177,32 @@ function processLoading(text) {
                   }
  if (!$error_file){ ?>
 <div>
-      <form method="get" action="<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . ".php"; ?>" name="google" target="googlefeed" onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=600, height=400, top=0, left=50, scrollbars=yes');setTimeout('location.reload();', 5000);"><?php //runs script in shop root in the popup, then reloads the admin page to display the newly-created file ?>
+    <?php
+    if (GOOGLE_PRODUCTS_DEBUG === 'true') {
+        $popup_width = 1000;
+        $popup_height = 750;
+    } else {
+        $popup_width = 400;
+        $popup_height = 400;
+    } ?>
+      <form method="get" action="<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . ".php"; ?>" name="google" target="googlefeed" onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=<?php echo $popup_width; ?>, height=<?php echo $popup_height; ?>, top=5, left=25, scrollbars=yes');setTimeout('location.reload();', 5000);"><?php //runs script in shop root in the popup, then reloads the admin page so it can find/list the newly-created file in the table ?>
         <label for="feed"><?php echo TEXT_FEED_TYPE ?></label>
         <select name="feed" id="feed">
           <option value="fy_un_tp"><?php echo TEXT_FEED_PRODUCTS ?></option>
           <option value="fy_un_td"><?php echo TEXT_FEED_DOCUMENTS ?></option>
           <option value="fy_un_tn"><?php echo TEXT_FEED_NEWS ?></option>
         </select>
-        <br class="clearBoth" />
+        <br>
         <label for="limit"><?php echo TEXT_ENTRY_LIMIT; ?></label>
         <?php echo zen_draw_input_field('limit', (int)GOOGLE_PRODUCTS_MAX_PRODUCTS, 'class="limiters" id="limit"'); ?>
-        <br class="clearBoth" />
+        <br>
         <label for="offset"><?php echo TEXT_ENTRY_OFFSET; ?></label>
         <?php echo zen_draw_input_field('offset', (int)GOOGLE_PRODUCTS_START_PRODUCTS, 'class="limiters" id="offset"'); ?>
-        <br class="clearBoth" />
+        <br>
+          <div><b><?php echo TEXT_FEED_ORDER_BY; ?></b>
+          <label><?php echo TEXT_FEED_ID . zen_draw_radio_field('sort', 'id', true); ?></label>
+          <label><?php echo TEXT_FEED_MODEL . zen_draw_radio_field('sort', 'model', false); ?></label>
+          </div>
         <?php
           echo '<div class="buttonRow back">' . zen_image_submit('button_confirm.gif', IMAGE_CONFIRM, 'id="submitButton"') . '</div>';
         ?>
@@ -219,7 +231,10 @@ function processLoading(text) {
                                       <tr>
                                           <td><?php echo $date; ?></td>
                                           <td><a href="<?php echo HTTP_SERVER . DIR_WS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file; ?>" target="_blank"><?php echo $file; ?></a></td>
-                                          <td><a href="<?php echo zen_href_link(FILENAME_GOOGLEFROOGLE, 'file=' . $file . '&action=delete'); ?>"><?php echo IMAGE_DELETE; ?></a> <a href="#" onclick="window.open('<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE; ?>.php?feed=fn_uy&upload_file=<?php echo $file; ?>&key=<?php echo GOOGLE_PRODUCTS_KEY; ?>', 'googlefrooglefeed', 'resizable=1, statusbar=5, width=600, height=400, top=0, left=50, scrollbars=yes'); return false;"><?php echo IMAGE_UPLOAD; ?></a></td>
+                                          <td>
+                                              <a href="<?php echo zen_href_link(FILENAME_GOOGLEFROOGLE, 'file=' . $file . '&action=delete'); ?>"><?php echo IMAGE_DELETE; ?></a>
+                                              <a href="#" onclick="window.open('<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE; ?>.php?feed=fn_uy&upload_file=<?php echo $file; ?>&key=<?php echo GOOGLE_PRODUCTS_KEY; ?>', 'googlefrooglefeed', 'resizable=1, statusbar=5, width=600, height=400, top=5, left=50, scrollbars=yes'); return false;"><?php echo IMAGE_UPLOAD; ?></a>
+                                          </td>
                                       </tr>
                                       <?php
                                   }
@@ -233,8 +248,7 @@ function processLoading(text) {
           <hr>
     <div>
         <img src="images/google_merchant_center_logo.gif" width="174" height="80" alt="Google Merchant Center logo">
-        <?php echo TEXT_GOOGLE_PRODUCTS_LOGIN_HEAD;
-        echo TEXT_GOOGLE_PRODUCTS_LOGIN; ?>
+        <?php echo TEXT_GOOGLE_PRODUCTS_INFO; ?>
     </div>
 </div>
 <!-- body_eof //-->
