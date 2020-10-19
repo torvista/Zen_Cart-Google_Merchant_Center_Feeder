@@ -973,7 +973,7 @@
         $upload = ftp_put($cd, $ftp_file, $local_file, $ftp_mode);
         $out = $this->ftp_get_error_from_ob();
         $raw = ftp_rawlist($cd, $ftp_file, true);
-        if ($raw !== false) {
+        if ($raw !== false) {//returns false if directory not found...todo
             for ($i = 0, $n = count($raw); $i < $n; $i++) {//todo foreach IDE
                 $out .= $raw[$i] . '<br>';
             }

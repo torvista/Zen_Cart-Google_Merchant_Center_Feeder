@@ -11,7 +11,9 @@
  * @author Numinix Technology
  */
   /* configuration */
-  if (phpversion() < 5) die('PHP 5+ required, please contact your host to upgrade.'); 
+if (PHP_VERSION < 5) {
+    die('PHP 5+ required, please contact your host to upgrade.');
+}
   require('includes/application_top.php');
   require(DIR_WS_CLASSES . 'google_base.php');
   include(DIR_WS_LANGUAGES . 'english/googlefroogle.php');
@@ -26,23 +28,26 @@
   } // change to whatever you need
   
   $keepAlive = 100;  // perform a keep alive every x number of products  
-  // include shipping class
-  if (GOOGLE_PRODUCTS_SHIPPING_METHOD === 'percategory') {
+
+// include shipping class
+if (GOOGLE_PRODUCTS_SHIPPING_METHOD === 'percategory') {//Numinix shipping module
     include(DIR_WS_MODULES . 'shipping/percategory.php');
     $percategory = new percategory();
-  } elseif (GOOGLE_PRODUCTS_SHIPPING_METHOD === 'freerules') {
+} elseif (GOOGLE_PRODUCTS_SHIPPING_METHOD === 'freerules') {//Numinix shipping module
     include(DIR_WS_MODULES . 'shipping/freerules.php');
     $freerules = new freerules();
-  }
-                                                                                                      
+}//todo add Advanced Shipper
+
+/* these are already defined in the Admin configuration
   define('GOOGLE_PRODUCTS_EXPIRATION_DAYS', 29);
   define('GOOGLE_PRODUCTS_EXPIRATION_BASE', 'now'); // now/product
   define('GOOGLE_PRODUCTS_OFFER_ID', 'id'); // id/model/false
   define('GOOGLE_PRODUCTS_DIRECTORY', 'feed/google/');
+  define('GOOGLE_PRODUCTS_USE_CPATH', 'false');
+*/
   define('GOOGLE_PRODUCTS_OUTPUT_BUFFER_MAXSIZE', 1024*1024*8); // 8MB
   $anti_timeout_counter = 0; //for timeout issues as well as counting number of products processed
   $google_base_start_counter = 0; //for counting all products regardless of inclusion
-  define('GOOGLE_PRODUCTS_USE_CPATH', 'false');
   define('NL', "<br>\n");
   
   $stock_attributes = false;
@@ -64,36 +69,39 @@
   }
   $languages_query = "SELECT code, languages_id, directory FROM " . TABLE_LANGUAGES . " WHERE languages_id = " . (int)GOOGLE_PRODUCTS_LANGUAGE . " LIMIT 1";
   $languages = $db->Execute($languages_query);
+
   if (isset($_GET['upload_file'])) {
     $outfile = '';
-    $upload_file = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $_GET['upload_file'];
+    $upload_file = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $_GET['upload_file'];//todo sanitise?
   } else {
       $upload_file = '';
-    // sql limiters
-      if ((int)GOOGLE_PRODUCTS_MAX_PRODUCTS > 0 || (isset($_GET['limit']) && (int)$_GET['limit'] > 0)) {
-      $query_limit = (isset($_GET['limit']) && (int)$_GET['limit'] > 0) ? (int)$_GET['limit'] : (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
-      $limit = ' LIMIT ' . $query_limit; 
-    } else {
-        $query_limit = 0;
-        $limit = '';
-    }
+}
 
-    if ((int)GOOGLE_PRODUCTS_START_PRODUCTS > 0 || (isset($_GET['offset']) && (int)$_GET['offset'] > 0)) {
-      $query_offset = (isset($_GET['offset']) && (int)$_GET['offset'] > 0) ? (int)$_GET['offset'] : (int)GOOGLE_PRODUCTS_START_PRODUCTS;
-      $offset = ' OFFSET ' . $query_offset;
-    } else {
-        $query_offset = 0;
-        $offset = '';
-    }
-    $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . "_" . $type . "_" . $languages->fields['code'];
-    if ($query_limit > 0) {
-        $outfile .= '_' . $query_limit;
-    }
-    if ($query_offset > 0) {
-        $outfile .= '_' . $query_offset;
-    }
-    $outfile .= '.xml'; //example domain_products.xml
-  }
+$query_limit = 0;
+$limit = '';
+$query_offset = 0;
+$offset = '';
+
+// sql limits
+if ((int)GOOGLE_PRODUCTS_MAX_PRODUCTS > 0 || (isset($_GET['limit']) && (int)$_GET['limit'] > 0)) {
+    $query_limit = (isset($_GET['limit']) && (int)$_GET['limit'] > 0) ? (int)$_GET['limit'] : (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
+    $limit = ' LIMIT ' . $query_limit;
+}
+
+if ((int)GOOGLE_PRODUCTS_START_PRODUCTS > 0 || (isset($_GET['offset']) && (int)$_GET['offset'] > 0)) {
+    $query_offset = (isset($_GET['offset']) && (int)$_GET['offset'] > 0) ? (int)$_GET['offset'] : (int)GOOGLE_PRODUCTS_START_PRODUCTS;
+    $offset = ' OFFSET ' . $query_offset;
+}
+
+$outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . "_" . $type . "_" . $languages->fields['code'];
+//todo review these suffixes
+if ($query_limit > 0) {
+    $outfile .= '_' . $query_limit;
+}
+if ($query_offset > 0) {
+    $outfile .= '_' . $query_offset;
+}
+$outfile .= '.xml'; //example domain_products.xml
 
   if (GOOGLE_PRODUCTS_MAGIC_SEO_URLS === 'true') {
     require_once(DIR_WS_CLASSES . 'msu_ao.php');
@@ -112,12 +120,10 @@
         body {
             margin-left: 5px;
             font-family: Verdana, sans-serif;
+            font-size: small;
         }
         h1 {
             font-size: medium;
-        }
-        p {
-            font-size: small;
         }
         .errorText {
             color: #ff0000;
@@ -132,11 +138,13 @@
 <p><?php echo TEXT_GOOGLE_PRODUCTS_FEED . (isset($feed) && $feed === "yes" ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?><br>
     <?php echo TEXT_GOOGLE_PRODUCTS_UPLOAD . (isset($upload) && $upload === "yes" ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?></p>
 <?php
-  ob_flush();
-  flush();
+//why both?  https://www.php.net/manual/en/function.flush.php
+ob_flush();
+flush();
 
-  //check output file location permissions
-  if (isset($feed) && $feed === "yes") {
+//CREATE A FEED FILE
+if (isset($feed) && $feed === "yes") {
+//check output file location permissions
     if (is_dir(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
       if (!is_writable(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
           echo '<p class="errorText">' . sprintf(ERROR_GOOGLE_PRODUCTS_DIRECTORY_NOT_WRITEABLE, substr(sprintf('%o', fileperms(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)), -4)) . '</p>';
@@ -194,6 +202,8 @@
       $additional_attributes .= ", p.products_condition";
     }
     
+    $order_by = $_GET['sort'] === 'id' ? 'p.products_id' : 'p.products_model';
+
     if (defined('GOOGLE_PRODUCTS_PAYMENT_METHODS') && GOOGLE_PRODUCTS_PAYMENT_METHODS !== '') {
       $payments_accepted = explode(",", GOOGLE_PRODUCTS_PAYMENT_METHODS);
     }
@@ -210,14 +220,14 @@
                              AND p.products_type <> 3
                              AND p.product_is_call <> 1
                              AND p.product_is_free <> 1
-                             AND pd.language_id = " . (int)$languages->fields['languages_id'] ."
+                             AND pd.language_id = " . (int)$languages->fields['languages_id'] . "
                              AND (
                               p.products_image IS NOT NULL
                               OR p.products_image != ''
                               OR p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "'
                               )
-                           GROUP BY pd.products_name
-                           ORDER BY p.products_id ASC" . $limit . $offset . ";";
+                           GROUP BY pd.products_name 
+                           ORDER BY " . $order_by . $limit . $offset . ";";
 
         $products = $db->Execute($products_query);
         $total_products = $products->RecordCount();
@@ -530,7 +540,7 @@
                         $options_name = str_replace(' ', '_', strtolower($options->fields['products_options_name']));
                         if ($options_name == 'google_product_category') {
                           $google_product_category_check = true;
-                        } else if ($options_name == 'colour') {
+                                            } elseif ($options_name == 'colour') {
                           $options_name = 'color';
                         }
                         $custom_fields[$options_name] = strtolower($google_base->google_base_xml_sanitizer($options->fields['products_options_values_name']));
@@ -577,6 +587,7 @@
               if (!$google_base->check_product($products->fields['products_id'])) {
               echo $products->fields['products_id'] . ' skipped due to user restrictions<br>';
           }}
+                }
           ob_flush();
           flush();
           $products->MoveNext();
@@ -592,7 +603,7 @@
         {
           $outfile .= '.gz'; // Append .gz to end of file name
           $data = $dom->saveXML(); //Save XML feed to string
-          $gz = gzopen("$outfile",'w9'); // Open file for writing, 0 (no) to 9 (maximum) compression
+                $gz = gzopen("$outfile", 'w9'); // todo, in quotes?? Open file for writing, 0 (no) to 9 (maximum) compression
           gzwrite($gz, $data, strlen($data)); // Write compressed file
           gzclose($gz); // Close file handler
         } 
@@ -600,19 +611,26 @@
     }
     
     $timer_feed = $google_base->microtime_float()-$stimer_feed; ?>
-    <p><?php echo sprintf(TEXT_GOOGLE_PRODUCTS_FEED_COMPLETE, number_format($timer_feed, 1)); ?><br>
-    <?php echo sprintf(TEXT_GOOGLE_PRODUCTS_FEED_RECORDS, $anti_timeout_counter, $products->RecordCount(), $products->RecordCount()-$anti_timeout_counter); ?></p>
- </body></html>
-<?php
-  }
+    <p><?php echo sprintf(TEXT_GOOGLE_PRODUCTS_FEED_RECORDS, $anti_timeout_counter, $products->RecordCount(), $products->RecordCount() - $anti_timeout_counter); ?><br>
+        <?php echo sprintf(TEXT_GOOGLE_PRODUCTS_FEED_COMPLETE, number_format($timer_feed, 1)); ?></p>
+    <?php
+}
 
-  if (isset($upload) && $upload === "yes") {
-    echo TEXT_GOOGLE_PRODUCTS_UPLOAD_STARTED . NL;
-    if ($upload_file === '') $upload_file = $outfile; // use file just created if no upload file was specified
-    if($google_base->ftp_file_upload(GOOGLE_PRODUCTS_SERVER, GOOGLE_PRODUCTS_USERNAME, GOOGLE_PRODUCTS_PASSWORD, $upload_file)) {
-      echo TEXT_GOOGLE_PRODUCTS_UPLOAD_OK . NL;
-      $db->execute("update " . TABLE_CONFIGURATION . " set configuration_value = '" . date("Y/m/d H:i:s") . "' where configuration_key='GOOGLE_PRODUCTS_UPLOADED_DATE'");
-    } else {
-      echo TEXT_GOOGLE_PRODUCTS_UPLOAD_FAILED . NL;
+//UPLOAD A FEED FILE
+if (isset($upload) && $upload === "yes") {
+
+    if ($upload_file === '') {
+        $upload_file = $outfile;//if no upload file was specified, use the file just created
     }
-  }
+
+    if ($google_base->ftp_file_upload(GOOGLE_PRODUCTS_SERVER, GOOGLE_PRODUCTS_USERNAME, GOOGLE_PRODUCTS_PASSWORD, $upload_file)) {
+        echo '<p>' . TEXT_GOOGLE_PRODUCTS_UPLOAD_OK . '</p>';
+        $db->execute("UPDATE " . TABLE_CONFIGURATION . " SET configuration_value = '" . date("Y/m/d H:i:s") . "' WHERE configuration_key = 'GOOGLE_PRODUCTS_UPLOADED_DATE'");
+    } else {
+        echo '<p class="errorText">' . TEXT_GOOGLE_PRODUCTS_UPLOAD_FAILED . '</p>';
+    }
+} ?>
+</body>
+</html>
+
+

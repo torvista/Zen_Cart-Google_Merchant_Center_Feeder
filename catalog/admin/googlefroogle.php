@@ -146,11 +146,34 @@ function processLoading(text) {
 //--></script>
 <style>
   /*label{display:block;width:200px;float:left;}*/
-  .limiters{width:100px;}
-  .buttonRow{padding:5px 0;}
-  table#googleFiles { margin-left:0; border-collapse:collapse; border:1px solid #036; font-size: small; }
-  table#googleFiles th { background-color:#036; border-bottom:1px double #fff; color: #fff; text-align:left; padding:8px; }
-  table#googleFiles td { border:1px solid #036; vertical-align:top; padding:5px 10px; }
+            .limiters {
+                width: 100px;
+            }
+
+            .buttonRow {
+                padding: 5px 0;
+            }
+
+            table#googleFiles {
+                margin-left: 0;
+                border-collapse: collapse;
+                border: 1px solid #036;
+                font-size: small;
+            }
+
+            table#googleFiles th {
+                background-color: #036;
+                border-bottom: 1px double #fff;
+                color: #fff;
+                text-align: left;
+                padding: 8px;
+            }
+
+            table#googleFiles td {
+                border: 1px solid #036;
+                vertical-align: top;
+                padding: 5px 10px;
+            }
 </style>
 </head>
 <body onload="init()">
