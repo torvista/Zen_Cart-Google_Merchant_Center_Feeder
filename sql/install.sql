@@ -28,6 +28,9 @@ INSERT INTO configuration (configuration_id, configuration_title, configuration_
 (NULL, 'Store Address', 'GOOGLE_PRODUCTS_ADDRESS', 'http://www.domain.com', 'Enter your website address', @configuration_group_id, 6, NOW(), NULL, NULL),
 (NULL, 'Store Description', 'GOOGLE_PRODUCTS_DESCRIPTION', '', 'Enter a short description of your store', @configuration_group_id, 7, NOW(), NULL, NULL),
 (NULL, 'Output File Name', 'GOOGLE_PRODUCTS_OUTPUT_FILENAME', 'domain', 'Set the name of your Merchant Center output file', @configuration_group_id, 8, NOW(), NULL, NULL),
+
+(NULL, 'Feed File Sort', 'GOOGLE_PRODUCTS_FEED_SORT', 'ID', 'Create the product feed file ordered by the product id, product model or product name.', @configuration_group_id, 9, NOW(), NULL, 'zen_cfg_select_option(array(\'ID\', \'Model\', \'Name\'),'),
+
 (NULL, 'Compress Feed File', 'GOOGLE_PRODUCTS_COMPRESS', 'false', 'Compress Google Merchant Center file', @configuration_group_id, 9, NOW(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),'),
 (NULL, 'Uploaded date', 'GOOGLE_PRODUCTS_UPLOADED_DATE', '', 'Date and time of the last upload', @configuration_group_id, 10, NOW(), NULL, NULL),
 (NULL, 'Output Directory', 'GOOGLE_PRODUCTS_DIRECTORY', 'feeds/google_merchant_center/', 'Define the directory where the feed file should be created. e.g. "feeds/google_merchant_center/"', @configuration_group_id, 11, NOW(), NULL, NULL),
