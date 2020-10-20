@@ -296,24 +296,23 @@
         $tax->appendChild($dom->createElement('g:rate', $tax_rate));
         $item->appendChild($tax);
       }
-      if (STOCK_CHECK === 'true') {
-        if ($products->fields['products_quantity'] > 0) {
-          $item->appendChild($dom->createElement('g:availability', 'in stock'));
-        } else {
-          // are back orders allowed?
-          if (STOCK_ALLOW_CHECKOUT === 'true') {
-            if ($products->fields['products_date_available'] != 'NULL') {//todo check
-              $item->appendChild($dom->createElement('g:availability', 'available for order'));
+//availability: only "in_stock", "out_of_stock", "preorder" allowed
+        if (STOCK_CHECK === 'true') {//products have physical stock, and it is checked
+            if ($products->fields['products_quantity'] > 0) {
+                $item->appendChild($dom->createElement('g:availability', 'in_stock'));
+            } elseif (STOCK_ALLOW_CHECKOUT === 'true') {//allow checkout without stock
+                if ($products->fields['products_date_available'] > date('Y-m-d H:i:s')) {//only NULL if a date has never been set
+                    $item->appendChild($dom->createElement('g:availability', 'preorder'));
+                } else {
+                    $item->appendChild($dom->createElement('g:availability', 'in_stock'));//replaces backorder.
+                }
             } else {
-              $item->appendChild($dom->createElement('g:availability', 'preorder'));
+                $item->appendChild($dom->createElement('g:availability', 'out_of_stock'));
             }
-          } else {
-            $item->appendChild($dom->createElement('g:availability', 'out of stock'));
-          }
+        } else {//no stock check
+            $item->appendChild($dom->createElement('g:availability', 'in_stock'));
         }
-      } else {
-        $item->appendChild($dom->createElement('g:availability', 'in stock'));                  
-      }
+
       if(GOOGLE_PRODUCTS_WEIGHT === 'true' && $products->fields['products_weight'] !== '') {
         $item->appendChild($dom->createElement('g:shipping_weight', $products->fields['products_weight'] . ' ' . str_replace(['pounds', 'kilograms'], ['lb', 'kg'], GOOGLE_PRODUCTS_UNITS)));
       } 
