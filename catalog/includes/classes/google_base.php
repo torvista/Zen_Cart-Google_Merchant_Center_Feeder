@@ -10,63 +10,132 @@
  */
  
   class google_base {
-    
-    function additional_images($products_image, $products_id) {
-      if ($products_image !== '') {
-        $images_array = [];
-        if (is_array($this->additional_images_array[$products_id])) {
-          $images_array = $this->additional_images_array[$products_id];  
-        } else {
-          // prepare image name
-          $products_image_extension = substr($products_image, strrpos($products_image, '.'));
-          $products_image_base = str_replace($products_image_extension, '', $products_image);
 
-          // if in a subdirectory
-          if (strrpos($products_image, '/')) {
-            $products_image_match = substr($products_image, strrpos($products_image, '/')+1);
-            $products_image_match = str_replace($products_image_extension, '', $products_image_match) . '_';
-            $products_image_base = $products_image_match;
+      public array $additional_images_array;//stores the additional images found, per-product, for re-use if that product id comes up again...when does that happen? DISABLED
+      public array $image_files; //stores the images per-directory to prevent re-scanning if that directory has already ben scanned
+
+      public function additional_images($product_main_image, $product_id): array
+      {
+          $debug_additional_images = false;//verbose step-by-step processing output for dummies
+
+          if ($debug_additional_images) {
+              echo '<hr>function additional_images' . NL . __LINE__ . ' $product_main_image=' . $product_main_image . ' | $product_id = ' . $product_id . NL;
           }
 
-          $products_image_directory = str_replace($products_image, '', substr($products_image, strrpos($products_image, '/')));
-          if ($products_image_directory !== '') {
-            $products_image_directory = DIR_WS_IMAGES . str_replace($products_image_directory, '', $products_image) . "/";
-          } else {
-            $products_image_directory = DIR_WS_IMAGES;
-          }
-
-          // Check for additional matching images
-          //$file_extension = $products_image_extension;
-          //$products_image_match_array = array();
-          if (is_array($this->image_files[$products_image_directory])) {
-            $image_files = $this->image_files[$products_image_directory];
-          } else {
-            $image_files = scandir($products_image_directory);
-            $this->image_files[$products_image_directory] = $image_files;
-          }
-          //print_r($this->image_files);
-          //die();
-          if (is_array($image_files) && count($image_files) > 0) {
-            foreach($this->image_files[$products_image_directory] as $file) {
-              $file_extension = substr($file, strrpos($file, '.'));
-              $file_base = str_replace($file_extension, '', $file);
-              // skip the main image and make sure the base and extension match the main image
-              if (($file != $products_image) && (preg_match("/" . $products_image_base . "/i", $file) == 1)) {
-                $images_array[] = $this->google_base_image_url(($products_image_directory !== '' ? str_replace(DIR_WS_IMAGES, '', $products_image_directory) : ''). $file);
-                if (count($images_array) >= 9) {
-                    break;
-                } // Google Supports up to 10 images
+          // if ($product_main_image !== '') {// removed: it always is !='', or function is not called
+          $images_array = [];
+          if (isset($this->additional_images_array[$product_id]) && is_array($this->additional_images_array[$product_id])) {//has this product id already been analysed?
+              if ($debug_additional_images) {
+                  echo __LINE__ . ' $this->additional_images_array exists for #' . $product_id . NL;
+                  mv_printVar($this->additional_images_array);
               }
-            }
-          }
-          $this->additional_images_array[$products_id] = $images_array;
-        }
-        return $images_array;
-      }
+              //no need to process this product_id, return
+              $images_array = $this->additional_images_array[$product_id];
 
-// default
-        return false;
-    }   
+          } else {//product id has not been processed previously
+
+              // analyse main image name
+              $product_main_image_extension = substr($product_main_image, strrpos($product_main_image, '.'));// eg. '.jpg'
+              //$product_main_image_extension = pathinfo($product_main_image, PATHINFO_EXTENSION);//// eg. 'jpg' TODO simplify all this extraction
+
+              if ($debug_additional_images) {
+                  echo __LINE__ . ' $product_main_image_extension=' . $product_main_image_extension . NL;
+              }
+              $product_main_image_filename = str_replace($product_main_image_extension, '', $product_main_image);
+
+              // check for subdirectory
+              if (strrpos($product_main_image, '/')) {
+                  $products_image_match = substr($product_main_image, strrpos($product_main_image, '/') + 1);//remove subdirectory from main image name
+
+                  if ($debug_additional_images) {
+                      echo __LINE__ . ' is in subdirectory, $products_image_match=' . $products_image_match . NL;
+                  }
+
+                  $products_image_match = str_replace($product_main_image_extension, '', $products_image_match) . '_';//construct imagenamestub_
+
+                  if ($debug_additional_images) {
+                      echo __LINE__ . ' $products_image_match=' . $products_image_match . NL;
+                  }
+
+                  $product_main_image_filename = $products_image_match;
+              } elseif ($debug_additional_images) {
+                  echo __LINE__ . ' is in root' . NL;
+              }
+
+              $products_image_directory = str_replace($product_main_image, '', substr($product_main_image, strrpos($product_main_image, '/')));
+
+              if ($products_image_directory !== '') {
+                  $products_image_directory = DIR_WS_IMAGES . str_replace($products_image_directory, '', $product_main_image) . "/";
+              } else {
+                  $products_image_directory = DIR_WS_IMAGES;
+              }
+
+              // Check for additional images
+              if (isset($this->image_files[$products_image_directory]) && is_array($this->image_files[$products_image_directory])) {//check for files in the same directory as the main image
+                  if ($debug_additional_images) {
+                      echo __LINE__ . ' this directory "' . $products_image_directory . '" has previously been scanned:' . NL;
+                      mv_printVar($this->image_files);
+                  }
+                  $image_files = $this->image_files[$products_image_directory];//array of all files in image directory
+              } else {
+                  if ($debug_additional_images) {
+                      echo __LINE__ . ' not set $this->image_files[$products_image_directory]: this directory not previously scanned' . NL;
+                  }
+                  $image_files = scandir($products_image_directory);
+                  $this->image_files[$products_image_directory] = $image_files;
+                  if ($debug_additional_images) {
+                      echo __LINE__ . ' directory "' . $products_image_directory . '" added to $this->image_files' . NL;
+                      mv_printVar($this->image_files);
+                  }
+              }
+
+              if (is_array($image_files) && count($image_files) > 0) {
+                  if ($debug_additional_images) {
+                      echo __LINE__ . ' files found in "' . $products_image_directory . '"' . NL;
+                      mv_printVar($image_files);
+                  }
+
+                  foreach ($this->image_files[$products_image_directory] as $file) {
+                      /*$file_extension = substr($file, strrpos($file, '.'));
+                      if ($debug_additional_images) {
+                          echo __LINE__ . ' $file_extension=' . $file_extension . NL;
+                      }
+
+                      $file_base = str_replace($file_extension, '', $file);
+                      if ($debug_additional_images) {
+                          echo __LINE__ . ' $file_base=' . $file_base . NL;
+                      }*/
+                      // skip the main image and make sure the base and extension match the main image
+                      if (($file !== $product_main_image) && (preg_match("/" . $product_main_image_filename . "/i", $file) === 1)) {
+                          $images_array[] = $this->google_base_image_url(($products_image_directory !== '' ? str_replace(DIR_WS_IMAGES, '', $products_image_directory) : '') . $file);
+                          if ($debug_additional_images) {
+                              echo __LINE__ . ' loop build array of additional images' . NL;
+                              mv_printVar($images_array);
+                          }
+
+                          if (count($images_array) >= GOOGLE_PRODUCTS_MAX_ADDITIONAL_IMAGES) {
+                              if ($debug_additional_images) {
+                                  echo __LINE__ . ' maximum additional images (' . GOOGLE_PRODUCTS_MAX_ADDITIONAL_IMAGES . ') reached: break out of loop' . NL;
+                              }
+                              break;
+                          }
+                      }
+                  }
+              }
+              /*DISABLED: See start of function
+              $this->additional_images_array[$product_id] = $images_array;
+              if ($debug_additional_images) {
+                  echo __LINE__ . ' $this->additional_images_array stored to object' . NL;
+                  mv_printVar($this->additional_images_array);
+              }
+              */
+          }
+          if ($debug_additional_images) {
+              echo __LINE__ . ' images_array of additional images returned from function' . NL;
+              mv_printVar($images_array);
+          }
+          return $images_array;
+      }
    
     // writes out the code into the feed file
     function google_base_fwrite($output='', $mode, $products_id = '') { // added products id for debugging
@@ -126,9 +195,9 @@
     // returns the type of feed
     function get_type($type_parameter) {
       switch($type_parameter) {
-        case 'tp':
+        /*case 'tp':
           $type = 'products';
-          break;
+          break;*/
         case 'td':
           $type = 'documents';
           break;
@@ -359,11 +428,11 @@
         $item->appendChild($dom->createElement('g:image_link', $this->google_base_image_url($products->fields['products_image'])));
         $additional_images = $this->additional_images($products->fields['products_image'], $products->fields['products_id']);
         if (is_array($additional_images) && count($additional_images) > 0) {
-          $count = 0;
+          //$count = 0;//todo remove Limit of 10 is done in function
           foreach ($additional_images as $additional_image) {
-            $count++;
+            //$count++;
             $item->appendChild($dom->createElement('g:additional_image_link', $additional_image));
-            if ($count === 9) break; // max 10 images including main image 
+            //if ($count === 9) break; // max 10 images including main image
           }
         }
       }
@@ -917,52 +986,67 @@
   }
 
 // FTP FUNCTIONS //
-    
     function ftp_file_upload($url, $login, $password, $local_file, $ftp_dir = '', $ftp_file = false, $ssl = false, $ftp_mode = FTP_ASCII) {
-      if (!is_callable('ftp_connect')) {
-        echo FTP_FAILED . NL;
-        return false;
-      }
-      if (!$ftp_file) {
-          $ftp_file = basename($local_file);//todo check change from boolean to string
-          //echo '$ftp_file=' . $ftp_file;die;//todo remove
-      }
-      ob_start();
-      if ($ssl) {
-          $cd = ftp_ssl_connect($url);
-      }
-      else {
-          $cd = ftp_connect($url);
-      }
-      if (!$cd) {
-        $out = $this->ftp_get_error_from_ob();
-        echo FTP_CONNECTION_FAILED . ' ' . $url . NL;
-        echo $out . NL;
-        return false;
-      }
-      echo FTP_CONNECTION_OK . ' ' . $url . NL;
-      $login_result = ftp_login($cd, $login, $password);
-      if (!$login_result) {
-        $out = $this->ftp_get_error_from_ob();
-  //      echo FTP_LOGIN_FAILED . FTP_USERNAME . ' ' . $login . FTP_PASSWORD . ' ' . $password . NL;
-        echo FTP_LOGIN_FAILED . NL;
-        echo $out . NL;
-        ftp_close($cd);
+        $debug_ftp_file_upload = true;//verbose step-by-step processing output for dummiesº
+
+        echo ($debug_ftp_file_upload ? __LINE__ . ': ' : '') . FTP_START . NL;
+        if (!is_callable('ftp_connect')) {
+        echo '<p class="errorText">' . FTP_FAILED . '</p>';
         return false;
       }
 
-//    echo FTP_LOGIN_OK . FTP_USERNAME . ' ' . $login . FTP_PASSWORD . ' ' . $password . NL;
-        echo FTP_LOGIN_OK . NL;
-        if ($ftp_dir !== "") {
-          if (!ftp_chdir($cd, $ftp_dir)) {
-            $out = $this->ftp_get_error_from_ob();
-            echo FTP_CANT_CHANGE_DIRECTORY . '&nbsp;' . $url . NL;
-            echo $out . NL;
-            ftp_close($cd);
-            return false;
+      if (!$ftp_file) {
+          $ftp_file = basename($local_file);//todo check change from boolean to string
+      }
+        echo ($debug_ftp_file_upload ? __LINE__ . ': before ob_start' . NL : '');
+
+      ob_start();
+        echo ($debug_ftp_file_upload ? __LINE__ . ': after ob_start' . NL : '');
+      if ($ssl) {
+          $cd = @ftp_ssl_connect($url);//silenced as an error gets reported
+      }
+      else {
+          $cd = @ftp_connect($url);//silenced to prevent debug, as any error is handled subsequently
+      }
+      if (!$cd) {
+        $out = $this->ftp_get_error_from_ob();
+        echo '<p class="errorText">' . sprintf(FTP_CONNECTION_FAILED, $url);
+          if ($out !== '') {
+              echo $out;
           }
+          echo '</p>';
+        return false;
+      }
+        echo ($debug_ftp_file_upload ? __LINE__ . ': ' : '') . sprintf(FTP_CONNECTION_OK, $url) . NL;
+
+      $login_result = @ftp_login($cd, $login, $password);//silenced to prevent debug, as any error is handled subsequently
+      if (!$login_result) {
+        $out = $this->ftp_get_error_from_ob();
+  //      echo FTP_LOGIN_FAILED . FTP_USERNAME . ' ' . $login . FTP_PASSWORD . ' ' . $password . NL;
+          echo '<p class="errorText">' .  sprintf(FTP_LOGIN_FAILED, $url);
+        if ($out !== '') {
+            echo $out;
         }
-        echo FTP_CURRENT_DIRECTORY . '&nbsp;' . ftp_pwd($cd) . NL;
+          echo '</p>';
+        ftp_close($cd);
+        return false;
+      }
+//    echo FTP_LOGIN_OK . FTP_USERNAME . ' ' . $login . FTP_PASSWORD . ' ' . $password . NL;
+        echo ($debug_ftp_file_upload ? __LINE__ . ': ' : '') . sprintf(FTP_LOGIN_OK, $url, $login) . NL;
+
+        //this is never changed in current code...not tested
+        if (($ftp_dir !== '') && !ftp_chdir($cd, $ftp_dir)) {
+          echo '<p class="errorText">' .  sprintf(FTP_CANT_CHANGE_DIRECTORY, $url, $ftp_dir);
+          $out = $this->ftp_get_error_from_ob();
+            if ($out !== '') {
+                echo $out;
+            }
+            echo '</p>';
+          ftp_close($cd);
+          return false;
+        }
+        echo ($debug_ftp_file_upload ? __LINE__ . ': ' : '') . sprintf(FTP_CURRENT_DIRECTORY, ftp_pwd($cd)) . NL;
+
         if (GOOGLE_PRODUCTS_PASV === 'true') {
           $pasv = true;
         } else {
@@ -978,27 +1062,30 @@
             }
         }
         if (!$upload) {
-          echo FTP_UPLOAD_FAILED . NL;
+          echo ($debug_ftp_file_upload ? __LINE__ . ': ' : '') . FTP_UPLOAD_FAILED . NL;
           if (isset($raw[0])) {
               echo $raw[0] . NL;
           }
-          echo $out . NL;
+          echo ($debug_ftp_file_upload ? __LINE__ . ': ' : '') . $out . NL;
           ftp_close($cd);
           return false;
         }
 
-        echo FTP_UPLOAD_SUCCESS . NL;
-        echo $raw[0] . NL;
-        echo $out . NL;
+        echo ($debug_ftp_file_upload ? __LINE__ . ': ' : '') . FTP_UPLOAD_SUCCESS . NL;
+        echo ($debug_ftp_file_upload ? __LINE__ . ': ' : '') . $raw[0] . NL;
+        echo ($debug_ftp_file_upload ? __LINE__ . ': ' : '') . $out . NL;
         ftp_close($cd);
         return true;
     }
 
     function ftp_get_error_from_ob() {
-      $out = ob_get_contents();//todo IDE
-      ob_end_clean();
-      $out = str_replace(['\\', '<!--error-->', '<br>', '<br />', "\n", 'in <b>'], ['/', '', '', '', '', ''],$out);
-      if(strpos($out, DIR_FS_CATALOG) !== false){
+        $out = ob_get_clean();
+        if ($out !== false) {//false if buffering not active
+            $out = str_replace(['\\', '<!--error-->', '<br>', '<br />', "\n", 'in <b>'], ['/', '', '', '', '', ''], $out);
+        } else {
+            $out = 'Output Buffer was not active';
+        }
+      if (strpos($out, DIR_FS_CATALOG) !== false) {
         $out = substr($out, 0, strpos($out, DIR_FS_CATALOG));
       }
       return $out;
@@ -1008,4 +1095,19 @@
        [$usec, $sec] = explode(" ", microtime());
        return ((float)$usec + (float)$sec);
     }
-  }
+
+//https://alexwebdevelop.com/monitor-script-memory-usage/
+    function print_mem()
+    {
+        /* Currently used memory */
+        $mem_usage = memory_get_usage();
+
+        /* Peak memory usage */
+        $mem_peak = memory_get_peak_usage();
+
+        echo 'The script is now using: <strong>' . round($mem_usage / 1024) . 'KB</strong> of memory.<br>';
+        echo 'Peak usage: <strong>' . round($mem_peak / 1024) . 'KB</strong> of memory.<br><br>';
+    }
+
+
+}

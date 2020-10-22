@@ -41,6 +41,8 @@ define('TEXT_ENTRY_OFFSET', 'Starting Point/Offset:');
 define('TEXT_FEED_ORDER_BY', 'Sort By:');
 define('TEXT_FEED_ID', 'ID ');
 define('TEXT_FEED_MODEL', 'Model ');
+define('TEXT_FEED_NAME', 'Name ');
+define('TEXT_FEED_SORT_TITLE', 'Default Sort: ');
 define('TEXT_FEED_FILES', 'Generated Feeds');
 define('TEXT_DATE_CREATED', 'Created <span class="small">(DD/MM/YYYY)</span>');
 define('TEXT_DOWNLOAD_LINK', 'Download');

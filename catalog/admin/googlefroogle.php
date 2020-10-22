@@ -222,9 +222,11 @@ function processLoading(text) {
         <label for="offset"><?php echo TEXT_ENTRY_OFFSET; ?></label>
         <?php echo zen_draw_input_field('offset', (int)GOOGLE_PRODUCTS_START_PRODUCTS, 'class="limiters" id="offset"'); ?>
         <br>
-          <div><b><?php echo TEXT_FEED_ORDER_BY; ?></b>
-          <label><?php echo TEXT_FEED_ID . zen_draw_radio_field('sort', 'id', true); ?></label>
-          <label><?php echo TEXT_FEED_MODEL . zen_draw_radio_field('sort', 'model', false); ?></label>
+<?php //todo use this to change default and remove configuration switch ?>
+          <div title="<?php echo TEXT_FEED_SORT_TITLE . GOOGLE_PRODUCTS_FEED_SORT; ?>"><b><?php echo TEXT_FEED_ORDER_BY; ?></b>
+              <label><?php echo TEXT_FEED_ID . zen_draw_radio_field('feed_sort', 'id', GOOGLE_PRODUCTS_FEED_SORT === 'ID'); ?></label>
+              <label><?php echo TEXT_FEED_MODEL . zen_draw_radio_field('feed_sort', 'model', GOOGLE_PRODUCTS_FEED_SORT === 'Model'); ?></label>
+              <label><?php echo TEXT_FEED_NAME . zen_draw_radio_field('feed_sort', 'name', GOOGLE_PRODUCTS_FEED_SORT === 'Name'); ?></label>
           </div>
         <?php
           echo '<div class="buttonRow back">' . zen_image_submit('button_confirm.gif', IMAGE_CONFIRM, 'id="submitButton"') . '</div>';

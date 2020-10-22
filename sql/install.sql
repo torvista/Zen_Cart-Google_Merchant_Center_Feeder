@@ -39,9 +39,12 @@ INSERT INTO configuration (configuration_id, configuration_title, configuration_
 (NULL, 'Max Execution Time', 'GOOGLE_PRODUCTS_MAX_EXECUTION_TIME', '300', 'Override your PHP configuration by entering a max execution time in seconds for the tool (leave blank to disable):', @configuration_group_id, 13, NOW(), NULL, NULL),
 (NULL, 'Memory Limit', 'GOOGLE_PRODUCTS_MEMORY_LIMIT', '128M', 'Override your PHP configuration by entering a memory limit for the tool (i.e. 128M or leave blank to disable):', @configuration_group_id, 14, NOW(), NULL, NULL),
 
-(NULL, 'Max products', 'GOOGLE_PRODUCTS_MAX_PRODUCTS', '0', 'Default = 0 for infinite # of products', @configuration_group_id, 20, NOW(), NULL, NULL),
+(NULL, 'Limit Products to Process', 'GOOGLE_PRODUCTS_MAX_PRODUCTS', '', 'Limit the quantity of products to process/add to the feed file.<br>For testing or due to server limitations it may be necessary to limit the processing in conjunction with the Offset option ,to produce multiple feed files.<br>Default value is empty.', @configuration_group_id, 20, NOW(), NULL, NULL),
+
 (NULL, 'Starting Point', 'GOOGLE_PRODUCTS_START_PRODUCTS', '0', 'Start at which entry (not product_id)?<br />Default=0', @configuration_group_id, 21, NOW(), NULL, NULL),
+
 (NULL, 'Included Categories', 'GOOGLE_PRODUCTS_POS_CATEGORIES', '', 'Enter category ids separated by commas <br>(i.e. 1,2,3)<br>Leave blank to allow all categories', @configuration_group_id, 22, NOW(), NULL, NULL),
+
 (NULL, 'Excluded Categories', 'GOOGLE_PRODUCTS_NEG_CATEGORIES', '', 'Enter category ids separated by commas <br>(i.e. 1,2,3)<br>Leave blank to deactivate', @configuration_group_id, 23, NOW(), NULL, NULL),
 (NULL, 'Included Manufacturers', 'GOOGLE_PRODUCTS_POS_MANUFACTURERS', '', 'Enter manufacturer ids separated by commas <br>(i.e. 1,2,3)<br>Leave blank to allow all categories', @configuration_group_id, 24, NOW(), NULL, NULL),
 (NULL, 'Excluded Manufacturers', 'GOOGLE_PRODUCTS_NEG_MANUFACTURERS', '', 'Enter manufacturer ids separated by commas <br>(i.e. 1,2,3)<br>Leave blank to deactivate', @configuration_group_id, 25, NOW(), NULL, NULL),

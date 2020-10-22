@@ -10,10 +10,7 @@
  * @version $Id: googlefroogle.php 67 2011-09-15 19:26:39Z numinix $
  * @author Numinix Technology
  */
-  /* configuration */
-if (PHP_VERSION < 5) {
-    die('PHP 5+ required, please contact your host to upgrade.');
-}
+
   require('includes/application_top.php');
   require(DIR_WS_CLASSES . 'google_base.php');
   include(DIR_WS_LANGUAGES . 'english/googlefroogle.php');
@@ -45,8 +42,17 @@ if (GOOGLE_PRODUCTS_SHIPPING_METHOD === 'percategory') {//Numinix shipping modul
   define('GOOGLE_PRODUCTS_DIRECTORY', 'feed/google/');
   define('GOOGLE_PRODUCTS_USE_CPATH', 'false');
 */
-  define('GOOGLE_PRODUCTS_OUTPUT_BUFFER_MAXSIZE', 1024*1024*8); // 8MB
-  $anti_timeout_counter = 0; //for timeout issues as well as counting number of products processed
+define('GOOGLE_PRODUCTS_OUTPUT_BUFFER_MAXSIZE', 1024*1024*8); // 8MB
+// definitions
+//https://support.google.com/merchants/answer/7052112?hl=en&ref_topic=6324338
+define('GOOGLE_PRODUCTS_MAX_CHARS_ID', 50);
+define('GOOGLE_PRODUCTS_MAX_CHARS_TITLE', 150);
+define('GOOGLE_PRODUCTS_MAX_CHARS_DESCRIPTION', 5000);
+define('GOOGLE_PRODUCTS_MAX_CHARS_IMAGE_LINK', 2000);
+define('GOOGLE_PRODUCTS_MAX_CHARS_ADDITIONAL_IMAGE_LINK', GOOGLE_PRODUCTS_MAX_CHARS_IMAGE_LINK);
+define('GOOGLE_PRODUCTS_MAX_ADDITIONAL_IMAGES', 10);
+
+$anti_timeout_counter = 0; //for timeout issues as well as counting number of products processed
   $google_base_start_counter = 0; //for counting all products regardless of inclusion
   define('NL', "<br>\n");
   
@@ -77,16 +83,15 @@ if (GOOGLE_PRODUCTS_SHIPPING_METHOD === 'percategory') {//Numinix shipping modul
       $upload_file = '';
 }
 
-$query_limit = 0;
-$limit = '';
-$query_offset = 0;
-$offset = '';
-
-// sql limits
-if ((int)GOOGLE_PRODUCTS_MAX_PRODUCTS > 0 || (isset($_GET['limit']) && (int)$_GET['limit'] > 0)) {
-    $query_limit = (isset($_GET['limit']) && (int)$_GET['limit'] > 0) ? (int)$_GET['limit'] : (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
-    $limit = ' LIMIT ' . $query_limit;
+if ((isset($_GET['limit']) && (int)$_GET['limit'] > 0)) {
+      $query_limit = (int)$_GET['limit'];
+} elseif ((int)GOOGLE_PRODUCTS_MAX_PRODUCTS > 0) {//''->0: process all products
+    $query_limit = (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
+} else {
+    $query_limit = 0;
 }
+
+$query_offset = (int)GOOGLE_PRODUCTS_START_PRODUCTS;//''->0: no offset
 
 if ((int)GOOGLE_PRODUCTS_START_PRODUCTS > 0 || (isset($_GET['offset']) && (int)$_GET['offset'] > 0)) {
     $query_offset = (isset($_GET['offset']) && (int)$_GET['offset'] > 0) ? (int)$_GET['offset'] : (int)GOOGLE_PRODUCTS_START_PRODUCTS;
@@ -94,6 +99,7 @@ if ((int)GOOGLE_PRODUCTS_START_PRODUCTS > 0 || (isset($_GET['offset']) && (int)$
 }
 
 $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . "_" . $type . "_" . $languages->fields['code'];
+
 //todo review these suffixes
 if ($query_limit > 0) {
     $outfile .= '_' . $query_limit;
@@ -134,6 +140,10 @@ $outfile .= '.xml'; //example domain_products.xml
 
 <body>
 <h1>Google Merchant Feeder v<?php echo $google_base->google_base_version()?></h1>
+<?php
+if (GOOGLE_PRODUCTS_DEBUG === 'true') {
+    $google_base->print_mem();
+} ?>
     <p><?php echo TEXT_GOOGLE_PRODUCTS_STARTED; ?></p>
 <p><?php echo TEXT_GOOGLE_PRODUCTS_FEED . (isset($feed) && $feed === "yes" ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?><br>
     <?php echo TEXT_GOOGLE_PRODUCTS_UPLOAD . (isset($upload) && $upload === "yes" ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?></p>
@@ -157,8 +167,6 @@ if (isset($feed) && $feed === "yes") {
     ?>
 
 <p><?php echo TEXT_GOOGLE_PRODUCTS_FILE_LOCATION . NL . (($upload_file !== '') ? $upload_file : $outfile); ?></p>
-<p><?php echo TEXT_GOOGLE_PRODUCTS_PROCESSING; ?></p>
-
       <?php
     $stimer_feed = $google_base->microtime_float();
     
@@ -201,15 +209,43 @@ if (isset($feed) && $feed === "yes") {
     if (GOOGLE_PRODUCTS_PRODUCT_CONDITION === 'true') {
       $additional_attributes .= ", p.products_condition";
     }
-    
-    $order_by = $_GET['sort'] === 'id' ? 'p.products_id' : 'p.products_model';
+    switch ($_GET['feed_sort']) {
+        /*case ('id'):
+            $order_by = 'p.products_id';
+            break;*/
+        case ('model'):
+            $order_by = 'p.products_model';
+            break;
+        case ('name'):
+            $order_by = 'pd.products_name';
+            break;
+        default:
+            $order_by = 'p.products_id';
+            break;
+    }
 
     if (defined('GOOGLE_PRODUCTS_PAYMENT_METHODS') && GOOGLE_PRODUCTS_PAYMENT_METHODS !== '') {
       $payments_accepted = explode(",", GOOGLE_PRODUCTS_PAYMENT_METHODS);
     }
     
-    switch($type) {
+    switch($type) {//wot no documents or news?
       case "products":
+          if ($query_limit === 0) {
+              if ($query_offset !== 0) {// OFFSET must be used with LIMIT, so have to add a value for LIMIT
+                  echo __LINE__ . NL;
+                  $products_max = $db->Execute("SELECT COUNT(*) AS products_max FROM " . TABLE_PRODUCTS);
+                  $products_max = (int)$products_max->fields['products_max'];
+                  $sql_limit = ' LIMIT ' . $products_max;
+                  $sql_offset = ' OFFSET ' . $query_offset;
+              } else {//all products, no offset
+                  $sql_limit = '';
+                  $sql_offset = '';
+              }
+          } else {//limit in use, maybe an offset
+              $sql_limit = ' LIMIT ' . $query_limit;
+              $sql_offset = $query_offset === 0 ? '' : ' OFFSET ' . $query_offset;
+          }
+
         $products_query = "SELECT distinct(pd.products_name), p.products_id, p.products_model, pd.products_description, p.products_image, p.products_tax_class_id, p.products_price_sorter, p.products_priced_by_attribute, p.products_type, GREATEST(p.products_date_added, IFNULL(p.products_last_modified, 0), IFNULL(p.products_date_available, 0)) AS base_date, p.products_date_available, m.manufacturers_name, p.products_quantity, pt.type_handler, p.products_weight" . $additional_attributes . "
                            FROM " . TABLE_PRODUCTS . " p
                              LEFT JOIN " . TABLE_MANUFACTURERS . " m ON (p.manufacturers_id = m.manufacturers_id)
@@ -227,12 +263,18 @@ if (isset($feed) && $feed === "yes") {
                               OR p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "'
                               )
                            GROUP BY pd.products_name 
-                           ORDER BY " . $order_by . $limit . $offset . ";";
+                           ORDER BY " . $order_by . $sql_limit . $sql_offset;
 
         $products = $db->Execute($products_query);
         $total_products = $products->RecordCount();
-        //die('record count: ' . $products->RecordCount());
 
+echo '<p>' . TEXT_GOOGLE_PRODUCTS_PROCESSING . '</p>';
+
+          if (GOOGLE_PRODUCTS_DEBUG === 'true') {
+              //die('record count: ' . $products->RecordCount());
+              echo '<p>Records to process=' . $products->RecordCount() . ($query_limit === 0 ? ' (not limited)' : ' (limited)') . ($query_offset > 0 ? ' | offset by ' . $query_offset : '') . '</p>';
+
+          }
         while (!$products->EOF) { // run until end of file or until maximum number of products reached
           $google_base_start_counter++;
           /* BEGIN GLOBAL ELEMENTS USED IN ALL ITEMS */
@@ -264,25 +306,36 @@ if (isset($feed) && $feed === "yes") {
         }
 //eof boilerplate text
 
-            $products_description = trim(substr($google_base->google_base_xml_sanitizer($products_description, $products->fields['products_id']),0,1000));
+            $products_description = zen_trunc_string($google_base->google_base_xml_sanitizer($products_description, $products->fields['products_id']),GOOGLE_PRODUCTS_MAX_CHARS_DESCRIPTION,true);
 
-        if ( (GOOGLE_PRODUCTS_META_TITLE === 'true') && ($products->fields['metatags_title'] != '') ) {
+        if ( (GOOGLE_PRODUCTS_META_TITLE === 'true') && ($products->fields['metatags_title'] !== '') ) {
               $productstitle = $google_base->google_base_xml_sanitizer($products->fields['metatags_title']);
             } else {
               $productstitle = $google_base->google_base_xml_sanitizer($products->fields['products_name']); 
             }
+        $productstitle = zen_trunc_string($productstitle, GOOGLE_PRODUCTS_MAX_CHARS_TITLE, true);
 
         if (GOOGLE_PRODUCTS_DEBUG === 'true') {
-              $success = false;
-              echo '<p>id: ' . $products->fields['products_id'] . ', price: ' . round($price, 2) . ', description length: ' . strlen($products_description) . ' ';
-              if ($price <= 0) {
-                echo '- skipped: price below zero, description length less than 15 chars, or title less than 3 chars';
-              } elseif (strlen($products_description) < 15) {
-                echo '- skipped: description length less than 15 chars';
-              } elseif (strlen($productstitle) < 3) {
-                echo '- skipped: title less than 3 chars';
-              } else {
-                echo '- including';
+              $success = false;//todo add error formatting to this array to remove error texts
+              $product_data = [$products->fields['products_id'], $products->fields['products_model'], $productstitle, zen_trunc_string($products_description, 30, true), strlen($products_description), round($price, 2)];//todo format currency?
+            $product_summary = '';
+              if ($_GET['feed_sort'] === 'id') {
+                $product_summary = vsprintf(TEXT_GOOGLE_PRODUCTS_PRODUCT_SUMMARY_ID, $product_data);
+            } elseif ($_GET['feed_sort'] === 'model') {
+                  $product_summary = vsprintf(TEXT_GOOGLE_PRODUCTS_PRODUCT_SUMMARY_MODEL, $product_data);
+            } elseif ($_GET['feed_sort'] === 'name') {
+                  $product_summary = vsprintf(TEXT_GOOGLE_PRODUCTS_PRODUCT_SUMMARY_NAME, $product_data);
+              }
+            echo $product_summary;
+
+            if ($price <= 0) {//todo CONSTANTS
+                echo ' | <span class="errorText">price <= 0</span>';
+              }
+            if (strlen($products_description) < 15) {
+                echo ' | <span class="errorText">description length less than 15 chars</span>';
+              }
+            if (strlen($productstitle) < 3) {
+                echo ' | <span class="errorText">title less than 3 chars</span>';
               }
             }
             $default_google_product_category = $google_base->google_base_xml_sanitizer(GOOGLE_PRODUCTS_DEFAULT_PRODUCT_CATEGORY); 
@@ -577,17 +630,17 @@ if (isset($feed) && $feed === "yes") {
             }
             if (GOOGLE_PRODUCTS_DEBUG === 'true') {
               if ($success) {
-                echo ' - success';
+                echo '';
               } else {
-                echo ' - failed';
+                echo ' | <span class="errorText">SKIPPED</span>';
               }
-              echo '</p>';
+              echo NL;
             }
-          } elseif (GOOGLE_PRODUCTS_DEBUG === 'true'){
-              if (!$google_base->check_product($products->fields['products_id'])) {
-              echo $products->fields['products_id'] . ' skipped due to user restrictions<br>';
-          }}
-                }
+          } elseif (GOOGLE_PRODUCTS_DEBUG === 'true') {
+              //if (!$google_base->check_product($products->fields['products_id'])) {
+                  echo $products->fields['products_id'] . ' skipped due to user restrictions<br>';//todo
+             // }
+          }
           ob_flush();
           flush();
           $products->MoveNext();
@@ -629,6 +682,9 @@ if (isset($upload) && $upload === "yes") {
     } else {
         echo '<p class="errorText">' . TEXT_GOOGLE_PRODUCTS_UPLOAD_FAILED . '</p>';
     }
+}
+if (GOOGLE_PRODUCTS_DEBUG === 'true') {
+    $google_base->print_mem();
 } ?>
 </body>
 </html>
