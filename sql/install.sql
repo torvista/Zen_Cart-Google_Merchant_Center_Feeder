@@ -41,7 +41,7 @@ INSERT INTO configuration (configuration_id, configuration_title, configuration_
 
 (NULL, 'Limit Products to Process', 'GOOGLE_PRODUCTS_MAX_PRODUCTS', '', 'Limit the quantity of products to process/add to the feed file.<br>For testing or due to server limitations it may be necessary to limit the processing in conjunction with the Offset option ,to produce multiple feed files.<br>Default value is empty.', @configuration_group_id, 20, NOW(), NULL, NULL),
 
-(NULL, 'Starting Point', 'GOOGLE_PRODUCTS_START_PRODUCTS', '0', 'Start at which entry (not product_id)?<br />Default=0', @configuration_group_id, 21, NOW(), NULL, NULL),
+(NULL, 'Starting Point', 'GOOGLE_PRODUCTS_START_PRODUCTS', '0', 'Start at which entry (not product_id)?<br />Default=1', @configuration_group_id, 21, NOW(), NULL, NULL),
 
 (NULL, 'Included Categories', 'GOOGLE_PRODUCTS_POS_CATEGORIES', '', 'Enter category ids separated by commas <br>(i.e. 1,2,3)<br>Leave blank to allow all categories', @configuration_group_id, 22, NOW(), NULL, NULL),
 
