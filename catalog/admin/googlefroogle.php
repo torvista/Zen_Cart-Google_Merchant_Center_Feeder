@@ -208,19 +208,21 @@ function processLoading(text) {
         $popup_width = 400;
         $popup_height = 400;
     } ?>
-      <form method="get" action="<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . ".php"; ?>" name="google" target="googlefeed" onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=<?php echo $popup_width; ?>, height=<?php echo $popup_height; ?>, top=5, left=25, scrollbars=yes');setTimeout('location.reload();', 5000);"><?php //runs script in shop root in the popup, then reloads the admin page so it can find/list the newly-created file in the table ?>
-        <label for="feed"><?php echo TEXT_FEED_TYPE ?></label>
+      <form method="get" action="<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . ".php"; ?>" name="google" target="googlefeed" onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=<?php echo $popup_width; ?>, height=<?php echo $popup_height; ?>, top=5, left=25, scrollbars=yes');setTimeout('location.reload();', 5000);"><?php //runs script in shop root in the popup, then reloads the admin page so it can find/list the newly-created file in the table
+          // code only supports products, so selections are pointless ?>
+        <!--<label for="feed"><?php //echo TEXT_FEED_TYPE ?></label>
         <select name="feed" id="feed">
-          <option value="fy_un_tp"><?php echo TEXT_FEED_PRODUCTS ?></option>
-          <option value="fy_un_td"><?php echo TEXT_FEED_DOCUMENTS ?></option>
-          <option value="fy_un_tn"><?php echo TEXT_FEED_NEWS ?></option>
+          <option value="fy_un_tp"><?php //echo TEXT_FEED_PRODUCTS ?></option>
+          <option value="fy_un_td"><?php //echo TEXT_FEED_DOCUMENTS ?></option>
+          <option value="fy_un_tn"><?php //echo TEXT_FEED_NEWS ?></option>
         </select>
-        <br>
+        <br>-->
+          <?php echo zen_draw_hidden_field('feed', 'fy_un_tp'); ?>
         <label for="limit"><?php echo TEXT_ENTRY_LIMIT; ?></label>
         <?php echo zen_draw_input_field('limit', (int)GOOGLE_PRODUCTS_MAX_PRODUCTS, 'class="limiters" id="limit"'); ?>
         <br>
-        <label for="offset"><?php echo TEXT_ENTRY_OFFSET; ?></label>
-        <?php echo zen_draw_input_field('offset', (int)GOOGLE_PRODUCTS_START_PRODUCTS, 'class="limiters" id="offset"'); ?>
+        <label for="start"><?php echo TEXT_ENTRY_OFFSET; ?></label>
+        <?php echo zen_draw_input_field('start', (int)GOOGLE_PRODUCTS_START_PRODUCTS, 'class="limiters" id="start"'); ?>
         <br>
 <?php //todo use this to change default and remove configuration switch ?>
           <div title="<?php echo TEXT_FEED_SORT_TITLE . GOOGLE_PRODUCTS_FEED_SORT; ?>"><b><?php echo TEXT_FEED_ORDER_BY; ?></b>
