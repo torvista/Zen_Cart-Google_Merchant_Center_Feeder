@@ -11,9 +11,14 @@
  
   class google_base {
 
-      public array $additional_images_array;//stores the additional images found, per-product, for re-use if that product id comes up again...when does that happen? DISABLED
-      public array $image_files; //stores the images per-directory to prevent re-scanning if that directory has already ben scanned
+      //public array $additional_images_array;//stores the additional images found, per-product, for re-use if that product id comes up again...when does that happen? DISABLED
+      //public array $image_files; //stores the images per-directory to prevent re-scanning if that directory has already been scanned
 
+      /**
+       * @param $product_main_image
+       * @param $product_id
+       * @return array
+       */
       public function additional_images($product_main_image, $product_id): array
       {
           $debug_additional_images = false;//verbose step-by-step processing output for dummies
@@ -424,7 +429,7 @@
       if ($product_type) {
         $item->appendChild($dom->createElement('g:product_type', $product_type));
       }
-      if ($products->fields['products_image'] !== '') {
+      if ($products->fields['products_image'] !== '' && file_exists(DIR_WS_IMAGES . $products->fields['products_image'])) {
         $item->appendChild($dom->createElement('g:image_link', $this->google_base_image_url($products->fields['products_image'])));
         $additional_images = $this->additional_images($products->fields['products_image'], $products->fields['products_id']);
         if (is_array($additional_images) && count($additional_images) > 0) {
@@ -556,7 +561,7 @@
     
     // creates the url for the products_image
     function google_base_image_url($products_image) {
-      if ($products_image === "") {
+      if ($products_image === '') {
           return "";
       }
       if (defined('GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL') && GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL !== '') {
@@ -572,21 +577,21 @@
       $products_image_large = $products_image_base . IMAGE_SUFFIX_LARGE . $products_image_extension;
       
       // check for a large image else use medium else use small
-      if (!file_exists(DIR_WS_IMAGES . 'large/' . $products_image_large)) {
-        if (!file_exists(DIR_WS_IMAGES . 'medium/' . $products_image_medium)) {
-          $products_image_large = DIR_WS_IMAGES . $products_image;
-        } else {
-          $products_image_large = DIR_WS_IMAGES . 'medium/' . $products_image_medium;
-        }
-      } else {
+      if (file_exists(DIR_WS_IMAGES . 'large/' . $products_image_large)) {
         $products_image_large = DIR_WS_IMAGES . 'large/' . $products_image_large;
-      }
+      } elseif (file_exists(DIR_WS_IMAGES . 'medium/' . $products_image_medium)) {
+        $products_image_large = DIR_WS_IMAGES . 'medium/' . $products_image_medium;
+      } else {
+          $products_image_large = DIR_WS_IMAGES . $products_image;
+        }
+
       if ((function_exists('handle_image')) && (GOOGLE_PRODUCTS_IMAGE_HANDLER === 'true')) {
         $image_ih = handle_image($products_image_large, '', LARGE_IMAGE_MAX_WIDTH, LARGE_IMAGE_MAX_HEIGHT, '');
         $retval = (HTTP_SERVER . DIR_WS_CATALOG . $image_ih[0]);
       } else {
         $retval = (HTTP_SERVER . DIR_WS_CATALOG . rawurlencode($products_image_large));
       }
+
      // $retval = str_replace('%2F', '/', $retval);
      // $retval = str_replace('%28', '(', $retval);
 	 // return str_replace('%29', ')', $retval);
@@ -987,7 +992,7 @@
 
 // FTP FUNCTIONS //
     function ftp_file_upload($url, $login, $password, $local_file, $ftp_dir = '', $ftp_file = false, $ssl = false, $ftp_mode = FTP_ASCII) {
-        $debug_ftp_file_upload = true;//verbose step-by-step processing output for dummiesº
+        $debug_ftp_file_upload = false;//verbose step-by-step processing output for dummiesº
 
         echo ($debug_ftp_file_upload ? __LINE__ . ': ' : '') . FTP_START . NL;
         if (!is_callable('ftp_connect')) {
