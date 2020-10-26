@@ -53,7 +53,6 @@ define('GOOGLE_PRODUCTS_MAX_CHARS_ADDITIONAL_IMAGE_LINK', GOOGLE_PRODUCTS_MAX_CH
 define('GOOGLE_PRODUCTS_MAX_ADDITIONAL_IMAGES', 10);
 
 $anti_timeout_counter = 0; //for timeout issues as well as counting number of products processed
-  $google_base_start_counter = 0; //for counting all products regardless of inclusion
   define('NL', "<br>\n");
   
   $stock_attributes = false;
@@ -82,33 +81,24 @@ $anti_timeout_counter = 0; //for timeout issues as well as counting number of pr
   } else {
       $upload_file = '';
 }
-
+//Query modifiers
 if ((isset($_GET['limit']) && (int)$_GET['limit'] > 0)) {
-      $query_limit = (int)$_GET['limit'];
+      $limit = (int)$_GET['limit'];
 } elseif ((int)GOOGLE_PRODUCTS_MAX_PRODUCTS > 0) {//''->0: process all products
-    $query_limit = (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
+    $limit = (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
+} else {$limit = 0;}
+
+if ((isset($_GET['start']) && (int)$_GET['start'] > 1) && ((int)$_GET['start'] !== (int)GOOGLE_PRODUCTS_START_PRODUCTS)) {
+    $start = (int)$_GET['start'];
+} elseif ((int)GOOGLE_PRODUCTS_START_PRODUCTS > 1) {
+    $start = (int)GOOGLE_PRODUCTS_START_PRODUCTS;
 } else {
-    $query_limit = 0;
+    $start = 1;
 }
 
-$query_offset = (int)GOOGLE_PRODUCTS_START_PRODUCTS;//''->0: no offset
-
-if ((int)GOOGLE_PRODUCTS_START_PRODUCTS > 0 || (isset($_GET['offset']) && (int)$_GET['offset'] > 0)) {
-    $query_offset = (isset($_GET['offset']) && (int)$_GET['offset'] > 0) ? (int)$_GET['offset'] : (int)GOOGLE_PRODUCTS_START_PRODUCTS;
-    $offset = ' OFFSET ' . $query_offset;
+if ($start >= $limit) {
+    //todo handle illegal values
 }
-
-$outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . "_" . $type . "_" . $languages->fields['code'];
-
-//todo review these suffixes
-if ($query_limit > 0) {
-    $outfile .= '_' . $query_limit;
-}
-if ($query_offset > 0) {
-    $outfile .= '_' . $query_offset;
-}
-$outfile .= '.xml'; //example domain_products.xml
-
   if (GOOGLE_PRODUCTS_MAGIC_SEO_URLS === 'true') {
     require_once(DIR_WS_CLASSES . 'msu_ao.php');
     include(DIR_WS_INCLUDES . 'modules/msu_ao_1.php');
@@ -166,7 +156,6 @@ if (isset($feed) && $feed === "yes") {
     }
     ?>
 
-<p><?php echo TEXT_GOOGLE_PRODUCTS_FILE_LOCATION . NL . (($upload_file !== '') ? $upload_file : $outfile); ?></p>
       <?php
     $stimer_feed = $google_base->microtime_float();
     
@@ -187,96 +176,129 @@ if (isset($feed) && $feed === "yes") {
     $additional_tables = '';
     $gb_map_enabled = false;
 
-    // upc
-    if (GOOGLE_PRODUCTS_ASA_UPC === 'true') {
-      $additional_attributes .= ", p.products_upc, p.products_isbn, p.products_ean";
-    }
-    // description 2
-    if (GOOGLE_PRODUCTS_ASA_DESCRIPTION_2 === 'true') {
-      $additional_attributes .= ", pd.products_description2";
-    }
-    
-    if (GOOGLE_PRODUCTS_MAP_PRICING === 'true') {
-      $additional_attributes .= ", p.map_price, p.map_enabled";
-      $gb_map_enabled = true;
-    }
-    
-    if (GOOGLE_PRODUCTS_META_TITLE === 'true') {
-      $additional_attributes .= ", mtpd.metatags_title";
-      $additional_tables .= " LEFT JOIN " . TABLE_META_TAGS_PRODUCTS_DESCRIPTION . " mtpd ON (p.products_id = mtpd.products_id) ";
-    }
-    
-    if (GOOGLE_PRODUCTS_PRODUCT_CONDITION === 'true') {
-      $additional_attributes .= ", p.products_condition";
-    }
-    switch ($_GET['feed_sort']) {
-        /*case ('id'):
-            $order_by = 'p.products_id';
-            break;*/
-        case ('model'):
-            $order_by = 'p.products_model';
-            break;
-        case ('name'):
-            $order_by = 'pd.products_name';
-            break;
-        default:
-            $order_by = 'p.products_id';
-            break;
+    if (defined('GOOGLE_PRODUCTS_PAYMENT_METHODS') && GOOGLE_PRODUCTS_PAYMENT_METHODS !== '') {
+        $payments_accepted = explode(",", GOOGLE_PRODUCTS_PAYMENT_METHODS);
     }
 
-    if (defined('GOOGLE_PRODUCTS_PAYMENT_METHODS') && GOOGLE_PRODUCTS_PAYMENT_METHODS !== '') {
-      $payments_accepted = explode(",", GOOGLE_PRODUCTS_PAYMENT_METHODS);
-    }
-    
     switch($type) {//wot no documents or news?
       case "products":
-          if ($query_limit === 0) {
-              if ($query_offset !== 0) {// OFFSET must be used with LIMIT, so have to add a value for LIMIT
+
+          // upc
+          if (GOOGLE_PRODUCTS_ASA_UPC === 'true') {
+              $additional_attributes .= ", p.products_upc, p.products_isbn, p.products_ean";
+          }
+          // description 2
+          if (GOOGLE_PRODUCTS_ASA_DESCRIPTION_2 === 'true') {
+              $additional_attributes .= ", pd.products_description2";
+          }
+
+          if (GOOGLE_PRODUCTS_MAP_PRICING === 'true') {
+              $additional_attributes .= ", p.map_price, p.map_enabled";
+              $gb_map_enabled = true;
+          }
+
+          if (GOOGLE_PRODUCTS_META_TITLE === 'true') {
+              $additional_attributes .= ", mtpd.metatags_title";
+              $additional_tables .= " LEFT JOIN " . TABLE_META_TAGS_PRODUCTS_DESCRIPTION . " mtpd ON (p.products_id = mtpd.products_id) ";
+          }
+
+          if (GOOGLE_PRODUCTS_PRODUCT_CONDITION === 'true') {
+              $additional_attributes .= ", p.products_condition";
+          }
+
+          switch ($_GET['feed_sort']) {
+              /*case ('id'):
+                  $order_by = 'p.products_id';
+                  break;*/
+              case ('model'):
+                  $count = 'DISTINCT(p.products_model)';
+                  $select = $count . ', p.products_id, pd.products_name';
+                  $order_by = 'p.products_model';
+                  break;
+              case ('name'):
+                  $count = 'DISTINCT(pd.products_name)';
+                  $select = $count . ', p.products_id, p.products_model';
+                  $order_by = 'pd.products_name';
+                  break;
+              default:
+                  $count = 'p.products_id';
+                  $select = $count . ', p.products_model, pd.products_name';
+                  $order_by = $count;
+                  break;
+          }
+
+          $products_all = $db->Execute("SELECT COUNT(" . $count. ") as products_max
+                           FROM " . TABLE_PRODUCTS . " p
+                             LEFT JOIN " . TABLE_PRODUCTS_DESCRIPTION . " pd ON (p.products_id = pd.products_id)
+                             WHERE p.products_status = 1
+                             AND p.products_type <> 3
+                             AND p.product_is_call <> 1
+                             AND p.product_is_free <> 1
+                             AND pd.language_id = " . (int)$languages->fields['languages_id'] . "
+                             AND (p.products_image IS NOT NULL 
+                             OR p.products_image != '' 
+                             OR p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "')
+                           ORDER BY " . $order_by);
+
+          $products_all = $products_all->fields['products_max'];
+
+          if ($limit === 0) {//no limit: all products
+              if ($start > 1) {// MYSQL OFFSET must be used with LIMIT, so have to add a value for LIMIT
                   echo __LINE__ . NL;
-                  $products_max = $db->Execute("SELECT COUNT(*) AS products_max FROM " . TABLE_PRODUCTS);
-                  $products_max = (int)$products_max->fields['products_max'];
-                  $sql_limit = ' LIMIT ' . $products_max;
-                  $sql_offset = ' OFFSET ' . $query_offset;
+                  $sql_limit = ' LIMIT ' . $products_all;
+                  $sql_offset = ' OFFSET ' . ($start-1);
               } else {//all products, no offset
                   $sql_limit = '';
                   $sql_offset = '';
               }
           } else {//limit in use, maybe an offset
-              $sql_limit = ' LIMIT ' . $query_limit;
-              $sql_offset = $query_offset === 0 ? '' : ' OFFSET ' . $query_offset;
+              $sql_limit = ' LIMIT ' . $limit;
+              $sql_offset = $start > 1 ? ' OFFSET ' . ($start-1) : '';
           }
-
-        $products_query = "SELECT distinct(pd.products_name), p.products_id, p.products_model, pd.products_description, p.products_image, p.products_tax_class_id, p.products_price_sorter, p.products_priced_by_attribute, p.products_type, GREATEST(p.products_date_added, IFNULL(p.products_last_modified, 0), IFNULL(p.products_date_available, 0)) AS base_date, p.products_date_available, m.manufacturers_name, p.products_quantity, pt.type_handler, p.products_weight" . $additional_attributes . "
+          
+          //ORIGINAl was based on distinct pd.name
+          $products_query = "SELECT " . $select . ", pd.products_description, p.products_image, p.products_tax_class_id, p.products_price_sorter, p.products_priced_by_attribute, p.products_type, GREATEST(p.products_date_added, IFNULL(p.products_last_modified, 0), IFNULL(p.products_date_available, 0)) AS base_date, p.products_date_available, m.manufacturers_name, p.products_quantity, pt.type_handler, p.products_weight" . $additional_attributes . "
                            FROM " . TABLE_PRODUCTS . " p
                              LEFT JOIN " . TABLE_MANUFACTURERS . " m ON (p.manufacturers_id = m.manufacturers_id)
                              LEFT JOIN " . TABLE_PRODUCTS_DESCRIPTION . " pd ON (p.products_id = pd.products_id)
                              LEFT JOIN " . TABLE_PRODUCT_TYPES . " pt ON (p.products_type=pt.type_id)"
-                           . $additional_tables . 
-                           "WHERE p.products_status = 1
+              . $additional_tables .
+              " WHERE p.products_status = 1
                              AND p.products_type <> 3
                              AND p.product_is_call <> 1
                              AND p.product_is_free <> 1
                              AND pd.language_id = " . (int)$languages->fields['languages_id'] . "
-                             AND (
-                              p.products_image IS NOT NULL
-                              OR p.products_image != ''
-                              OR p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "'
-                              )
-                           GROUP BY pd.products_name 
+                             AND (p.products_image IS NOT NULL 
+                             OR p.products_image != '' 
+                             OR p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "')
                            ORDER BY " . $order_by . $sql_limit . $sql_offset;
 
-        $products = $db->Execute($products_query);
-        $total_products = $products->RecordCount();
-
-echo '<p>' . TEXT_GOOGLE_PRODUCTS_PROCESSING . '</p>';
+          $products = $db->Execute($products_query);
+          $products_count = $products->RecordCount();
 
           if (GOOGLE_PRODUCTS_DEBUG === 'true') {
-              //die('record count: ' . $products->RecordCount());
-              echo '<p>Records to process=' . $products->RecordCount() . ($query_limit === 0 ? ' (not limited)' : ' (limited)') . ($query_offset > 0 ? ' | offset by ' . $query_offset : '') . '</p>';
+              echo '<p>Valid products=' . $products_all . NL . 'Processing ' . $products_count . ' products' . ($limit === 0 ? ' (not limited)' : ' (as per limit)') . ', starting from ' . $start . '.</p>';
 
           }
+
+          $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . "_" . $type . "_" . $languages->fields['code'];
+
+          //todo review these suffixes
+          $end_point = $products_all;
+          if ($limit > 0) {
+              $end_point = $start + $limit-1;
+          }
+          $outfile .= '_' . $start . '-' . $end_point;
+
+          $outfile .= '.xml'; //example domain_products.xml
+
+          echo '<p>' . TEXT_GOOGLE_PRODUCTS_FILE_LOCATION . NL . (($upload_file !== '') ? $upload_file : $outfile) . '</p>';
+
+          echo '<p>' . TEXT_GOOGLE_PRODUCTS_PROCESSING . '</p>';
+
+        $loop_count = 0; //for counting all products regardless of inclusion
         while (!$products->EOF) { // run until end of file or until maximum number of products reached
-          $google_base_start_counter++;
+            $loop_count++;
           /* BEGIN GLOBAL ELEMENTS USED IN ALL ITEMS */
           // reset tax array
           $tax_rate = [];
@@ -347,9 +369,13 @@ echo '<p>' . TEXT_GOOGLE_PRODUCTS_PROCESSING . '</p>';
             if (strlen($productstitle) < 3) {
                 echo ' | <span class="errorText">title less than 3 chars</span>';
               }
+            if (!file_exists(DIR_WS_IMAGES . $products->fields['products_image'])) {
+                echo ' | <span class="errorText"><b>defined image not found:</b> "' .  DIR_WS_IMAGES . $products->fields['products_image'] . '"</span>';//todo: make it skipped...but it is a db error to be fixed by user
+            }
             }
             $default_google_product_category = $google_base->google_base_xml_sanitizer(GOOGLE_PRODUCTS_DEFAULT_PRODUCT_CATEGORY); 
-            if (GOOGLE_PRODUCTS_MAGIC_SEO_URLS === 'true') {
+
+        if (GOOGLE_PRODUCTS_MAGIC_SEO_URLS === 'true') {
               include(DIR_WS_INCLUDES . 'modules/msu_ao_2.php'); 
             } else { // default
               $link = ($products->fields['type_handler'] ?: 'product') . '_info';
@@ -498,7 +524,7 @@ echo '<p>' . TEXT_GOOGLE_PRODUCTS_PROCESSING . '</p>';
                       }
 
                         $sba_failed = false;
-                        $total_products++;
+                        $products_count++;
                         $anti_timeout_counter++;
                         $variant_count++;
                         $item = $dom->createElement('item');
