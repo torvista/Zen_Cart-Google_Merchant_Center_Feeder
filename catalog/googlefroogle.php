@@ -316,8 +316,18 @@ echo '<p>' . TEXT_GOOGLE_PRODUCTS_PROCESSING . '</p>';
         $productstitle = zen_trunc_string($productstitle, GOOGLE_PRODUCTS_MAX_CHARS_TITLE, true);
 
         if (GOOGLE_PRODUCTS_DEBUG === 'true') {
-              $success = false;//todo add error formatting to this array to remove error texts
-              $product_data = [$products->fields['products_id'], $products->fields['products_model'], $productstitle, zen_trunc_string($products_description, 30, true), strlen($products_description), round($price, 2)];//todo format currency?
+            $success = false;
+            $position = ($start+$loop_count-1) . '/' . $products_all . ' (' . $loop_count . '/' . $limit . ')';
+//todo add error formatting to this array to remove error texts
+              $product_data = [
+                  $products->fields['products_id'],
+                  $products->fields['products_model'], 
+                  $productstitle, 
+                  zen_trunc_string($products_description, 30, true), 
+                  strlen($products_description), 
+                  round($price, 2),
+                  $position
+              ];//todo format currency?
             $product_summary = '';
               if ($_GET['feed_sort'] === 'id') {
                 $product_summary = vsprintf(TEXT_GOOGLE_PRODUCTS_PRODUCT_SUMMARY_ID, $product_data);
@@ -328,7 +338,7 @@ echo '<p>' . TEXT_GOOGLE_PRODUCTS_PROCESSING . '</p>';
               }
             echo $product_summary;
 
-            if ($price <= 0) {//todo CONSTANTS
+            if ($price <= 0) {//todo change for CONSTANTS
                 echo ' | <span class="errorText">price <= 0</span>';
               }
             if (strlen($products_description) < 15) {
