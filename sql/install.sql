@@ -6,6 +6,7 @@ ALTER TABLE products_options_values MODIFY products_options_values_name varchar(
 SET @configuration_group_id=0;
 SELECT (@configuration_group_id:=configuration_group_id) 
 FROM configuration_group 
+
 WHERE configuration_group_title = 'Google Merchant Center Feeder Configuration' 
 LIMIT 1;
 DELETE FROM configuration WHERE configuration_group_id = @configuration_group_id AND @configuration_group_id != 0;
@@ -25,10 +26,9 @@ INSERT INTO configuration (configuration_id, configuration_title, configuration_
 (NULL, 'Google Merchant Center Server', 'GOOGLE_PRODUCTS_SERVER', 'uploads.google.com', 'Enter Merchant Center server<br />default: hedwig.google.com', @configuration_group_id, 3, NOW(), NULL, NULL),
 (NULL, 'Google Merchant Center PASV', 'GOOGLE_PRODUCTS_PASV', 'true', 'Turn PASV mode on or off for FTP upload?', @configuration_group_id, 4, NOW(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),'),
 (NULL, 'Security Key', 'GOOGLE_PRODUCTS_KEY', @security_key, 'Enter a random string of numbers and characters to ensure only the admin accesses the file', @configuration_group_id, 5, NOW(), NULL, NULL),
-(NULL, 'Store Address', 'GOOGLE_PRODUCTS_ADDRESS', 'http://www.domain.com', 'Enter your website address', @configuration_group_id, 6, NOW(), NULL, NULL),
+(NULL, 'Store Address', 'GOOGLE_PRODUCTS_ADDRESS', 'http://www.MYSTOREDOMAIN.COM', 'Enter your website address', @configuration_group_id, 6, NOW(), NULL, NULL),
 (NULL, 'Store Description', 'GOOGLE_PRODUCTS_DESCRIPTION', '', 'Enter a short description of your store', @configuration_group_id, 7, NOW(), NULL, NULL),
-(NULL, 'Output File Name', 'GOOGLE_PRODUCTS_OUTPUT_FILENAME', 'domain', 'Set the name of your Merchant Center output file', @configuration_group_id, 8, NOW(), NULL, NULL),
-
+(NULL, 'Output File Name', 'GOOGLE_PRODUCTS_OUTPUT_FILENAME', 'MYSTORENAME', 'Set the name of your Merchant Center output file', @configuration_group_id, 8, NOW(), NULL, NULL),
 (NULL, 'Feed File Sort', 'GOOGLE_PRODUCTS_FEED_SORT', 'ID', 'Create the product feed file ordered by the product id, product model or product name.', @configuration_group_id, 9, NOW(), NULL, 'zen_cfg_select_option(array(\'ID\', \'Model\', \'Name\'),'),
 
 (NULL, 'Compress Feed File', 'GOOGLE_PRODUCTS_COMPRESS', 'false', 'Compress Google Merchant Center file', @configuration_group_id, 9, NOW(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),'),
@@ -88,7 +88,7 @@ INSERT INTO configuration (configuration_id, configuration_title, configuration_
 (NULL, 'Shipping Service', 'GOOGLE_PRODUCTS_SHIPPING_SERVICE', '', 'Enter the shipping service type (i.e. Ground):', @configuration_group_id, 94, NOW(), NULL, NULL),
 (NULL, 'Pickup', 'GOOGLE_PRODUCTS_PICKUP', 'do not display', 'Local pickup available?', @configuration_group_id, 95, NOW(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\', \'do not display\'),'),
 
-(NULL, 'Alternate Image URL', 'GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL', '', 'Add an alternate URL if your images are hosted offsite (i.e. http://www.domain.com/images/).  Your defined image will be appended to the end of this URL.', @configuration_group_id, 100, NOW(), NULL, NULL),
+(NULL, 'Alternate Image URL', 'GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL', '', 'Add an alternate URL if your images are hosted offsite (i.e. http://www.someCDN.com/images/).  Your defined image will be appended to the end of this URL.', @configuration_group_id, 100, NOW(), NULL, NULL),
 (NULL, 'Image Handler', 'GOOGLE_PRODUCTS_IMAGE_HANDLER', 'false', 'Resize images using image handler (separate module required)?', @configuration_group_id, 101, NOW(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),'),
 (NULL, 'Attribute-Stock Plugin', 'GOOGLE_PRODUCTS_SWITCH_STOCK_PLUGIN', 'none', 'Select the third party plugin used for managing attribute/variant stocks or leave as \'none\'.', @configuration_group_id, 102, NOW(), NULL, 'zen_cfg_select_drop_down(array(array(\'id\' => \'none\', \'text\' => \'none\'), array(\'id\' => \'stockbyattributes\', \'text\' => \'Stock By Attributes\'), array(\'id\' => \'numinixproductvariants\', \'text\' => \'Numinix Product Variants\'), array(\'id\' => \'posm\', \'text\' => \'Products Options Stock Manager\')),'),
 (NULL, 'Magic SEO URLs', 'GOOGLE_PRODUCTS_MAGIC_SEO_URLS', 'false', 'Output Magic SEO URLs (separate module required)?', @configuration_group_id, 999, NOW(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),');
