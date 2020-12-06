@@ -281,15 +281,32 @@ if (isset($feed) && $feed === "yes") {
 
           }
 
+// sql limiters
+      /*ORIGINAL CODE for reference
+          if ((int)GOOGLE_PRODUCTS_MAX_PRODUCTS > 0 || (isset($_GET['limit']) && (int)$_GET['limit'] > 0)) {
+              $query_limit = (isset($_GET['limit']) && (int)$_GET['limit'] > 0) ? (int)$_GET['limit'] : (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
+              $limit = ' LIMIT ' . $query_limit;
+          }
+          if ((int)GOOGLE_PRODUCTS_START_PRODUCTS > 0 || (isset($_GET['offset']) && (int)$_GET['offset'] > 0)) {
+              $query_offset = (isset($_GET['offset']) && (int)$_GET['offset'] > 0) ? (int)$_GET['offset'] : (int)GOOGLE_PRODUCTS_START_PRODUCTS;
+              $offset = ' OFFSET ' . $query_offset;
+          }
+          $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . "_" . $type . "_" . $languages->fields['code'];
+          if ($query_limit > 0) $outfile .= '_' . $query_limit;
+          if ($query_offset > 0) $outfile .= '_' . $query_offset;
+          $outfile .= '.xml'; //example domain_products.xml
+*/
+
+//todo admin options for file limits and languages, if in use
           $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . "_" . $type . "_" . $languages->fields['code'];
 
           //todo review these suffixes
-          $end_point = $products_all;
+         /* $end_point = $products_all;
           if ($limit > 0) {
               $end_point = $start + $limit-1;
           }
           $outfile .= '_' . $start . '-' . $end_point;
-
+*/
           $outfile .= '.xml'; //example domain_products.xml
 
           echo '<p>' . TEXT_GOOGLE_PRODUCTS_FILE_LOCATION . NL . (($upload_file !== '') ? $upload_file : $outfile) . '</p>';
