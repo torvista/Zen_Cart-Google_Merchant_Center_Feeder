@@ -8,7 +8,7 @@
  * @version $Id: google_base.php 64 2011-08-31 16:07:57Z numinix $
  * @author Numinix Technology
  */
- 
+
   class google_base {
 
       //public array $additional_images_array;//stores the additional images found, per-product, for re-use if that product id comes up again...when does that happen? DISABLED
@@ -141,7 +141,7 @@
           }
           return $images_array;
       }
-   
+
     // writes out the code into the feed file: UNUSED!!
     function google_base_fwrite($mode, $output = '', $products_id = '') { // added products id for debugging
       global $outfile;
@@ -157,19 +157,19 @@
       file_put_contents($outfile, $output, $mode);
       //return $retval;
     }
-    
+
     // gets the Google Base Feeder version number from the Module Versions file
     function google_base_version() {
       return trim(GOOGLE_PRODUCTS_VERSION);
-    }  
-    
+    }
+
     // trims the value of each element of an array
     function trim_array($x) {
       if (is_array($x)) {
          return array_map('trim_array', $x);
       }
         return trim($x);
-    } 
+    }
 
     // determines if the feed should be generated
     function get_feed($feed_parameter) {
@@ -196,7 +196,7 @@
       }
       return $upload;
     }
-    
+
     // returns the type of feed
     function get_type($type_parameter) {
       switch($type_parameter) {
@@ -215,12 +215,12 @@
       }
       return $type;
     }
-    
+
     // performs a set of functions to see if a product is valid
     function check_product($products_id) {
         return $this->included_categories_check(GOOGLE_PRODUCTS_POS_CATEGORIES, $products_id) && !$this->excluded_categories_check(GOOGLE_PRODUCTS_NEG_CATEGORIES, $products_id) && $this->included_manufacturers_check(GOOGLE_PRODUCTS_POS_MANUFACTURERS, $products_id) && !$this->excluded_manufacturers_check(GOOGLE_PRODUCTS_NEG_MANUFACTURERS, $products_id);
     }
-    
+
     // check to see if a product is inside an included category
     function included_categories_check($categories_list, $products_id) {
       if ($categories_list === '') {
@@ -236,7 +236,7 @@
         }
         return $match === true;
     }
-    
+
     // check to see if a product is inside an excluded category
     function excluded_categories_check($categories_list, $products_id) {
       if ($categories_list === '') {
@@ -253,7 +253,7 @@
         }
         return $match === true;
     }
-    
+
     // check to see if a product is from an included manufacturer
     function included_manufacturers_check($manufacturers_list, $products_id) {
       if ($manufacturers_list === '') {
@@ -267,7 +267,7 @@
         }
         return false;
     }
-    
+
     function excluded_manufacturers_check($manufacturers_list, $products_id) {
       if ($manufacturers_list === '') {
         return false;
@@ -281,14 +281,14 @@
 
         return false;
     }
-    
+
     function google_base_get_category($products_id) {
       global $db;
-      
+
       // get the master_categories_id
       $master_categories_id = $db->Execute("SELECT master_categories_id FROM " . TABLE_PRODUCTS . " WHERE products_id = " . $products_id . " LIMIT 1;");
       $master_categories_id = $master_categories_id->fields['master_categories_id'];
-      
+
       // build the cPath
       $cPath_array = zen_generate_category_path($master_categories_id);
       $category_names = [];
@@ -298,9 +298,9 @@
         $category_names[] = zen_get_category_name($category['id'], (int)GOOGLE_PRODUCTS_LANGUAGE); // have to use this function just in case of a different language
         $cPath[] = $category['id'];
       }
-      return [$category_names, $cPath];  
+      return [$category_names, $cPath];
     }
-    
+
     // returns an array containing the category name and cPath
     /*
     function google_base_get_category($products_id) {
@@ -324,7 +324,7 @@
       return array($retval, $cPath);
     }
     */
-    
+
     // builds the category tree
     function google_base_category_tree($id_parent=0, $cPath='', $cName='', $cats= []){
       global $db, $languages;
@@ -345,7 +345,7 @@
       }
       return $cats;
     }
-    
+
     // create a product that doesn't use stock by attributes
     function create_regular_product($products, $dom) {
       global $id, $price, $tax_rate, $productstitle, $percategory, $freerules;
@@ -355,9 +355,9 @@
       $item->appendChild($products_title);
       $iD = $dom->createElement('g:id');
       $iD->appendChild($dom->createCDATASection($id));
-      $item->appendChild($iD);      
-      
-		$item->appendChild($dom->createElement('g:price', number_format($price, 2, '.', '') . ' ' . GOOGLE_PRODUCTS_CURRENCY));  
+      $item->appendChild($iD);
+
+		$item->appendChild($dom->createElement('g:price', number_format($price, 2, '.', '') . ' ' . GOOGLE_PRODUCTS_CURRENCY));
       if (GOOGLE_PRODUCTS_TAX_DISPLAY === 'true' && GOOGLE_PRODUCTS_TAX_COUNTRY === 'US' && $tax_rate != '') {
         $tax = $dom->createElement('g:tax');
         $tax->appendChild($dom->createElement('g:country', GOOGLE_PRODUCTS_TAX_COUNTRY));
@@ -389,15 +389,15 @@
 
       if(GOOGLE_PRODUCTS_WEIGHT === 'true' && $products->fields['products_weight'] !== '') {
         $item->appendChild($dom->createElement('g:shipping_weight', $products->fields['products_weight'] . ' ' . str_replace(['pounds', 'kilograms'], ['lb', 'kg'], GOOGLE_PRODUCTS_UNITS)));
-      } 
-      if (defined('GOOGLE_PRODUCTS_SHIPPING_METHOD') && (GOOGLE_PRODUCTS_SHIPPING_METHOD !== '') && (GOOGLE_PRODUCTS_SHIPPING_METHOD !== 'none')) {   
+      }
+      if (defined('GOOGLE_PRODUCTS_SHIPPING_METHOD') && (GOOGLE_PRODUCTS_SHIPPING_METHOD !== '') && (GOOGLE_PRODUCTS_SHIPPING_METHOD !== 'none')) {
         $shipping_rate = $this->shipping_rate(GOOGLE_PRODUCTS_SHIPPING_METHOD, $percategory, $freerules, GOOGLE_PRODUCTS_RATE_ZONE, $products->fields['products_weight'], $price, $products->fields['products_id']);
         if ((float)$shipping_rate >= 0) {
           $shipping = $dom->createElement('g:shipping');
           if (GOOGLE_PRODUCTS_SHIPPING_COUNTRY !== '') {
             $shipping->appendChild($dom->createElement('g:country', $this->get_countries_iso_code_2(GOOGLE_PRODUCTS_SHIPPING_COUNTRY)));
           }
-          
+
           if (GOOGLE_PRODUCTS_SHIPPING_REGION !== '') {
             $shipping->appendChild($dom->createElement('g:region', GOOGLE_PRODUCTS_SHIPPING_REGION));
           }
@@ -408,10 +408,10 @@
           $item->appendChild($shipping);
         }
       }
-                       
+
       return $item;
     }
-    
+
     // takes already created $item and adds universal attributes from $products
     function universal_attributes($products, $item, $dom) {
       global $link, $product_type, $payments_accepted, $google_product_category_check, $default_google_product_category, $products_description;
@@ -425,7 +425,7 @@
       } else {
         $item->appendChild($dom->createElement('g:condition', GOOGLE_PRODUCTS_CONDITION));
       }
-      
+
       if ($product_type) {
         $item->appendChild($dom->createElement('g:product_type', $product_type));
       }
@@ -463,7 +463,7 @@
         } elseif ($products->fields['products_ean'] !== '') {
           $ean = $dom->createElement('g:ean');
           $ean->appendChild($dom->createCDATASection($this->google_base_xml_sanitizer($products->fields['products_ean'])));
-          $item->appendChild($ean);                  
+          $item->appendChild($ean);
         }
       }
       if (GOOGLE_PRODUCTS_CURRENCY_DISPLAY === 'true') {
@@ -472,7 +472,7 @@
       if(GOOGLE_PRODUCTS_PICKUP !== 'do not display') {
         $item->appendChild($dom->createElement('g:pickup', GOOGLE_PRODUCTS_PICKUP));
       }
-      if (defined('GOOGLE_PRODUCTS_PAYMENT_METHODS') && GOOGLE_PRODUCTS_PAYMENT_METHODS !== '') { 
+      if (defined('GOOGLE_PRODUCTS_PAYMENT_METHODS') && GOOGLE_PRODUCTS_PAYMENT_METHODS !== '') {
         foreach($payments_accepted as $payment_accepted) {
           $item->appendChild($dom->createElement('g:payment_accepted', trim($payment_accepted)));
         }
@@ -487,10 +487,10 @@
         $google_product_category = $dom->createElement('g:google_product_category');
         $google_product_category->appendChild($dom->createCDATASection($default_google_product_category));
         $item->appendChild($google_product_category);
-      }     
+      }
       return $item;
     }
-    
+
     function google_base_sanita($str, $rt=false) {
       //global $products;
       $str = str_replace(["\r\n", "\r", "\n", "&nbsp;", '’'], [' ', ' ', ' ', ' ', "'"], $str);
@@ -502,10 +502,10 @@
       $str = html_entity_decode($str, ENT_QUOTES);//, $charset);
       //$str = html_entity_decode($str, ENT_QUOTES, $charset);
       //$str = htmlspecialchars($str, ENT_QUOTES, '', false);
-      //$str = htmlentities($str, ENT_QUOTES, $charset, false); 
+      //$str = htmlentities($str, ENT_QUOTES, $charset, false);
       return $str;
     }
-             
+
     function google_base_xml_sanitizer($str, $products_id = '') { // products id added for debugging purposes
       $str = $this->google_base_sanita($str);
       if (GOOGLE_PRODUCTS_XML_SANITIZATION === 'true') {
@@ -542,7 +542,7 @@
 
         return $str;
     }
-    
+
     function transcribe_cp1252_to_latin1($cp1252) {
       return strtr(
         $cp1252,
@@ -558,7 +558,7 @@
         ]
       );
     }
-    
+
     // creates the url for the products_image
     function google_base_image_url($products_image) {
       if ($products_image === '') {
@@ -569,13 +569,13 @@
           $products_image = substr(GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL, strlen(HTTP_SERVER . '/' . DIR_WS_IMAGES)) . $products_image;
         } else {
           return GOOGLE_PRODUCTS_ALTERNATE_IMAGE_URL . rawurlencode($products_image);
-        } 
+        }
       }
       $products_image_extension = substr($products_image, strrpos($products_image, '.'));
       $products_image_base = preg_replace("/" . $products_image_extension . "/", '', $products_image);
       $products_image_medium = $products_image_base . IMAGE_SUFFIX_MEDIUM . $products_image_extension;
       $products_image_large = $products_image_base . IMAGE_SUFFIX_LARGE . $products_image_extension;
-      
+
       // check for a large image else use medium else use small
       if (file_exists(DIR_WS_IMAGES . 'large/' . $products_image_large)) {
         $products_image_large = DIR_WS_IMAGES . 'large/' . $products_image_large;
@@ -597,13 +597,13 @@
 	 // return str_replace('%29', ')', $retval);
         return str_replace(['%2F', '%28', '%29'], ['/', '(', ')'], $retval);
     }
-    
+
     // creates the url for a News and Articles Manager article
     function google_base_news_link($article_id) {
       $link = zen_href_link(FILENAME_NEWS_ARTICLE, 'article_id=' . (int)$article_id . $product_url_add, 'NONSSL', false);
       return $link;
     }
-    
+
     function google_base_expiration_date($base_date) {
       if (GOOGLE_PRODUCTS_EXPIRATION_BASE === 'now') {
           $expiration_date = time();
@@ -615,7 +615,7 @@
       $retval = (date('Y-m-d', $expiration_date));
       return $retval;
     }
-    
+
 // SHIPPING FUNCTIONS //
 
   function get_countries_iso_code_2($countries_id) {
@@ -704,10 +704,10 @@
         }
         return $rate;
     }
-  
+
   function numinix_table_rate($products_weight, $products_price) {//Zen Cart shipping method: table
     global $currencies;
-    
+
      switch (MODULE_SHIPPING_TABLE_MODE) {
       case ('weight'):
        $order_total = $products_weight;
@@ -736,10 +736,10 @@
     $shipping += MODULE_SHIPPING_TABLE_HANDLING;
     return $shipping;
   }
-    
+
   function numinix_zones_table_rate($products_weight, $table_zone) {//Plugin: Zones Table Rate (for Multiple Zones) https://www.zen-cart.com/downloads.php?do=file&id=478
     global $currencies;
-    
+
     switch (MODULE_SHIPPING_ZONETABLE_MODE) {
      case ('weight'):
        $order_total = $products_weight;
@@ -751,7 +751,7 @@
         $order_total = 1;
         break;
     }
-    
+
     $table_cost = $this->google_multi_explode(',', ':', constant('MODULE_SHIPPING_ZONETABLE_COST_' . $table_zone));
     $size = count($table_cost);
     for ($i=0, $n=$size; $i<$n; $i+=2) {
@@ -763,10 +763,10 @@
     $shipping += constant('MODULE_SHIPPING_ZONETABLE_HANDLING_' . $table_zone);
     return $shipping;
   }
-  
+
   function numinix_zones_rate($products_weight, $products_price, $table_zone) {//Zen Cart shipping method: zones
     global $currencies;
-    
+
     switch (MODULE_SHIPPING_ZONES_METHOD) {
       case ('Weight'):
         $order_total = $products_weight;
@@ -778,7 +778,7 @@
         $order_total = 1;
         break;
     }
-    
+
     $zones_cost = constant('MODULE_SHIPPING_ZONES_COST_' . $table_zone);
     $zones_table = $this->google_multi_explode(',', ':', $zones_cost);
     $size = count($zones_table);
@@ -796,7 +796,7 @@
     $shipping += constant('MODULE_SHIPPING_ZONES_HANDLING_' . $table_zone);
     return $shipping;
   }
-  
+
   function google_multi_explode($delim1, $delim2, $string) {
   	$new_data = [];
   	$data = explode($delim1, $string);
@@ -882,7 +882,7 @@
       //echo $the_base_price;
       return $the_base_price;
   }
-  
+
 //get specials price or sale price
   function google_get_products_special_price($product_id, $product_price, $specials_price_only = false) {
     global $db;
