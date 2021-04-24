@@ -142,8 +142,8 @@
           return $images_array;
       }
    
-    // writes out the code into the feed file
-    function google_base_fwrite($output='', $mode, $products_id = '') { // added products id for debugging
+    // writes out the code into the feed file: UNUSED!!
+    function google_base_fwrite($mode, $output = '', $products_id = '') { // added products id for debugging
       global $outfile;
       $output = implode("\n", $output);
       //if(strtolower(CHARSET) != 'utf-8') {
