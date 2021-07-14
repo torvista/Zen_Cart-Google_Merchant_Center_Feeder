@@ -15,7 +15,7 @@
   require(DIR_WS_CLASSES . 'google_base.php');
   include(DIR_WS_LANGUAGES . 'english/googlefroogle.php');
   $google_base = new google_base();
-  
+
   if ((int)GOOGLE_PRODUCTS_MAX_EXECUTION_TIME > 0) {
     ini_set('max_execution_time', (int)GOOGLE_PRODUCTS_MAX_EXECUTION_TIME); // change to whatever time you need
     set_time_limit((int)GOOGLE_PRODUCTS_MAX_EXECUTION_TIME); // change to whatever time you need
@@ -23,8 +23,8 @@
   if ((int)GOOGLE_PRODUCTS_MEMORY_LIMIT > 0) {
       ini_set('memory_limit', (int)GOOGLE_PRODUCTS_MEMORY_LIMIT . 'M');
   } // change to whatever you need
-  
-  $keepAlive = 100;  // perform a keep alive every x number of products  
+
+  $keepAlive = 100;  // perform a keep alive every x number of products
 
 // include shipping class
 if (GOOGLE_PRODUCTS_SHIPPING_METHOD === 'percategory') {//Numinix shipping module
@@ -54,12 +54,12 @@ define('GOOGLE_PRODUCTS_MAX_ADDITIONAL_IMAGES', 10);
 
 $anti_timeout_counter = 0; //for timeout issues as well as counting number of products processed
   define('NL', "<br>\n");
-  
+
   $stock_attributes = false;
   if (GOOGLE_PRODUCTS_SWITCH_STOCK_PLUGIN !== 'none') {//a 3rd party plugin is in use for attribute-stocks
     $stock_attributes = true;
   }
-  
+
   // process parameters
   $parameters = explode('_', $_GET['feed']); // ?feed=fy_uy_tp
   $feed_parameter = $parameters[0];
@@ -102,7 +102,7 @@ if ($start >= $limit) {
   if (GOOGLE_PRODUCTS_MAGIC_SEO_URLS === 'true') {
     require_once(DIR_WS_CLASSES . 'msu_ao.php');
     include(DIR_WS_INCLUDES . 'modules/msu_ao_1.php');
-  }  
+  }
   ob_start();
   $product_url_add = (GOOGLE_PRODUCTS_LANGUAGE_DISPLAY === 'true' && $languages->RecordCount() > 0 ? "&language=" . $languages->fields['code'] : '') . (GOOGLE_PRODUCTS_CURRENCY_DISPLAY === 'true' ? "&currency=" . GOOGLE_PRODUCTS_CURRENCY : '');
   //require(DIR_WS_LANGUAGES . $languages->fields['directory'] .'/googlefroogle.php');
@@ -158,7 +158,7 @@ if (isset($feed) && $feed === "yes") {
 
       <?php
     $stimer_feed = $google_base->microtime_float();
-    
+
     $dom = new DOMDocument('1.0', 'utf-8');
     $rss = $dom->createElement('rss');
     $rss->setAttribute('version', '2.0');
@@ -171,7 +171,7 @@ if (isset($feed) && $feed === "yes") {
     $channel->appendChild($title);
     $channel->appendChild($link);
     $channel->appendChild($channel_description);
-          
+
     $additional_attributes = '';
     $additional_tables = '';
     $gb_map_enabled = false;
@@ -184,7 +184,7 @@ if (isset($feed) && $feed === "yes") {
       case "products":
 
           // upc
-          if (GOOGLE_PRODUCTS_ASA_UPC === 'true') {
+          if (GOOGLE_PRODUCTS_ASA_UPC === 'true') {//Numix Additional Product Fields
               $additional_attributes .= ", p.products_upc, p.products_isbn, p.products_ean";
           }
           // description 2
@@ -235,8 +235,8 @@ if (isset($feed) && $feed === "yes") {
                              AND p.product_is_call <> 1
                              AND p.product_is_free <> 1
                              AND pd.language_id = " . (int)$languages->fields['languages_id'] . "
-                             AND (p.products_image IS NOT NULL 
-                             OR p.products_image != '' 
+                             AND (p.products_image IS NOT NULL
+                             OR p.products_image != ''
                              OR p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "')
                            ORDER BY " . $order_by);
 
@@ -255,7 +255,7 @@ if (isset($feed) && $feed === "yes") {
               $sql_limit = ' LIMIT ' . $limit;
               $sql_offset = $start > 1 ? ' OFFSET ' . ($start-1) : '';
           }
-          
+
           //ORIGINAl was based on distinct pd.name
           $products_query = "SELECT " . $select . ", pd.products_description, p.products_image, p.products_tax_class_id, p.products_price_sorter, p.products_priced_by_attribute, p.products_type, GREATEST(p.products_date_added, IFNULL(p.products_last_modified, 0), IFNULL(p.products_date_available, 0)) AS base_date, p.products_date_available, m.manufacturers_name, p.products_quantity, pt.type_handler, p.products_weight" . $additional_attributes . "
                            FROM " . TABLE_PRODUCTS . " p
@@ -268,8 +268,8 @@ if (isset($feed) && $feed === "yes") {
                              AND p.product_is_call <> 1
                              AND p.product_is_free <> 1
                              AND pd.language_id = " . (int)$languages->fields['languages_id'] . "
-                             AND (p.products_image IS NOT NULL 
-                             OR p.products_image != '' 
+                             AND (p.products_image IS NOT NULL
+                             OR p.products_image != ''
                              OR p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "')
                            ORDER BY " . $order_by . $sql_limit . $sql_offset;
 
@@ -332,7 +332,7 @@ if (isset($feed) && $feed === "yes") {
             $price = zen_add_tax($price, $tax_rate);
             // modify price to match defined currency
             $price = $currencies->value($price, true, GOOGLE_PRODUCTS_CURRENCY, $currencies->get_value(GOOGLE_PRODUCTS_CURRENCY));
-                          
+
             $products_description = $products->fields['products_description'];
             //Numinix Product Fields additional description
             if (GOOGLE_PRODUCTS_ASA_DESCRIPTION_2 === 'true') {
@@ -350,7 +350,7 @@ if (isset($feed) && $feed === "yes") {
         if ( (GOOGLE_PRODUCTS_META_TITLE === 'true') && ($products->fields['metatags_title'] !== '') ) {
               $productstitle = $google_base->google_base_xml_sanitizer($products->fields['metatags_title']);
             } else {
-              $productstitle = $google_base->google_base_xml_sanitizer($products->fields['products_name']); 
+              $productstitle = $google_base->google_base_xml_sanitizer($products->fields['products_name']);
             }
         $productstitle = zen_trunc_string($productstitle, GOOGLE_PRODUCTS_MAX_CHARS_TITLE, true);
 
@@ -360,10 +360,10 @@ if (isset($feed) && $feed === "yes") {
 //todo add error formatting to this array to remove error texts
               $product_data = [
                   $products->fields['products_id'],
-                  $products->fields['products_model'], 
-                  $productstitle, 
-                  zen_trunc_string($products_description, 30, true), 
-                  strlen($products_description), 
+                  $products->fields['products_model'],
+                  $productstitle,
+                  zen_trunc_string($products_description, 30, true),
+                  strlen($products_description),
                   round($price, 2),
                   $position
               ];//todo format currency?
@@ -390,7 +390,7 @@ if (isset($feed) && $feed === "yes") {
                 echo ' | <span class="errorText"><b>defined image not found:</b> "' .  DIR_WS_IMAGES . $products->fields['products_image'] . '"</span>';//todo: make it skipped...but it is a db error to be fixed by user
             }
             }
-            $default_google_product_category = $google_base->google_base_xml_sanitizer(GOOGLE_PRODUCTS_DEFAULT_PRODUCT_CATEGORY); 
+            $default_google_product_category = $google_base->google_base_xml_sanitizer(GOOGLE_PRODUCTS_DEFAULT_PRODUCT_CATEGORY);
 
         if (GOOGLE_PRODUCTS_MAGIC_SEO_URLS === 'true') {
               include(DIR_WS_INCLUDES . 'modules/msu_ao_2.php'); 
@@ -409,7 +409,7 @@ if (isset($feed) && $feed === "yes") {
                 case 'UPC':
                   if ($products->fields['products_upc']) {
                     $id = $products->fields['products_upc'];
-                    break; 
+                    break;
                   }
                 case 'ISBN':
                   if ($products->fields['products_isbn']) {
@@ -426,7 +426,7 @@ if (isset($feed) && $feed === "yes") {
                 default:
                   $id = $products->fields['products_id'];
                   break;
-              } 
+              }
             }
 
             if (GOOGLE_PRODUCTS_PRODUCT_TYPE === 'default' && GOOGLE_PRODUCTS_DEFAULT_PRODUCT_TYPE !== '') {
@@ -445,7 +445,7 @@ if (isset($feed) && $feed === "yes") {
                 $full_path = implode(",", $product_type);
                 $product_type = htmlentities($full_path);
               }
-            }            
+            }
             if ((strlen($products_description) >= 15)) {
               // check if product has attributes
               if (zen_has_product_attributes($products->fields['products_id'], false)) {
@@ -457,7 +457,7 @@ if (isset($feed) && $feed === "yes") {
                     $stock_attributes = $db->Execute("SELECT stock_id, quantity FROM " . TABLE_PRODUCTS_VARIANTS_ATTRIBUTES_STOCK . "
                                                     WHERE products_id = " . $products->fields['products_id'] . "
                                                     ORDER BY stock_id");
-                    
+
                   } else {
                     $stock_attributes = $db->Execute("SELECT stock_id, stock_attributes, quantity FROM " . TABLE_PRODUCTS_WITH_ATTRIBUTES_STOCK . "
                                                     WHERE products_id = " . $products->fields['products_id'] . "
@@ -494,9 +494,9 @@ if (isset($feed) && $feed === "yes") {
                       $google_product_category_check = false;
                       foreach($attribute_ids as $attribute_id) {
                         $options = $db->Execute("SELECT po.products_options_name, pov.products_options_values_name, pa.options_values_price, pa.price_prefix, pa.products_attributes_weight, pa.products_attributes_weight_prefix FROM " . TABLE_PRODUCTS_ATTRIBUTES . " pa
-                                                 LEFT JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov ON (pov.products_options_values_id = pa.options_values_id) 
+                                                 LEFT JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov ON (pov.products_options_values_id = pa.options_values_id)
                                                  LEFT JOIN " . TABLE_PRODUCTS_OPTIONS . " po ON (po.products_options_id = pa.options_id)
-                                                 WHERE pa.products_attributes_id = " . (int)$attribute_id . " 
+                                                 WHERE pa.products_attributes_id = " . (int)$attribute_id . "
                                                  LIMIT 1;");
 
                         // create variants
@@ -516,9 +516,9 @@ if (isset($feed) && $feed === "yes") {
                               }
                               $variants_title .= ' ' . $google_base->google_base_xml_sanitizer($options->fields['products_options_values_name']);
                             }
-                            
+
                             $custom_fields[$options_name] = strtolower($google_base->google_base_xml_sanitizer($options->fields['products_options_values_name']));
-                             
+
                             if ($options->fields['price_prefix'] === '-') {
                               $variants_price-= $options->fields['options_values_price'];
                             } else {
@@ -532,7 +532,7 @@ if (isset($feed) && $feed === "yes") {
                             }
                             $variants_quantity = $stock_attributes->fields['quantity'];
                           }
-                        } 
+                        }
                       }
                       if ($variant === false) {
                         // no matching variants found, move to next stock combination
@@ -619,7 +619,7 @@ if (isset($feed) && $feed === "yes") {
                         }
                         $stock_attributes->MoveNext();
                     }
-                  }  
+                  }
                 }
                 // if no variants
                 if ( ($sba_failed || !$stock_attributes) && $price > 0) {
@@ -638,9 +638,9 @@ if (isset($feed) && $feed === "yes") {
                     $custom_fields = [];
                     foreach($attribute_ids as $attribute_id) {
                       $options = $db->Execute("SELECT po.products_options_name, pov.products_options_values_name FROM " . TABLE_PRODUCTS_ATTRIBUTES . " pa
-                                               LEFT JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov ON (pov.products_options_values_id = pa.options_values_id) 
+                                               LEFT JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov ON (pov.products_options_values_id = pa.options_values_id)
                                                LEFT JOIN " . TABLE_PRODUCTS_OPTIONS . " po ON (po.products_options_id = pa.options_id)
-                                               WHERE pa.products_attributes_id = " . (int)$attribute_id . " 
+                                               WHERE pa.products_attributes_id = " . (int)$attribute_id . "
                                                LIMIT 1;");
                       if ($options->RecordCount() > 0 && in_array(strtolower($options->fields['products_options_name']), ['color', 'colour', 'material', 'pattern', 'size', 'age group', 'gender', 'google product category', 'upc', 'ean', 'isbn'])) {
                         $options_name = str_replace(' ', '_', strtolower($options->fields['products_options_name']));
@@ -650,7 +650,7 @@ if (isset($feed) && $feed === "yes") {
                           $options_name = 'color';
                         }
                         $custom_fields[$options_name] = strtolower($google_base->google_base_xml_sanitizer($options->fields['products_options_values_name']));
-                      } 
+                      }
                     }
                   }
                   $item = $google_base->create_regular_product($products, $dom);
@@ -659,14 +659,14 @@ if (isset($feed) && $feed === "yes") {
                     $options_values_name->appendChild($dom->createCDATASection($fieldValue));
                     $item->appendChild($options_values_name);
                   }
-                  // add universal elements/attributes to products                                         
+                  // add universal elements/attributes to products
                   $item = $google_base->universal_attributes($products, $item, $dom);
                   // finalize item
                   $channel->appendChild($item);
                   $anti_timeout_counter++;
                   if (GOOGLE_PRODUCTS_DEBUG === 'true') {
                     $success = true;
-                  } 
+                  }
                 }
               // if product doesn't have attributes, create a regular item without attributes
               } elseif ($price > 0) {
@@ -674,12 +674,12 @@ if (isset($feed) && $feed === "yes") {
                   $success = true;
                 }
                 $item = $google_base->create_regular_product($products, $dom);
-                // add universal elements/attributes to products                                         
+                // add universal elements/attributes to products
                 $item = $google_base->universal_attributes($products, $item, $dom);
                 // finalize item
                 $channel->appendChild($item);
                 $anti_timeout_counter++;
-              } 
+              }
             }
             if (GOOGLE_PRODUCTS_DEBUG === 'true') {
               if ($success) {
@@ -712,10 +712,10 @@ if (isset($feed) && $feed === "yes") {
                 $gz = gzopen("$outfile", 'w9'); // todo, in quotes?? Open file for writing, 0 (no) to 9 (maximum) compression
           gzwrite($gz, $data, strlen($data)); // Write compressed file
           gzclose($gz); // Close file handler
-        } 
+        }
       break;
     }
-    
+
     $timer_feed = $google_base->microtime_float()-$stimer_feed; ?>
     <p><?php echo sprintf(TEXT_GOOGLE_PRODUCTS_FEED_RECORDS, $anti_timeout_counter, $products->RecordCount(), $products->RecordCount() - $anti_timeout_counter); ?><br>
         <?php echo sprintf(TEXT_GOOGLE_PRODUCTS_FEED_COMPLETE, number_format($timer_feed, 1)); ?></p>
