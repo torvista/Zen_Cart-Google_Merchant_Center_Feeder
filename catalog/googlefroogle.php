@@ -626,7 +626,7 @@ if (isset($feed) && $feed === "yes") {
                   // product still has attributes
                   $attribute_ids = [];
                   // add attributes to the array
-                  $attributes = $db->Execute("SELECT products_attributes_id FROM " . TABLE_PRODUCTS_ATTRIBUTES . " WHERE products_id = " . $products->fields['products_id'] . " ORDER BY products_attributes_id ASC;");
+                  $attributes = $db->Execute("SELECT products_attributes_id FROM " . TABLE_PRODUCTS_ATTRIBUTES . " WHERE products_id = " . $products->fields['products_id'] . " ORDER BY products_attributes_id;");
                   if ($attributes->RecordCount() > 0) {
                     while (!$attributes->EOF) {
                       if (!in_array($attributes->fields['products_attributes_id'], $attribute_ids)) {
