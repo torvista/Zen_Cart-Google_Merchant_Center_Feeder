@@ -340,8 +340,8 @@ if (isset($feed) && $feed === "yes") {
             }
 
 //torvista: my site only, using boilerplate text!
-        if (function_exists('mv_get_boilerplate') && !empty($descr_stringlist)) {
-            $products_description = mv_get_boilerplate($products_description, $descr_stringlist, $products->fields['products_id']);
+        if (function_exists('mv_get_boilerplate') && !empty($boilerplate_array)) {
+            $products_description = mv_get_boilerplate($products_description, (int)$products->fields['products_id']);
         }
 //eof boilerplate text
 
