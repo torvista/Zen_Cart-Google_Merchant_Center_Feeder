@@ -10,7 +10,7 @@
  */
 
   class google_base {
-
+      protected $image_files;
       //public array $additional_images_array;//stores the additional images found, per-product, for re-use if that product id comes up again...when does that happen? DISABLED
       //public array $image_files; //stores the images per-directory to prevent re-scanning if that directory has already been scanned
 
