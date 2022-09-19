@@ -811,8 +811,8 @@
 // Specials and Tax Included
   function google_get_products_actual_price($products_id) {
     global $db, $currencies;
-    $product_check = $db->Execute("SELECT products_tax_class_id, products_price, products_priced_by_attribute, product_is_free, product_is_call 
-                                   FROM " . TABLE_PRODUCTS . " 
+    $product_check = $db->Execute("SELECT products_tax_class_id, products_price, products_priced_by_attribute, product_is_free, product_is_call
+                                   FROM " . TABLE_PRODUCTS . "
                                    WHERE products_id = '" . (int)$products_id . "'" . " LIMIT 1");
 
     $show_display_price = '';
@@ -843,20 +843,20 @@
 // computes products_price + option groups lowest attributes price of each group when on
   function google_get_products_base_price($products_id) {
     global $db;
-      $product_check = $db->Execute("SELECT products_price, products_priced_by_attribute 
-                                     FROM " . TABLE_PRODUCTS . " 
+      $product_check = $db->Execute("SELECT products_price, products_priced_by_attribute
+                                     FROM " . TABLE_PRODUCTS . "
                                      WHERE products_id = " . (int)$products_id);
 
 // is there a products_price to add to attributes
       $products_price = $product_check->fields['products_price'];
 
       // do not select display only attributes and attributes_price_base_included is true
-      $product_att_query = $db->Execute("SELECT options_id, price_prefix, options_values_price, attributes_display_only, attributes_price_base_included 
-                                         FROM " . TABLE_PRODUCTS_ATTRIBUTES . " 
-                                         WHERE products_id = " . (int)$products_id . " 
-                                         AND attributes_display_only != '1' 
-                                         AND attributes_price_base_included ='1' 
-                                         AND options_values_price > 0". " 
+      $product_att_query = $db->Execute("SELECT options_id, price_prefix, options_values_price, attributes_display_only, attributes_price_base_included
+                                         FROM " . TABLE_PRODUCTS_ATTRIBUTES . "
+                                         WHERE products_id = " . (int)$products_id . "
+                                         AND attributes_display_only != '1'
+                                         AND attributes_price_base_included ='1'
+                                         AND options_values_price > 0". "
                                          ORDER BY options_id, price_prefix, options_values_price");
       //echo $products_id . ' ';
       //print_r($product_att_query);
@@ -927,14 +927,14 @@
       $product_to_categories = $db->Execute("SELECT master_categories_id FROM " . TABLE_PRODUCTS . " WHERE products_id = " . (int)$product_id);
       $category = $product_to_categories->fields['master_categories_id'];
 
-      $sale = $db->Execute("SELECT sale_specials_condition, sale_deduction_value, sale_deduction_type 
-                            FROM " . TABLE_SALEMAKER_SALES . " 
-                            WHERE sale_categories_all 
-                            LIKE '%," . $category . ",%' 
-                            AND sale_status = '1' 
-                            AND (sale_date_start <= now() OR sale_date_start = '0001-01-01') 
-                            AND (sale_date_end >= now() OR sale_date_end = '0001-01-01') 
-                            AND (sale_pricerange_from <= '" . $product_price . "' OR sale_pricerange_from = '0') 
+      $sale = $db->Execute("SELECT sale_specials_condition, sale_deduction_value, sale_deduction_type
+                            FROM " . TABLE_SALEMAKER_SALES . "
+                            WHERE sale_categories_all
+                            LIKE '%," . $category . ",%'
+                            AND sale_status = '1'
+                            AND (sale_date_start <= now() OR sale_date_start = '0001-01-01')
+                            AND (sale_date_end >= now() OR sale_date_end = '0001-01-01')
+                            AND (sale_pricerange_from <= '" . $product_price . "' OR sale_pricerange_from = '0')
                             AND (sale_pricerange_to >= '" . $product_price . "' OR sale_pricerange_to = '0')");
 
       if ($sale->RecordCount() < 1) {
