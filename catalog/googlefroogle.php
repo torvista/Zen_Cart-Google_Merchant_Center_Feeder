@@ -238,7 +238,7 @@ if (isset($feed) && $feed === "yes") {
                              AND (p.products_image IS NOT NULL
                              OR p.products_image != ''
                              OR p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "')
-                           ORDER BY " . $order_by);
+                           GROUP BY " . $order_by);
 
           $products_all = $products_all->fields['products_max'];
 
