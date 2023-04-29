@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 /**
  * googlefroogle.php
  *
@@ -8,7 +9,8 @@ declare(strict_types=1);
  * @copyright Copyright 2003-2006 Zen Cart Development Team
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
- * @version $Id: googlefroogle.php 60 2011-05-31 21:18:45Z numinix $
+ * @version $Id: googlefroogle.php 2023 04 28 torvista $
+ * @author Numinix Technology
  */
 
 if (!function_exists('google_cfg_pull_down_currencies')){

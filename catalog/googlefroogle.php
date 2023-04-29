@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 /**
  * googlefroogle.php
  *
@@ -62,13 +63,13 @@ $anti_timeout_counter = 0; //for timeout issues as well as counting number of pr
     $stock_attributes = true;
   }
 
-  // process parameters
+  // process parameters: e.g.?feed=fn_uy_tp&upload_file=MYFILE_products_en.xml&key=eeb6cf1423
   $parameters = explode('_', $_GET['feed']); // ?feed=fy_uy_tp
-  $feed_parameter = $parameters[0];
+  $feed_parameter = $parameters[0]; // e.g. 'fn'
   $feed = $google_base->get_feed($feed_parameter);
-  $upload_parameter = $parameters[1];
+  $upload_parameter = $parameters[1]; // e.g. 'uy'
   $upload = $google_base->get_upload($upload_parameter);
-  $type_parameter = $parameters[2];
+  $type_parameter = $parameters[2]; // e.g. 'tp'
   $type = $google_base->get_type($type_parameter);
   $key = $_GET['key'];
   if ($key !== GOOGLE_PRODUCTS_KEY) {
@@ -118,13 +119,14 @@ if ($start >= $limit) {
         body {
             margin-left: 5px;
             font-family: Verdana, sans-serif;
-            font-size: small;
+            font-size: 11px;
         }
         h1 {
-            font-size: medium;
+            font-size: 12px;
         }
         .errorText {
             color: #ff0000;
+            font-weight: bold;
         }
     </style>
 <title>Google Merchant Feeder v<?php echo $google_base->google_base_version()?></title>
@@ -134,10 +136,11 @@ if ($start >= $limit) {
 <h1>Google Merchant Feeder v<?php echo $google_base->google_base_version()?></h1>
 <?php
 if (GOOGLE_PRODUCTS_DEBUG === 'true') {
+    echo 'GOOGLE_PRODUCTS_DEBUG=true (admin)<br>';
     $google_base->print_mem();
 } ?>
     <p><?php echo TEXT_GOOGLE_PRODUCTS_STARTED; ?></p>
-<p><?php echo TEXT_GOOGLE_PRODUCTS_FEED . (isset($feed) && $feed === 'yes' ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?><br>
+    <p><?php echo TEXT_GOOGLE_PRODUCTS_FEED . (isset($feed) && $feed === 'yes' ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?><br>
     <?php echo TEXT_GOOGLE_PRODUCTS_UPLOAD . (isset($upload) && $upload === 'yes' ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?></p>
 <?php
 //why both?  https://www.php.net/manual/en/function.flush.php
@@ -285,7 +288,7 @@ if (isset($feed) && $feed === 'yes') {
           }
 
 // sql limiters
-      /*ORIGINAL CODE for reference
+      /* ORIGINAL CODE for reference
           if ((int)GOOGLE_PRODUCTS_MAX_PRODUCTS > 0 || (isset($_GET['limit']) && (int)$_GET['limit'] > 0)) {
               $query_limit = (isset($_GET['limit']) && (int)$_GET['limit'] > 0) ? (int)$_GET['limit'] : (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
               $limit = ' LIMIT ' . $query_limit;
@@ -317,7 +320,7 @@ if (isset($feed) && $feed === 'yes') {
           echo '<p>' . TEXT_GOOGLE_PRODUCTS_PROCESSING . '</p>';
 
         $loop_count = 0; //for counting all products regardless of inclusion
-        while (!$products->EOF) { // run until end of file or until maximum number of products reached
+        while (!$products->EOF) { // run until end of file or until maximum number of products reached. Note IDE-detected closing/balance bracket may be incorrect.
             $loop_count++;
           /* BEGIN GLOBAL ELEMENTS USED IN ALL ITEMS */
           // reset tax array
@@ -709,7 +712,7 @@ if (isset($feed) && $feed === 'yes') {
           ob_flush();
           flush();
           $products->MoveNext();
-        }
+        }  // end of product loop
         $rss->appendChild($channel);
         $dom->appendChild($rss);
         $dom->formatOutput = true;
@@ -741,6 +744,7 @@ if (isset($upload) && $upload === 'yes') {
         $upload_file = $outfile;//if no upload file was specified, use the file just created
     }
 
+    // FTP no longer supported 09 2023: SFTP instead
     if ($google_base->ftp_file_upload(GOOGLE_PRODUCTS_SERVER, GOOGLE_PRODUCTS_USERNAME, GOOGLE_PRODUCTS_PASSWORD, $upload_file)) {
         echo '<p>' . TEXT_GOOGLE_PRODUCTS_UPLOAD_OK . '</p>';
         $db->Execute('UPDATE ' . TABLE_CONFIGURATION . ' SET configuration_value = "' . date('Y/m/d H:i:s') . '" WHERE configuration_key = "' . GOOGLE_PRODUCTS_UPLOADED_DATE . '"');

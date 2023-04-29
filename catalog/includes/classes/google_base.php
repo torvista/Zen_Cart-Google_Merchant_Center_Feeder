@@ -22,7 +22,7 @@ class google_base
      * @param $product_id
      * @return array
      */
-    public function additional_images($product_main_image, $product_id): array
+    private function additional_images($product_main_image, $product_id): array
     {
         $debug_additional_images = false;//verbose step-by-step processing output for dummies
 
@@ -153,7 +153,7 @@ class google_base
      * @param string $products_id
      * @return void
      */
-    public function google_base_fwrite($mode, string $output = '', string $products_id = '')
+    private function google_base_fwrite($mode, string $output = '', string $products_id = '')
     { // added products id for debugging
         global $outfile;
         $output = implode("\n", $output); //todo change to PHP_EOL?
@@ -185,7 +185,7 @@ class google_base
      * @param $x
      * @return array|string
      */
-    public function trim_array($x)
+    private function trim_array($x)
     {
         if (is_array($x)) {
             return array_map('trim_array', $x);
@@ -277,7 +277,7 @@ class google_base
      * @param $products_id
      * @return bool
      */
-    public function included_categories_check($categories_list, $products_id): bool
+    private function included_categories_check($categories_list, $products_id): bool
     {
         if ($categories_list === '') {
             return true;
@@ -300,7 +300,7 @@ class google_base
      * @param $products_id
      * @return bool
      */
-    public function excluded_categories_check($categories_list, $products_id): bool
+    private function excluded_categories_check($categories_list, $products_id): bool
     {
         if ($categories_list === '') {
             return false;
@@ -324,7 +324,7 @@ class google_base
      * @param $products_id
      * @return bool
      */
-    public function included_manufacturers_check($manufacturers_list, $products_id): bool
+    private function included_manufacturers_check($manufacturers_list, $products_id): bool
     {
         if ($manufacturers_list === '') {
             return true;
@@ -343,7 +343,7 @@ class google_base
      * @param $products_id
      * @return bool
      */
-    public function excluded_manufacturers_check($manufacturers_list, $products_id): bool
+    private function excluded_manufacturers_check($manufacturers_list, $products_id): bool
     {
         if ($manufacturers_list === '') {
             return false;
@@ -414,7 +414,7 @@ class google_base
      * @param array $cats
      * @return array|mixed
      */
-    public function google_base_category_tree(string $id_parent = '0', string $cPath = '', string $cName = '', array $cats = [])
+    private function google_base_category_tree(string $id_parent = '0', string $cPath = '', string $cName = '', array $cats = [])
     {
         global $db, $languages;
         $cat = $db->Execute(
@@ -539,7 +539,8 @@ class google_base
         if ($product_type) {
             $item->appendChild($dom->createElement('g:product_type', $product_type));
         }
-        if ($products->fields['products_image'] !== '' && file_exists(DIR_WS_IMAGES . $products->fields['products_image'])) {
+       //steve createElement chokes on an ampersand
+        if ($products->fields['products_image'] !== '' && file_exists(DIR_WS_IMAGES . $products->fields['products_image']) && (!str_contains($products->fields['products_image'], '&'))) {
             $item->appendChild($dom->createElement('g:image_link', $this->google_base_image_url($products->fields['products_image'])));
             $additional_images = $this->additional_images($products->fields['products_image'], $products->fields['products_id']);
             if (is_array($additional_images) && count($additional_images) > 0) {
@@ -606,7 +607,7 @@ class google_base
      * @param $rt
      * @return string
      */
-    public function google_base_sanita($str, $rt = false): string
+    private function google_base_sanita($str, $rt = false): string
     {
         //global $products;
         $str = str_replace(["\r\n", "\r", "\n", '&nbsp;', '’'], [' ', ' ', ' ', ' ', "'"], $str);
@@ -668,7 +669,7 @@ class google_base
      * @param $cp1252
      * @return string
      */
-    public function transcribe_cp1252_to_latin1($cp1252): string
+    private function transcribe_cp1252_to_latin1($cp1252): string
     {
         return strtr(
             $cp1252,
@@ -715,7 +716,7 @@ class google_base
      * @param $products_image
      * @return array|string|string[]
      */
-    public function google_base_image_url($products_image)
+    private function google_base_image_url($products_image)
     {
         if ($products_image === '') {
             return '';
@@ -760,7 +761,7 @@ class google_base
      * @param $article_id
      * @return array|mixed|string|string[]|null
      */
-    public function google_base_news_link($article_id)
+    private function google_base_news_link($article_id)
     {
         $link = zen_href_link(FILENAME_NEWS_ARTICLE, 'article_id=' . (int)$article_id . $product_url_add, 'NONSSL', false);
         return $link;
@@ -770,7 +771,7 @@ class google_base
      * @param $base_date
      * @return false|string
      */
-    public function google_base_expiration_date($base_date)
+    private function google_base_expiration_date($base_date)
     {
         if (GOOGLE_PRODUCTS_EXPIRATION_BASE === 'now') {
             $expiration_date = time();
@@ -891,7 +892,7 @@ class google_base
      * @param $products_price
      * @return float|int|mixed
      */
-    public function numinix_table_rate($products_weight, $products_price)
+    private function numinix_table_rate($products_weight, $products_price)
     {//Zen Cart shipping method: table
         global $currencies;
 
@@ -929,7 +930,7 @@ class google_base
      * @param $table_zone
      * @return mixed
      */
-    public function numinix_zones_table_rate($products_weight, $table_zone)
+    private function numinix_zones_table_rate($products_weight, $table_zone)
     {//Plugin: Zones Table Rate (for Multiple Zones) https://www.zen-cart.com/downloads.php?do=file&id=478
         global $currencies;
 
@@ -963,7 +964,7 @@ class google_base
      * @param $table_zone
      * @return float|int|mixed
      */
-    public function numinix_zones_rate($products_weight, $products_price, $table_zone)
+    private function numinix_zones_rate($products_weight, $products_price, $table_zone)
     {//Zen Cart shipping method: zones
         global $currencies;
 
@@ -1003,7 +1004,7 @@ class google_base
      * @param $string
      * @return array
      */
-    public function google_multi_explode($delim1, $delim2, $string): array
+    private function google_multi_explode($delim1, $delim2, $string): array
     {
         $new_data = [];
         $data = explode($delim1, $string);
@@ -1059,7 +1060,7 @@ class google_base
      * @param $products_id
      * @return int|mixed
      */
-    public function google_get_products_base_price($products_id)
+    private function google_get_products_base_price($products_id)
     {
         global $db;
         $product_check = $db->Execute(
@@ -1114,7 +1115,7 @@ class google_base
      * @param bool $specials_price_only
      * @return false|mixed|string
      */
-    public function google_get_products_special_price($product_id, $product_price, bool $specials_price_only = false)
+    private function google_get_products_special_price($product_id, $product_price, bool $specials_price_only = false)
     {
         global $db;
         $product = $db->Execute('SELECT products_price, products_model, products_priced_by_attribute FROM ' . TABLE_PRODUCTS . ' WHERE products_id = ' . (int)$product_id);
@@ -1233,10 +1234,9 @@ class google_base
      * @param string $ftp_dir
      * @param $ftp_file
      * @param bool $ssl
-     * @param int $ftp_mode
      * @return bool
      */
-    public function ftp_file_upload($url, $login, $password, $local_file, string $ftp_dir = '', $ftp_file = false, bool $ssl = false, int $ftp_mode = FTP_ASCII): bool
+    public function ftp_file_upload($url, $login, $password, $local_file, string $ftp_dir = '', $ftp_file = false, bool $ssl = false, $ftp_mode = FTP_ASCII): bool
     {
         $debug_ftp_file_upload = false;//verbose step-by-step processing output for dummiesº
 
@@ -1331,7 +1331,7 @@ class google_base
     /**
      * @return array|false|string|string[]
      */
-    public function ftp_get_error_from_ob()
+    private function ftp_get_error_from_ob()
     {
         $out = ob_get_clean();
         if ($out !== false) {//false if buffering not active
