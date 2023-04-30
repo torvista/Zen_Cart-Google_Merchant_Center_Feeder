@@ -77,7 +77,7 @@ if (isset($_GET['action']) && ($_GET['action'] === 'delete')) {
   }
   zen_redirect(zen_href_link(FILENAME_GOOGLEFROOGLE));
 }
-// sticky limit: TODO not working yet, need to add parms to js reload with form submission
+// sticky limit: TODO not working yet, need to add parameters to the js reload after the form submission
 $limit = !empty($_GET['limit']) ? (int)$_GET['limit'] : (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
 // sticky offset
 $start = !empty($_GET['start']) ? (int)$_GET['start'] : (int)GOOGLE_PRODUCTS_START_PRODUCTS;
@@ -153,7 +153,6 @@ function processLoading(text) {
 }
 //--></script>
 <style>
-  /*label{display:block;width:200px;float:left;}*/
             .limiters {
                 width: 100px;
             }
@@ -218,7 +217,7 @@ function processLoading(text) {
         $popup_width = 400;
         $popup_height = 400;
     } ?>
-    <?php // The form action executes the script in the shop root in a popup window, and also reloads the admin page after a delay so it can find/list the newly-created file in the table ?>
+    <?php // The form action executes the script in the shop root in a popup window, and also reloads the admin page after a delay so it can find the newly-created file and list it in the table ?>
       <form method="get" action="<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . '.php'; ?>" name="google" target="googlefeed" onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=<?php echo $popup_width; ?>, height=<?php echo $popup_height; ?>, top=5, left=25, scrollbars=yes');
           setTimeout('location.reload();', 5000);">
         <?php // the code only supports products, so the selections previously offered below are unused/commented out ?>
