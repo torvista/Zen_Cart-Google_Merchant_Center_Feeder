@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * googlefroogle.php
  *
@@ -7,7 +10,7 @@
  * @copyright Portions Copyright 2003-2006 Zen Cart Development Team
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
- * @version $Id: googlefroogle.php 67 2011-09-15 19:26:39Z numinix $
+ * @version $Id: googlefroogle.php 2023 04 28 torvista $
  * @author Numinix Technology
  */
 
@@ -17,7 +20,7 @@
   $google_base = new google_base();
 
   if ((int)GOOGLE_PRODUCTS_MAX_EXECUTION_TIME > 0) {
-    ini_set('max_execution_time', (int)GOOGLE_PRODUCTS_MAX_EXECUTION_TIME); // change to whatever time you need
+    ini_set('max_execution_time', GOOGLE_PRODUCTS_MAX_EXECUTION_TIME); // change to whatever time you need
     set_time_limit((int)GOOGLE_PRODUCTS_MAX_EXECUTION_TIME); // change to whatever time you need
   }
   if ((int)GOOGLE_PRODUCTS_MEMORY_LIMIT > 0) {
@@ -60,19 +63,19 @@ $anti_timeout_counter = 0; //for timeout issues as well as counting number of pr
     $stock_attributes = true;
   }
 
-  // process parameters
+  // process parameters: e.g.?feed=fn_uy_tp&upload_file=MYFILE_products_en.xml&key=eeb6cf1423
   $parameters = explode('_', $_GET['feed']); // ?feed=fy_uy_tp
-  $feed_parameter = $parameters[0];
+  $feed_parameter = $parameters[0]; // e.g. 'fn'
   $feed = $google_base->get_feed($feed_parameter);
-  $upload_parameter = $parameters[1];
+  $upload_parameter = $parameters[1]; // e.g. 'uy'
   $upload = $google_base->get_upload($upload_parameter);
-  $type_parameter = $parameters[2];
+  $type_parameter = $parameters[2]; // e.g. 'tp'
   $type = $google_base->get_type($type_parameter);
   $key = $_GET['key'];
   if ($key !== GOOGLE_PRODUCTS_KEY) {
       exit('<p>Incorrect key supplied!</p>');
   }
-  $languages_query = "SELECT code, languages_id, directory FROM " . TABLE_LANGUAGES . " WHERE languages_id = " . (int)GOOGLE_PRODUCTS_LANGUAGE . " LIMIT 1";
+  $languages_query = 'SELECT code, languages_id, directory FROM ' . TABLE_LANGUAGES . ' WHERE languages_id = ' . (int)GOOGLE_PRODUCTS_LANGUAGE . ' LIMIT 1';
   $languages = $db->Execute($languages_query);
 
   if (isset($_GET['upload_file'])) {
@@ -104,7 +107,7 @@ if ($start >= $limit) {
     include(DIR_WS_INCLUDES . 'modules/msu_ao_1.php');
   }
   ob_start();
-  $product_url_add = (GOOGLE_PRODUCTS_LANGUAGE_DISPLAY === 'true' && $languages->RecordCount() > 0 ? "&language=" . $languages->fields['code'] : '') . (GOOGLE_PRODUCTS_CURRENCY_DISPLAY === 'true' ? "&currency=" . GOOGLE_PRODUCTS_CURRENCY : '');
+  $product_url_add = (GOOGLE_PRODUCTS_LANGUAGE_DISPLAY === 'true' && $languages->RecordCount() > 0 ? '&language=' . $languages->fields['code'] : '') . (GOOGLE_PRODUCTS_CURRENCY_DISPLAY === 'true' ? '&currency=' . GOOGLE_PRODUCTS_CURRENCY : '');
   //require(DIR_WS_LANGUAGES . $languages->fields['directory'] .'/googlefroogle.php');
 ?>
 <!DOCTYPE html>
@@ -116,13 +119,14 @@ if ($start >= $limit) {
         body {
             margin-left: 5px;
             font-family: Verdana, sans-serif;
-            font-size: small;
+            font-size: 11px;
         }
         h1 {
-            font-size: medium;
+            font-size: 12px;
         }
         .errorText {
             color: #ff0000;
+            font-weight: bold;
         }
     </style>
 <title>Google Merchant Feeder v<?php echo $google_base->google_base_version()?></title>
@@ -132,18 +136,19 @@ if ($start >= $limit) {
 <h1>Google Merchant Feeder v<?php echo $google_base->google_base_version()?></h1>
 <?php
 if (GOOGLE_PRODUCTS_DEBUG === 'true') {
+    echo 'GOOGLE_PRODUCTS_DEBUG=true (admin)<br>';
     $google_base->print_mem();
 } ?>
     <p><?php echo TEXT_GOOGLE_PRODUCTS_STARTED; ?></p>
-<p><?php echo TEXT_GOOGLE_PRODUCTS_FEED . (isset($feed) && $feed === "yes" ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?><br>
-    <?php echo TEXT_GOOGLE_PRODUCTS_UPLOAD . (isset($upload) && $upload === "yes" ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?></p>
+    <p><?php echo TEXT_GOOGLE_PRODUCTS_FEED . (isset($feed) && $feed === 'yes' ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?><br>
+    <?php echo TEXT_GOOGLE_PRODUCTS_UPLOAD . (isset($upload) && $upload === 'yes' ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?></p>
 <?php
 //why both?  https://www.php.net/manual/en/function.flush.php
 ob_flush();
 flush();
 
 //CREATE A FEED FILE
-if (isset($feed) && $feed === "yes") {
+if (isset($feed) && $feed === 'yes') {
 //check output file location permissions
     if (is_dir(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
       if (!is_writable(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
@@ -177,33 +182,33 @@ if (isset($feed) && $feed === "yes") {
     $gb_map_enabled = false;
 
     if (defined('GOOGLE_PRODUCTS_PAYMENT_METHODS') && GOOGLE_PRODUCTS_PAYMENT_METHODS !== '') {
-        $payments_accepted = explode(",", GOOGLE_PRODUCTS_PAYMENT_METHODS);
+        $payments_accepted = explode(',', GOOGLE_PRODUCTS_PAYMENT_METHODS);
     }
 
     switch($type) {//wot no documents or news?
-      case "products":
+      case 'products':
 
           // upc
           if (GOOGLE_PRODUCTS_ASA_UPC === 'true') {//Numix Additional Product Fields
-              $additional_attributes .= ", p.products_upc, p.products_isbn, p.products_ean";
+              $additional_attributes .= ', p.products_upc, p.products_isbn, p.products_ean';
           }
           // description 2
           if (GOOGLE_PRODUCTS_ASA_DESCRIPTION_2 === 'true') {
-              $additional_attributes .= ", pd.products_description2";
+              $additional_attributes .= ', pd.products_description2';
           }
 
           if (GOOGLE_PRODUCTS_MAP_PRICING === 'true') {
-              $additional_attributes .= ", p.map_price, p.map_enabled";
+              $additional_attributes .= ', p.map_price, p.map_enabled';
               $gb_map_enabled = true;
           }
 
           if (GOOGLE_PRODUCTS_META_TITLE === 'true') {
-              $additional_attributes .= ", mtpd.metatags_title";
-              $additional_tables .= " LEFT JOIN " . TABLE_META_TAGS_PRODUCTS_DESCRIPTION . " mtpd ON (p.products_id = mtpd.products_id) ";
+              $additional_attributes .= ', mtpd.metatags_title';
+              $additional_tables .= ' LEFT JOIN ' . TABLE_META_TAGS_PRODUCTS_DESCRIPTION . ' mtpd ON (p.products_id = mtpd.products_id) ';
           }
 
           if (GOOGLE_PRODUCTS_PRODUCT_CONDITION === 'true') {
-              $additional_attributes .= ", p.products_condition";
+              $additional_attributes .= ', p.products_condition';
           }
 
           switch ($_GET['feed_sort']) {
@@ -227,18 +232,19 @@ if (isset($feed) && $feed === "yes") {
                   break;
           }
 
-          $products_all = $db->Execute("SELECT COUNT(" . $count. ") as products_max
-                           FROM " . TABLE_PRODUCTS . " p
-                             LEFT JOIN " . TABLE_PRODUCTS_DESCRIPTION . " pd ON (p.products_id = pd.products_id)
+          $products_all = $db->Execute(
+              'SELECT COUNT(' . $count. ') as products_max
+                           FROM ' . TABLE_PRODUCTS . ' p
+                             LEFT JOIN ' . TABLE_PRODUCTS_DESCRIPTION . ' pd ON (p.products_id = pd.products_id)
                              WHERE p.products_status = 1
                              AND p.products_type <> 3
                              AND p.product_is_call <> 1
                              AND p.product_is_free <> 1
-                             AND pd.language_id = " . (int)$languages->fields['languages_id'] . "
+                             AND pd.language_id = ' . (int)$languages->fields['languages_id'] . '
                              AND (p.products_image IS NOT NULL
-                             OR p.products_image != ''
-                             OR p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "')
-                           GROUP BY " . $order_by);
+                             OR p.products_image != ""
+                             OR p.products_image != "' . PRODUCTS_IMAGE_NO_IMAGE . '")
+                           GROUP BY ' . $order_by);
 
           $products_all = $products_all->fields['products_max'];
 
@@ -257,21 +263,21 @@ if (isset($feed) && $feed === "yes") {
           }
 
           //ORIGINAl was based on distinct pd.name
-          $products_query = "SELECT " . $select . ", pd.products_description, p.products_image, p.products_tax_class_id, p.products_price_sorter, p.products_priced_by_attribute, p.products_type, p.master_categories_id, GREATEST(p.products_date_added, IFNULL(p.products_last_modified, 0), IFNULL(p.products_date_available, 0)) AS base_date, p.products_date_available, m.manufacturers_name, p.products_quantity, pt.type_handler, p.products_weight" . $additional_attributes . "
-                           FROM " . TABLE_PRODUCTS . " p
-                             LEFT JOIN " . TABLE_MANUFACTURERS . " m ON (p.manufacturers_id = m.manufacturers_id)
-                             LEFT JOIN " . TABLE_PRODUCTS_DESCRIPTION . " pd ON (p.products_id = pd.products_id)
-                             LEFT JOIN " . TABLE_PRODUCT_TYPES . " pt ON (p.products_type=pt.type_id)"
+          $products_query = 'SELECT ' . $select . ', pd.products_description, p.products_image, p.products_tax_class_id, p.products_price_sorter, p.products_priced_by_attribute, p.products_type, p.master_categories_id, GREATEST(p.products_date_added, IFNULL(p.products_last_modified, 0), IFNULL(p.products_date_available, 0)) AS base_date, p.products_date_available, m.manufacturers_name, p.products_quantity, pt.type_handler, p.products_weight' . $additional_attributes . '
+                           FROM ' . TABLE_PRODUCTS . ' p
+                             LEFT JOIN ' . TABLE_MANUFACTURERS . ' m ON (p.manufacturers_id = m.manufacturers_id)
+                             LEFT JOIN ' . TABLE_PRODUCTS_DESCRIPTION . ' pd ON (p.products_id = pd.products_id)
+                             LEFT JOIN ' . TABLE_PRODUCT_TYPES . ' pt ON (p.products_type=pt.type_id)'
               . $additional_tables .
-              " WHERE p.products_status = 1
+              ' WHERE p.products_status = 1
                              AND p.products_type <> 3
                              AND p.product_is_call <> 1
                              AND p.product_is_free <> 1
-                             AND pd.language_id = " . (int)$languages->fields['languages_id'] . "
+                             AND pd.language_id = ' . (int)$languages->fields['languages_id'] . '
                              AND (p.products_image IS NOT NULL
-                             OR p.products_image != ''
-                             OR p.products_image != '" . PRODUCTS_IMAGE_NO_IMAGE . "')
-                           ORDER BY " . $order_by . $sql_limit . $sql_offset;
+                             OR p.products_image != ""
+                             OR p.products_image != "' . PRODUCTS_IMAGE_NO_IMAGE . '")
+                           ORDER BY ' . $order_by . $sql_limit . $sql_offset;
 
           $products = $db->Execute($products_query);
           $products_count = $products->RecordCount();
@@ -282,7 +288,7 @@ if (isset($feed) && $feed === "yes") {
           }
 
 // sql limiters
-      /*ORIGINAL CODE for reference
+      /* ORIGINAL CODE for reference
           if ((int)GOOGLE_PRODUCTS_MAX_PRODUCTS > 0 || (isset($_GET['limit']) && (int)$_GET['limit'] > 0)) {
               $query_limit = (isset($_GET['limit']) && (int)$_GET['limit'] > 0) ? (int)$_GET['limit'] : (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
               $limit = ' LIMIT ' . $query_limit;
@@ -298,7 +304,7 @@ if (isset($feed) && $feed === "yes") {
 */
 
 //todo admin options for file limits and languages, if in use
-          $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . "_" . $type . "_" . $languages->fields['code'];
+          $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . '_' . $type . '_' . $languages->fields['code'];
 
           //todo review these suffixes
          /* $end_point = $products_all;
@@ -314,7 +320,7 @@ if (isset($feed) && $feed === "yes") {
           echo '<p>' . TEXT_GOOGLE_PRODUCTS_PROCESSING . '</p>';
 
         $loop_count = 0; //for counting all products regardless of inclusion
-        while (!$products->EOF) { // run until end of file or until maximum number of products reached
+        while (!$products->EOF) { // run until end of file or until maximum number of products reached. Note IDE-detected closing/balance bracket may be incorrect.
             $loop_count++;
           /* BEGIN GLOBAL ELEMENTS USED IN ALL ITEMS */
           // reset tax array
@@ -401,6 +407,7 @@ if (isset($feed) && $feed === "yes") {
             }
             if (GOOGLE_PRODUCTS_OFFER_ID !== 'false') {
               switch (GOOGLE_PRODUCTS_OFFER_ID) {
+                  //TODO what about the breaks positions?
                 case 'model':
                   if ($products->fields['products_model']) {
                     $id = $google_base->google_base_xml_sanitizer($products->fields['products_model']);
@@ -442,7 +449,7 @@ if (isset($feed) && $feed === "yes") {
                 $bottom_level = $product_type[count($product_type) + 1]; // sets last category in array as bottom-level
                 $product_type = htmlentities($bottom_level);
               } elseif (GOOGLE_PRODUCTS_PRODUCT_TYPE === 'full') {
-                $full_path = implode(",", $product_type);
+                $full_path = implode(',', $product_type);
                 $product_type = htmlentities($full_path);
               }
             }
@@ -454,14 +461,18 @@ if (isset($feed) && $feed === "yes") {
                 if ($stock_attributes) {//todo handle 3rd party plugins
                   // get attributes
                   if (GOOGLE_PRODUCTS_SWITCH_STOCK_PLUGIN === 'numinixproductvariants') {
-                    $stock_attributes = $db->Execute("SELECT stock_id, quantity FROM " . TABLE_PRODUCTS_VARIANTS_ATTRIBUTES_STOCK . "
-                                                    WHERE products_id = " . $products->fields['products_id'] . "
-                                                    ORDER BY stock_id");
+                    $stock_attributes = $db->Execute(
+                        'SELECT stock_id, quantity FROM ' . TABLE_PRODUCTS_VARIANTS_ATTRIBUTES_STOCK . '
+                                                    WHERE products_id = ' . (int)$products->fields['products_id'] . '
+                                                    ORDER BY stock_id'
+                    );
 
                   } else {
-                    $stock_attributes = $db->Execute("SELECT stock_id, stock_attributes, quantity FROM " . TABLE_PRODUCTS_WITH_ATTRIBUTES_STOCK . "
-                                                    WHERE products_id = " . $products->fields['products_id'] . "
-                                                    ORDER BY stock_id");
+                    $stock_attributes = $db->Execute(
+                        'SELECT stock_id, stock_attributes, quantity FROM ' . TABLE_PRODUCTS_WITH_ATTRIBUTES_STOCK . '
+                                                    WHERE products_id = ' . (int)$products->fields['products_id'] . '
+                                                    ORDER BY stock_id'
+                    );
                   }
                   if ($stock_attributes->RecordCount() > 0) {
                     // check for acceptable variant attributes
@@ -481,7 +492,7 @@ if (isset($feed) && $feed === "yes") {
                       }
                       $variant = false;
                       // add read only attributes to the array
-                      $attributes = $db->Execute("SELECT products_attributes_id FROM " . TABLE_PRODUCTS_ATTRIBUTES . " WHERE attributes_display_only = 1 AND products_id = " . $products->fields['products_id'] . " ORDER BY products_attributes_id");
+                      $attributes = $db->Execute('SELECT products_attributes_id FROM ' . TABLE_PRODUCTS_ATTRIBUTES . ' WHERE attributes_display_only = 1 AND products_id = ' . (int)$products->fields['products_id'] . ' ORDER BY products_attributes_id');
                       if ($attributes->RecordCount() > 0) {
                         while (!$attributes->EOF) {
                           if (!in_array($attributes->fields['products_attributes_id'], $attribute_ids)) {
@@ -493,11 +504,13 @@ if (isset($feed) && $feed === "yes") {
                       $custom_fields = [];
                       $google_product_category_check = false;
                       foreach($attribute_ids as $attribute_id) {
-                        $options = $db->Execute("SELECT po.products_options_name, pov.products_options_values_name, pa.options_values_price, pa.price_prefix, pa.products_attributes_weight, pa.products_attributes_weight_prefix FROM " . TABLE_PRODUCTS_ATTRIBUTES . " pa
-                                                 LEFT JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov ON (pov.products_options_values_id = pa.options_values_id)
-                                                 LEFT JOIN " . TABLE_PRODUCTS_OPTIONS . " po ON (po.products_options_id = pa.options_id)
-                                                 WHERE pa.products_attributes_id = " . (int)$attribute_id . "
-                                                 LIMIT 1;");
+                        $options = $db->Execute(
+                            'SELECT po.products_options_name, pov.products_options_values_name, pa.options_values_price, pa.price_prefix, pa.products_attributes_weight, pa.products_attributes_weight_prefix FROM ' . TABLE_PRODUCTS_ATTRIBUTES . ' pa
+                                                 LEFT JOIN ' . TABLE_PRODUCTS_OPTIONS_VALUES . ' pov ON (pov.products_options_values_id = pa.options_values_id)
+                                                 LEFT JOIN ' . TABLE_PRODUCTS_OPTIONS . ' po ON (po.products_options_id = pa.options_id)
+                                                 WHERE pa.products_attributes_id = ' . (int)$attribute_id . '
+                                                 LIMIT 1;'
+                        );
 
                         // create variants
                         if ($options->RecordCount() > 0 && in_array(strtolower($options->fields['products_options_name']), ['color', 'colour', 'material', 'pattern', 'size', 'age group', 'gender', 'google product category', 'upc', 'ean', 'isbn'])) { // require at least one to create a variant
@@ -626,7 +639,7 @@ if (isset($feed) && $feed === "yes") {
                   // product still has attributes
                   $attribute_ids = [];
                   // add attributes to the array
-                  $attributes = $db->Execute("SELECT products_attributes_id FROM " . TABLE_PRODUCTS_ATTRIBUTES . " WHERE products_id = " . $products->fields['products_id'] . " ORDER BY products_attributes_id;");
+                  $attributes = $db->Execute('SELECT products_attributes_id FROM ' . TABLE_PRODUCTS_ATTRIBUTES . ' WHERE products_id = ' . (int)$products->fields['products_id'] . ' ORDER BY products_attributes_id;');
                   if ($attributes->RecordCount() > 0) {
                     while (!$attributes->EOF) {
                       if (!in_array($attributes->fields['products_attributes_id'], $attribute_ids)) {
@@ -637,11 +650,13 @@ if (isset($feed) && $feed === "yes") {
                     $google_product_category_check = false;
                     $custom_fields = [];
                     foreach($attribute_ids as $attribute_id) {
-                      $options = $db->Execute("SELECT po.products_options_name, pov.products_options_values_name FROM " . TABLE_PRODUCTS_ATTRIBUTES . " pa
-                                               LEFT JOIN " . TABLE_PRODUCTS_OPTIONS_VALUES . " pov ON (pov.products_options_values_id = pa.options_values_id)
-                                               LEFT JOIN " . TABLE_PRODUCTS_OPTIONS . " po ON (po.products_options_id = pa.options_id)
-                                               WHERE pa.products_attributes_id = " . (int)$attribute_id . "
-                                               LIMIT 1;");
+                      $options = $db->Execute(
+                          'SELECT po.products_options_name, pov.products_options_values_name FROM ' . TABLE_PRODUCTS_ATTRIBUTES . ' pa
+                                               LEFT JOIN ' . TABLE_PRODUCTS_OPTIONS_VALUES . ' pov ON (pov.products_options_values_id = pa.options_values_id)
+                                               LEFT JOIN ' . TABLE_PRODUCTS_OPTIONS . ' po ON (po.products_options_id = pa.options_id)
+                                               WHERE pa.products_attributes_id = ' . (int)$attribute_id . '
+                                               LIMIT 1'
+                      );
                       if ($options->RecordCount() > 0 && in_array(strtolower($options->fields['products_options_name']), ['color', 'colour', 'material', 'pattern', 'size', 'age group', 'gender', 'google product category', 'upc', 'ean', 'isbn'])) {
                         $options_name = str_replace(' ', '_', strtolower($options->fields['products_options_name']));
                         if ($options_name == 'google_product_category') {
@@ -697,7 +712,7 @@ if (isset($feed) && $feed === "yes") {
           ob_flush();
           flush();
           $products->MoveNext();
-        }
+        }  // end of product loop
         $rss->appendChild($channel);
         $dom->appendChild($rss);
         $dom->formatOutput = true;
@@ -723,15 +738,16 @@ if (isset($feed) && $feed === "yes") {
 }
 
 //UPLOAD A FEED FILE
-if (isset($upload) && $upload === "yes") {
+if (isset($upload) && $upload === 'yes') {
 
     if ($upload_file === '') {
         $upload_file = $outfile;//if no upload file was specified, use the file just created
     }
 
+    // FTP no longer supported 09 2023: SFTP instead
     if ($google_base->ftp_file_upload(GOOGLE_PRODUCTS_SERVER, GOOGLE_PRODUCTS_USERNAME, GOOGLE_PRODUCTS_PASSWORD, $upload_file)) {
         echo '<p>' . TEXT_GOOGLE_PRODUCTS_UPLOAD_OK . '</p>';
-        $db->execute("UPDATE " . TABLE_CONFIGURATION . " SET configuration_value = '" . date("Y/m/d H:i:s") . "' WHERE configuration_key = 'GOOGLE_PRODUCTS_UPLOADED_DATE'");
+        $db->Execute('UPDATE ' . TABLE_CONFIGURATION . ' SET configuration_value = "' . date('Y/m/d H:i:s') . '" WHERE configuration_key = "' . GOOGLE_PRODUCTS_UPLOADED_DATE . '"');
     } else {
         echo '<p class="errorText">' . TEXT_GOOGLE_PRODUCTS_UPLOAD_FAILED . '</p>';
     }
