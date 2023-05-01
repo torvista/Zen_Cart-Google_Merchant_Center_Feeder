@@ -134,7 +134,7 @@ var req, name;
 function loadFroogleXMLDoc(request,field, loading) {
 
    name = field;
-   var url="<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . '.php?' ?>"+request;
+   var url="<?= HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . '.php?'; ?>"+request;
    // Internet Explorer
    try { req = new ActiveXObject("Msxml2.XMLHTTP"); }
    catch(e) {
@@ -202,7 +202,7 @@ function processLoading(text) {
 <div class="container-fluid">
       <!-- body_text //-->
       <div class="row">
-     <h1><?php echo HEADING_TITLE. ' ' . GOOGLE_PRODUCTS_VERSION; ?></h1>
+     <h1><?= HEADING_TITLE. ' ' . GOOGLE_PRODUCTS_VERSION; ?></h1>
     <br>
     <?php
  //check output file location permissions
@@ -229,31 +229,33 @@ function processLoading(text) {
         $popup_height = 400;
     } ?>
     <?php // The form action executes the script in the shop root in a popup window, and also reloads the admin page after a delay so it can find the newly-created file and list it in the table ?>
-      <form method="get" action="<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . '.php'; ?>" name="google" target="googlefeed" onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=<?php echo $popup_width; ?>, height=<?php echo $popup_height; ?>, top=5, left=25, scrollbars=yes');
-          setTimeout('location.reload();', 5000);">
-        <?php // the code only supports products, so the selections previously offered below are unused/commented out ?>
-        <!--<label for="feed"><?php //echo TEXT_FEED_TYPE ?></label>
-        <select name="feed" id="feed">
-          <option value="fy_un_tp"><?php //echo TEXT_FEED_PRODUCTS ?></option>
-          <option value="fy_un_td"><?php //echo TEXT_FEED_DOCUMENTS ?></option>
-          <option value="fy_un_tn"><?php //echo TEXT_FEED_NEWS ?></option>
-        </select>
-        <br>-->
-        <?php echo zen_draw_hidden_field('feed', 'fy_un_tp'); //this replaces the options above ?>
-        <label for="limit"><?php echo TEXT_ENTRY_LIMIT; ?></label>
-        <?php echo zen_draw_input_field('limit', $limit, 'class="limiters" id="limit"');
-        $total_products = $db->Execute('SELECT COUNT(*) FROM ' . TABLE_PRODUCTS);
-        echo '(total ' . $total_products->fields['COUNT(*)'] . ')';
-        ?>
-        <br>
-        <label for="start"><?php echo TEXT_ENTRY_OFFSET; ?></label>
-        <?php echo zen_draw_input_field('start', $start, 'class="limiters" id="start"'); ?>
-        <br>
-<?php //todo use this to change default and remove configuration switch ?>
-          <div title="<?php echo TEXT_FEED_SORT_TITLE . GOOGLE_PRODUCTS_FEED_SORT; ?>"><b><?php echo TEXT_FEED_ORDER_BY; ?></b>
-              <label><?php echo TEXT_FEED_ID . zen_draw_radio_field('feed_sort', 'id', GOOGLE_PRODUCTS_FEED_SORT === 'ID'); ?></label>
-              <label><?php echo TEXT_FEED_MODEL . zen_draw_radio_field('feed_sort', 'model', GOOGLE_PRODUCTS_FEED_SORT === 'Model'); ?></label>
-              <label><?php echo TEXT_FEED_NAME . zen_draw_radio_field('feed_sort', 'name', GOOGLE_PRODUCTS_FEED_SORT === 'Name'); ?></label>
+      <form method="get" action="<?= HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . '.php'; ?>" name="google" target="googlefeed" onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=<?= $popup_width; ?>, height=<?= $popup_height; ?>, top=15, left=35, scrollbars=yes');setTimeout('location.reload();', 5000);">
+        <?php echo zen_draw_hidden_field('feed', 'fy_un_tp'); //this replaces the original Products option ?>
+        <?php echo zen_draw_hidden_field('languageAdmin', $_SESSION['language']); // pass the currently selected Admin language to the popup, but not affect the shopfront selected language ?>
+          <label for="limit" class="control-label"><?= TEXT_ENTRY_LIMIT . zen_draw_input_field('limit', $limit, 'class="limiters" id="limit"');
+          //get total number of valid products that may be submitted
+              $products_total = $db->Execute(
+                  'SELECT COUNT(p.products_id) as products_total
+                           FROM ' . TABLE_PRODUCTS . ' p
+                             WHERE p.products_status = 1
+                             AND p.products_type <> 3
+                             AND p.product_is_call <> 1
+                             AND p.product_is_free <> 1
+                             AND (p.products_image IS NOT NULL
+                             OR p.products_image != ""
+                             OR p.products_image != "' . PRODUCTS_IMAGE_NO_IMAGE . '")'
+              );
+              $products_total = $products_total->fields['products_total']; ?>
+        </label> (total valid products <?= $products_total; ?>)<br>
+        <label for="start" class="control-label"><?= TEXT_ENTRY_OFFSET . zen_draw_input_field('start', $start, 'class="limiters" id="start"'); ?></label><br>
+
+<?php //todo use this to change the default and relocate the configuration switch GOOGLE_PRODUCTS_FEED_SORT to gID=6 ?>
+          <div title="<?= TEXT_FEED_SORT_TITLE . GOOGLE_PRODUCTS_FEED_SORT; ?>">
+              <p class="control-label"><?= TEXT_FEED_ORDER_BY; ?></p>
+              <label class="control-label"><?= TEXT_FEED_ID . zen_draw_radio_field('feed_sort', 'id', GOOGLE_PRODUCTS_FEED_SORT === 'ID', 'class="form-control"'); ?></label><br>
+              <label class="control-label"><?= TEXT_FEED_MODEL . zen_draw_radio_field('feed_sort', 'model', GOOGLE_PRODUCTS_FEED_SORT === 'Model', 'class="form-control"'); ?></label><br>
+              <label class="control-label"><?= TEXT_FEED_NAME . zen_draw_radio_field('feed_sort', 'name', GOOGLE_PRODUCTS_FEED_SORT === 'Name', 'class="form-control"'); ?></label><br>
+              <label class="control-label"><?= TEXT_FEED_DATE . zen_draw_radio_field('feed_sort', 'date', GOOGLE_PRODUCTS_FEED_SORT === 'Date', 'class="form-control"'); ?></label>
           </div>
           <?php
           if ($langsMultiple !== false) { ?>
@@ -264,18 +266,18 @@ function processLoading(text) {
                   <?php
               }
           } ?>
-          <button type="submit" class="btn btn-primary"><?php echo IMAGE_GO; ?></button>
-          <input type="hidden" name="key" value="<?php echo GOOGLE_PRODUCTS_KEY; ?>">
+          <button type="submit" class="btn btn-primary"><?= IMAGE_GO; ?></button>
+          <input type="hidden" name="key" value="<?= GOOGLE_PRODUCTS_KEY; ?>">
       </form>
 </div>
           <hr>
           <div>
-      <h2><?php echo TEXT_FEED_FILES; ?></h2>
+      <h2><?= TEXT_FEED_FILES; ?></h2>
               <table id="googleFiles">
                   <tr>
-                      <th><?php echo TEXT_DATE_CREATED ?></th>
-                      <th><?php echo TEXT_DOWNLOAD_LINK ?></th>
-                      <th><?php echo TEXT_ACTION ?></th>
+                      <th><?= TEXT_DATE_CREATED ?></th>
+                      <th><?= TEXT_DOWNLOAD_LINK ?></th>
+                      <th><?= TEXT_ACTION ?></th>
                   </tr>
 
                   <?php
@@ -288,11 +290,11 @@ function processLoading(text) {
                                       $date = date('j/m/Y H:i:s', $filetime);
                                       ?>
                                       <tr>
-                                          <td><?php echo $date; ?></td>
-                                          <td><a href="<?php echo HTTP_SERVER . DIR_WS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file; ?>" target="_blank"><?php echo $file; ?></a></td>
+                                          <td><?= $date; ?></td>
+                                          <td><a href="<?= HTTP_SERVER . DIR_WS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file; ?>" target="_blank"><?= $file; ?></a></td>
                                           <td>
-                                              <a href="<?php echo zen_href_link(FILENAME_GOOGLEFROOGLE, 'file=' . $file . '&action=delete'); ?>"><?php echo IMAGE_DELETE; ?></a>
-                                              <a href="#" onclick="window.open('<?php echo HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE; ?>.php?feed=fn_uy_tp&upload_file=<?php echo $file; ?>&key=<?php echo GOOGLE_PRODUCTS_KEY; ?>', 'googlefrooglefeed', 'resizable=1, statusbar=5, width=600, height=400, top=5, left=50, scrollbars=yes'); return false;"><?php echo IMAGE_UPLOAD; ?></a>
+                                              <a href="<?= zen_href_link(FILENAME_GOOGLEFROOGLE, 'file=' . $file . '&action=delete'); ?>"><?= IMAGE_DELETE; ?></a>
+                                              <a href="#" onclick="window.open('<?= HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE; ?>.php?feed=fn_uy_tp&upload_file=<?= $file; ?>&key=<?= GOOGLE_PRODUCTS_KEY; ?>', 'googlefrooglefeed', 'resizable=1, statusbar=5, width=600, height=400, top=5, left=50, scrollbars=yes'); return false;"><?= IMAGE_UPLOAD; ?></a>
                                           </td>
                                       </tr>
                                       <?php
@@ -307,7 +309,7 @@ function processLoading(text) {
           <hr>
     <div>
         <img src="images/google_merchant_center_logo.gif" width="174" height="80" alt="Google Merchant Center logo">
-        <?php echo TEXT_GOOGLE_PRODUCTS_INFO; ?>
+        <?= TEXT_GOOGLE_PRODUCTS_INFO; ?>
     </div>
 </div>
 <!-- body_eof //-->

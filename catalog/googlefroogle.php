@@ -38,13 +38,6 @@ if (GOOGLE_PRODUCTS_SHIPPING_METHOD === 'percategory') {//Numinix shipping modul
     $freerules = new freerules();
 }//todo add Advanced Shipper
 
-/* these are already defined in the Admin configuration
-  define('GOOGLE_PRODUCTS_EXPIRATION_DAYS', 29);
-  define('GOOGLE_PRODUCTS_EXPIRATION_BASE', 'now'); // now/product
-  define('GOOGLE_PRODUCTS_OFFER_ID', 'id'); // id/model/false
-  define('GOOGLE_PRODUCTS_DIRECTORY', 'feed/google/');
-  define('GOOGLE_PRODUCTS_USE_CPATH', 'false');
-*/
 define('GOOGLE_PRODUCTS_OUTPUT_BUFFER_MAXSIZE', 1024*1024*8); // 8MB
 // definitions
 //https://support.google.com/merchants/answer/7052112?hl=en&ref_topic=6324338
@@ -131,19 +124,19 @@ if ($start >= $limit) {
             font-weight: bold;
         }
     </style>
-<title>Google Merchant Feeder v<?php echo $google_base->google_base_version()?></title>
+<title>Google Merchant Feeder v<?= $google_base->google_base_version()?></title>
 </head>
 
 <body>
-<h1>Google Merchant Feeder v<?php echo $google_base->google_base_version()?></h1>
+<h1>Google Merchant Feeder v<?= $google_base->google_base_version()?></h1>
 <?php
 if (GOOGLE_PRODUCTS_DEBUG === 'true') {
     echo 'GOOGLE_PRODUCTS_DEBUG=true (admin)<br>';
     $google_base->print_mem();
 } ?>
-    <p><?php echo TEXT_GOOGLE_PRODUCTS_STARTED; ?></p>
-    <p><?php echo TEXT_GOOGLE_PRODUCTS_FEED . (isset($feed) && $feed === 'yes' ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?><br>
-    <?php echo TEXT_GOOGLE_PRODUCTS_UPLOAD . (isset($upload) && $upload === 'yes' ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?></p>
+    <p><?= TEXT_GOOGLE_PRODUCTS_STARTED; ?></p>
+    <p><?= TEXT_GOOGLE_PRODUCTS_FEED . (isset($feed) && $feed === 'yes' ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?><br>
+    <?= TEXT_GOOGLE_PRODUCTS_UPLOAD . (isset($upload) && $upload === 'yes' ? TEXT_GOOGLE_PRODUCTS_YES : TEXT_GOOGLE_PRODUCTS_NO); ?></p>
 <?php
 //why both?  https://www.php.net/manual/en/function.flush.php
 ob_flush();
@@ -734,8 +727,8 @@ if (isset($feed) && $feed === 'yes') {
     }
 
     $timer_feed = $google_base->microtime_float()-$stimer_feed; ?>
-    <p><?php echo sprintf(TEXT_GOOGLE_PRODUCTS_FEED_RECORDS, $anti_timeout_counter, $products->RecordCount(), $products->RecordCount() - $anti_timeout_counter); ?><br>
-        <?php echo sprintf(TEXT_GOOGLE_PRODUCTS_FEED_COMPLETE, number_format($timer_feed, 1)); ?></p>
+    <p><?= sprintf(TEXT_GOOGLE_PRODUCTS_FEED_RECORDS, $anti_timeout_counter, $products->RecordCount(), $products->RecordCount() - $anti_timeout_counter); ?><br>
+        <?= sprintf(TEXT_GOOGLE_PRODUCTS_FEED_COMPLETE, number_format($timer_feed, 1)); ?></p>
     <?php
 }
 
