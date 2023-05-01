@@ -96,12 +96,7 @@ if (count($languages->catalog_languages) > 1) {
 <!DOCTYPE html>
 <html <?php echo HTML_PARAMS; ?>>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=<?php echo CHARSET; ?>">
-<title><?php echo TITLE; ?></title>
-<link rel="stylesheet" type="text/css" href="includes/stylesheet.css">
-<link rel="stylesheet" type="text/css" href="includes/cssjsmenuhover.css" media="all" id="hoverJS">
-<script src="includes/menu.js"></script>
-<script src="includes/general.js"></script>
+    <?php require DIR_WS_INCLUDES . 'admin_html_head.php'; ?>
 <script>
   <!--
   function init()
@@ -194,9 +189,11 @@ function processLoading(text) {
             }
 </style>
 </head>
-<body onload="init()">
+<body>
 <!-- header //-->
-<?php require(DIR_WS_INCLUDES . 'header.php'); ?>
+<?php
+require (DIR_WS_INCLUDES . 'header.php');
+?>
 <!-- header_eof //-->
 <!-- body //-->
 <div class="container-fluid">
