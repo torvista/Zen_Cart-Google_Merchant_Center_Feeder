@@ -1,16 +1,17 @@
 <?php
 
 declare(strict_types=1);
-
 /**
- * @package google base feeder
- * @copyright Copyright 2007-2008 Numinix Technology http://www.numinix.com
- * @copyright Portions Copyright 2003-2006 Zen Cart Development Team
- * @copyright Portions Copyright 2003 osCommerce
+ * @package Google Merchant Center
+ * @link https://github.com/torvista/Zen_Cart-Google_Merchant_Center_Feeder
+ * @author: torvista 01 May 2023
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
- * @version $Id: googlefroogle.php 2023 04 28 torvista $
- * @author Numinix Technology
+ * @copyright Copyright 2007 Numinix Technology http://www.numinix.com
+ * @author original Numinix Technology
+ * @since 1.6.0
+ * @version 1.6.0
  */
+
 class google_base
 {
     protected $image_files;
@@ -1221,6 +1222,50 @@ class google_base
                 break;
             default:
                 return number_format($special_price, 4, '.', '');
+        }
+    }
+
+    /** BIG TODO...initial attempt for sftp...tried to do it on Windows, gave up
+     * @param $local_file
+     * @return bool
+     */
+    public function sftp_file_upload($local_file): bool
+    {
+
+define ('GMC_SFTP_SERVER', 'partnerupload.google.com');
+define ('GMC_SFTP_SERVER_PORT', '19321');
+define ('GMC_SFTP_SERVER_USERNAME', '');
+define ('GMC_SFTP_SERVER_PASSWORD', '');
+
+//Send file via sftp to server
+        $strServer = GMC_SFTP_SERVER;
+        $strServerPort = GMC_SFTP_SERVER_PORT;
+        $strServerUsername = GMC_SFTP_SERVER_USERNAME;
+        $strServerPassword = GMC_SFTP_SERVER_PASSWORD;
+        $csv_filename = $local_file;
+
+//connect to server
+        $resConnection = ssh2_connect($strServer, $strServerPort);
+
+        if(ssh2_auth_password($resConnection, $strServerUsername, $strServerPassword)){
+            //Initialize SFTP subsystem
+
+            echo 'connected';
+            $resSFTP = ssh2_sftp($resConnection);
+//stackoverflow question
+           // $resFile = fopen("ssh2.sftp://{$resSFTP}/".$csv_filename, 'w');
+           // fwrite($resFile, "Testing");
+           // fclose($resFile);
+//answer
+            $resFile = fopen("ssh2.sftp://{$resSFTP}/".$csv_filename, 'w');
+            $srcFile = fopen($csv_filename, 'r');
+            $writtenBytes = stream_copy_to_stream($srcFile, $resFile);
+            fclose($resFile);
+            fclose($srcFile);
+            return true;
+        }else{
+            echo 'Unable to authenticate on server';
+            return false;
         }
     }
 

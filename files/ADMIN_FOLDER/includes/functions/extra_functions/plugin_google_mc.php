@@ -1,16 +1,15 @@
 <?php
 
 declare(strict_types=1);
-
 /**
- * googlefroogle.php
- *
- * @package google froogle
- * @copyright Copyright 2003-2006 Zen Cart Development Team
- * @copyright Portions Copyright 2003 osCommerce
+ * @package Google Merchant Center
+ * @link https://github.com/torvista/Zen_Cart-Google_Merchant_Center_Feeder
+ * @author: torvista 01 May 2023
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
- * @version $Id: googlefroogle.php 2023 04 28 torvista $
- * @author Numinix Technology
+ * @copyright Copyright 2007 Numinix Technology http://www.numinix.com
+ * @author original Numinix Technology
+ * @since 1.6.0
+ * @version 1.6.0
  */
 
 if (!function_exists('google_cfg_pull_down_currencies')){

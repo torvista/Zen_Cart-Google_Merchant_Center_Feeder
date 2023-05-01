@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * googlefroogle.php
  *
@@ -9,7 +11,10 @@
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
  * @version $Id: googlefroogle.php 57 2011-05-17 00:35:31Z numinix $
  */
- 
+
+//Description of feed embedded at the start of the XML file
+define('GOOGLE_MC_PRODUCTS_FEED_DESCRIPTION', GOOGLE_PRODUCTS_DESCRIPTION);
+
 define('TEXT_GOOGLE_PRODUCTS_STARTED', 'Feed file creation started ' . date("d/m/Y H:i:s"));
 define('TEXT_GOOGLE_PRODUCTS_FILE_LOCATION', 'File location:');
 define('TEXT_GOOGLE_PRODUCTS_FEED_COMPLETE', 'Feed File completed in %s seconds.');
