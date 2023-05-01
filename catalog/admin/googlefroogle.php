@@ -93,7 +93,7 @@ if (count($languages->catalog_languages) > 1) {
     $langsMultiple = false;
 }
 ?>
-<!DOCTYPE html>
+<!doctype html>
 <html <?php echo HTML_PARAMS; ?>>
 <head>
     <?php require DIR_WS_INCLUDES . 'admin_html_head.php'; ?>

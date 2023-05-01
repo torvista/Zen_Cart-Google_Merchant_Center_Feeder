@@ -207,40 +207,29 @@ if (isset($feed) && $feed === 'yes') {
           }
 
           switch ($_GET['feed_sort']) {
-              /*case ('id'):
-                  $order_by = 'p.products_id';
-                  break;*/
+              case ('date'):
+                  $order_by = 'p.products_last_modified';
+                  break;
               case ('model'):
-                  $count = 'DISTINCT(p.products_model)';
-                  $select = $count . ', p.products_id, pd.products_name';
                   $order_by = 'p.products_model';
                   break;
               case ('name'):
-                  $count = 'DISTINCT(pd.products_name)';
-                  $select = $count . ', p.products_id, p.products_model';
                   $order_by = 'pd.products_name';
                   break;
               default:
-                  $count = 'p.products_id';
-                  $select = $count . ', p.products_model, pd.products_name';
-                  $order_by = $count;
-                  break;
+                  $order_by = 'p.products_id';
           }
 
           $products_all = $db->Execute(
-              'SELECT COUNT(' . $count. ') as products_max
+              'SELECT COUNT(products_id) as products_max
                            FROM ' . TABLE_PRODUCTS . ' p
-                             LEFT JOIN ' . TABLE_PRODUCTS_DESCRIPTION . ' pd ON (p.products_id = pd.products_id)
                              WHERE p.products_status = 1
                              AND p.products_type <> 3
                              AND p.product_is_call <> 1
                              AND p.product_is_free <> 1
-                             AND pd.language_id = ' . (int)$languages->fields['languages_id'] . '
                              AND (p.products_image IS NOT NULL
                              OR p.products_image != ""
-                             OR p.products_image != "' . PRODUCTS_IMAGE_NO_IMAGE . '")
-                           GROUP BY ' . $order_by);
-
+                             OR p.products_image != "' . PRODUCTS_IMAGE_NO_IMAGE . '")');
           $products_all = $products_all->fields['products_max'];
 
           if ($limit === 0) {//no limit: all products
@@ -258,7 +247,7 @@ if (isset($feed) && $feed === 'yes') {
           }
 
           //ORIGINAl was based on distinct pd.name
-          $products_query = 'SELECT ' . $select . ', pd.products_description, p.products_image, p.products_tax_class_id, p.products_price_sorter, p.products_priced_by_attribute, p.products_type, p.master_categories_id, GREATEST(p.products_date_added, IFNULL(p.products_last_modified, 0), IFNULL(p.products_date_available, 0)) AS base_date, p.products_date_available, m.manufacturers_name, p.products_quantity, pt.type_handler, p.products_weight' . $additional_attributes . '
+          $products_query = 'SELECT p.products_id, p.products_model, pd.products_name, pd.products_description, p.products_image, p.products_tax_class_id, p.products_price_sorter, p.products_priced_by_attribute, p.products_type, p.master_categories_id, GREATEST(p.products_date_added, IFNULL(p.products_last_modified, 0), IFNULL(p.products_date_available, 0)) AS base_date, p.products_date_available, m.manufacturers_name, p.products_quantity, pt.type_handler, p.products_weight' . $additional_attributes . '
                            FROM ' . TABLE_PRODUCTS . ' p
                              LEFT JOIN ' . TABLE_MANUFACTURERS . ' m ON (p.manufacturers_id = m.manufacturers_id)
                              LEFT JOIN ' . TABLE_PRODUCTS_DESCRIPTION . ' pd ON (p.products_id = pd.products_id)
@@ -268,7 +257,7 @@ if (isset($feed) && $feed === 'yes') {
                              AND p.products_type <> 3
                              AND p.product_is_call <> 1
                              AND p.product_is_free <> 1
-                             AND pd.language_id = ' . (int)$languages->fields['languages_id'] . '
+                             AND pd.language_id = ' . $langSelect . '
                              AND (p.products_image IS NOT NULL
                              OR p.products_image != ""
                              OR p.products_image != "' . PRODUCTS_IMAGE_NO_IMAGE . '")
