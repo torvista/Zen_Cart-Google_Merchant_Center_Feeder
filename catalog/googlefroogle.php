@@ -15,8 +15,8 @@ declare(strict_types=1);
  */
 
   require('includes/application_top.php');
+  require(DIR_WS_LANGUAGES . zen_db_prepare_input($_GET['languageAdmin']) . '/googlefroogle.php');
   require(DIR_WS_CLASSES . 'google_base.php');
-  include(DIR_WS_LANGUAGES . 'english/googlefroogle.php');
   $google_base = new google_base();
 
   if ((int)GOOGLE_PRODUCTS_MAX_EXECUTION_TIME > 0) {
@@ -71,12 +71,14 @@ $anti_timeout_counter = 0; //for timeout issues as well as counting number of pr
   $upload = $google_base->get_upload($upload_parameter);
   $type_parameter = $parameters[2]; // e.g. 'tp'
   $type = $google_base->get_type($type_parameter);
+  $langSelect = (int)$_GET['langSelect'];
+$sql_result = $db->Execute('SELECT code FROM ' . TABLE_LANGUAGES . ' WHERE languages_id = ' . $langSelect . ' LIMIT 1');
+$langCodeSelect = $sql_result->fields['code'];
+
   $key = $_GET['key'];
   if ($key !== GOOGLE_PRODUCTS_KEY) {
       exit('<p>Incorrect key supplied!</p>');
   }
-  $languages_query = 'SELECT code, languages_id, directory FROM ' . TABLE_LANGUAGES . ' WHERE languages_id = ' . (int)GOOGLE_PRODUCTS_LANGUAGE . ' LIMIT 1';
-  $languages = $db->Execute($languages_query);
 
   if (isset($_GET['upload_file'])) {
     $outfile = '';
@@ -107,7 +109,7 @@ if ($start >= $limit) {
     include(DIR_WS_INCLUDES . 'modules/msu_ao_1.php');
   }
   ob_start();
-  $product_url_add = (GOOGLE_PRODUCTS_LANGUAGE_DISPLAY === 'true' && $languages->RecordCount() > 0 ? '&language=' . $languages->fields['code'] : '') . (GOOGLE_PRODUCTS_CURRENCY_DISPLAY === 'true' ? '&currency=' . GOOGLE_PRODUCTS_CURRENCY : '');
+  //$product_url_add = (GOOGLE_PRODUCTS_LANGUAGE_DISPLAY === 'true' && $languages->RecordCount() > 0 ? '&language=' . $languages->fields['code'] : '') . (GOOGLE_PRODUCTS_CURRENCY_DISPLAY === 'true' ? '&currency=' . GOOGLE_PRODUCTS_CURRENCY : '');
   //require(DIR_WS_LANGUAGES . $languages->fields['directory'] .'/googlefroogle.php');
 ?>
 <!DOCTYPE html>
@@ -304,7 +306,7 @@ if (isset($feed) && $feed === 'yes') {
 */
 
 //todo admin options for file limits and languages, if in use
-          $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . '_' . $type . '_' . $languages->fields['code'];
+          $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . GOOGLE_PRODUCTS_OUTPUT_FILENAME . '_' . $type . '_' . $langCodeSelect;
 
           //todo review these suffixes
          /* $end_point = $products_all;

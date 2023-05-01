@@ -15,7 +15,10 @@ declare(strict_types=1);
  */
 
   require('includes/application_top.php');
-
+if (!class_exists('language')) {
+    require DIR_FS_CATALOG . DIR_WS_CLASSES . 'language.php';
+}
+$languages = new language();
 /**
  * @param $url
  * @param $login
@@ -81,6 +84,14 @@ if (isset($_GET['action']) && ($_GET['action'] === 'delete')) {
 $limit = !empty($_GET['limit']) ? (int)$_GET['limit'] : (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
 // sticky offset
 $start = !empty($_GET['start']) ? (int)$_GET['start'] : (int)GOOGLE_PRODUCTS_START_PRODUCTS;
+// sticky languages
+if (count($languages->catalog_languages) > 1) {
+    $langsMultiple = $languages->catalog_languages;
+    $langSelect = isset($_GET['langSelect']) ? (int)$_GET['langSelect'] : $languages->catalog_languages[DEFAULT_LANGUAGE]['id'];
+} else {
+    $langSelect = $languages->catalog_languages[$_SESSION['languages_code']]['id'];
+    $langsMultiple = false;
+}
 ?>
 <!DOCTYPE html>
 <html <?php echo HTML_PARAMS; ?>>
@@ -244,6 +255,15 @@ function processLoading(text) {
               <label><?php echo TEXT_FEED_MODEL . zen_draw_radio_field('feed_sort', 'model', GOOGLE_PRODUCTS_FEED_SORT === 'Model'); ?></label>
               <label><?php echo TEXT_FEED_NAME . zen_draw_radio_field('feed_sort', 'name', GOOGLE_PRODUCTS_FEED_SORT === 'Name'); ?></label>
           </div>
+          <?php
+          if ($langsMultiple !== false) { ?>
+              <div><p class="control-label"><?= TEXT_LANGUAGE_OPTIONS; ?></p>
+              <?php
+              foreach ($langsMultiple as $langCode => $langArray) { ?>
+                  <label class="control-label"><?= $langArray['name']; ?>: <?= zen_draw_radio_field('langSelect', $langArray['id'], $langArray['id'] = $langSelect, 'class="limiters input-group" id="langSelect"'); ?></label><br>
+                  <?php
+              }
+          } ?>
           <button type="submit" class="btn btn-primary"><?php echo IMAGE_GO; ?></button>
           <input type="hidden" name="key" value="<?php echo GOOGLE_PRODUCTS_KEY; ?>">
       </form>
