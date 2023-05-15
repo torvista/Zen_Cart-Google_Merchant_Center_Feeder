@@ -655,7 +655,7 @@ class google_mc
                         //    [last_modified] => 2022-08-22 20:07:17
                         //)
                         $gtin = empty($posm_record->fields['pos_ean']) ? '' : $posm_record->fields['pos_ean'];
-                        $variant_info_error = empty($gtin) ? ' (for pos_mpn=' . $posm_record->fields['pos_mpn'] . ') ' : '';
+                        $variant_info_error = empty($gtin) && isset($posm_record->fields['pos_mpn']) ? ' (for pos_mpn=' . $posm_record->fields['pos_mpn'] . ') ' : '';
                     }
                 default : //none: no variant-stock handler...so suggest adding a field to the products_attributes table
             }
@@ -1448,6 +1448,10 @@ class google_mc
      */
     public function debug($message)
     {
+        if (GOOGLE_PRODUCTS_DEBUG === '3') {
+           // echo $message . NL;
+        }
+
         //no debug log
         if (GOOGLE_PRODUCTS_DEBUG === '0') {
             return;

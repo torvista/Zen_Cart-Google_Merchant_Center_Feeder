@@ -55,5 +55,6 @@ define('TEXT_FEED_FILES', 'Generated Feed Files');
 define('TEXT_DATE_CREATED', 'Created <span class="small">(DD/MM/YYYY)</span>');
 define('TEXT_DOWNLOAD_LINK', 'Download');
 define('TEXT_ACTION', 'Action');
+define('TEXT_LOG_FILES', 'Log Files');
 define('ERROR_GOOGLE_PRODUCTS_DIRECTORY_DOES_NOT_EXIST', 'The folder specified for the feed file ("<b>%s</b>") does not exist.<br>Please correct the path in Admin->Configuration->Google Merchant Center->Output Directory or create the specified directory and chmod to 755 or 777 depending on your host.');
 define('ERROR_GOOGLE_PRODUCTS_DIRECTORY_NOT_WRITEABLE', 'The folder specified for the feed file ("<b>' . GOOGLE_PRODUCTS_DIRECTORY . '</b>") is not writeable (currently set to %u).<br>Please chmod the folder to 755 or 777 depending on your host.');

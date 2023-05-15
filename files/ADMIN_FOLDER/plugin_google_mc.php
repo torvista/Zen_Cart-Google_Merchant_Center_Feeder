@@ -180,14 +180,14 @@ echo HTML_PARAMS; ?>>
             padding: 5px 0;
         }
 
-        table#googleFiles {
+        table.google_mc {
             margin-left: 0;
             border-collapse: collapse;
             border: 1px solid #036;
             font-size: small;
         }
 
-        table#googleFiles th {
+        table.google_mc th {
             background-color: #036;
             border-bottom: 1px double #fff;
             color: #fff;
@@ -195,7 +195,7 @@ echo HTML_PARAMS; ?>>
             padding: 8px;
         }
 
-        table#googleFiles td {
+        table.google_mc td {
             border: 1px solid #036;
             vertical-align: top;
             padding: 5px 10px;
@@ -302,7 +302,7 @@ require(DIR_WS_INCLUDES . 'header.php');
         <hr>
         <div>
             <h2><?= TEXT_FEED_FILES; ?></h2>
-            <table id="googleFiles">
+            <table class="google_mc">
                 <tr>
                     <th><?= TEXT_DATE_CREATED ?></th>
                     <th><?= TEXT_DOWNLOAD_LINK ?></th>
@@ -324,6 +324,37 @@ require(DIR_WS_INCLUDES . 'header.php');
                                     <a href="<?= zen_href_link(FILENAME_GOOGLEFROOGLE, 'file=' . $file . '&action=delete'); ?>"><?= IMAGE_DELETE; ?></a>
                                     <a href="#"
                                        onclick="window.open('<?= HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE; ?>.php?feed=fn_uy_tp&upload_file=<?= $file; ?>&key=<?= GOOGLE_PRODUCTS_KEY; ?>', 'googlefrooglefeed', 'resizable=1, statusbar=5, width=600, height=400, top=5, left=50, scrollbars=yes'); return false;"><?= IMAGE_UPLOAD; ?></a>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    closedir($handle);
+                }
+                ?>
+            </table>
+            <hr>
+            <h2><?= TEXT_LOG_FILES; ?></h2>
+            <table class="google_mc">
+                <tr>
+                    <th><?= TEXT_DATE_CREATED ?></th>
+                    <th><?= TEXT_DOWNLOAD_LINK ?></th>
+                    <th><?= TEXT_ACTION ?></th>
+                </tr>
+
+                <?php
+                //check output file location permissions
+                if ($handle = opendir(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
+                    while (($file = readdir($handle)) !== false) {
+                        if (str_ends_with($file, '.log')) {
+                            $filetime = filemtime(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file);
+                            $date = date('d/m/Y H:i:s', $filetime);
+                            ?>
+                            <tr>
+                                <td><?= $date; ?></td>
+                                <td><a href="<?= HTTP_SERVER . DIR_WS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file; ?>" target="_blank"><?= $file; ?></a></td>
+                                <td>
+                                    <a href="<?= zen_href_link(FILENAME_GOOGLEFROOGLE, 'file=' . $file . '&action=delete'); ?>"><?= IMAGE_DELETE; ?></a>
                                 </td>
                             </tr>
                             <?php
