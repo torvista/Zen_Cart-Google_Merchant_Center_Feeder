@@ -12,5 +12,5 @@ declare(strict_types=1);
  * @version 1.6.0
  */
 
-define('BOX_CONFIGURATION_GOOGLEMERCHANTFEED', 'Google Merchant Center');//Configuration Menu
-define('BOX_GOOGLEFROOGLE', BOX_CONFIGURATION_GOOGLEMERCHANTFEED);//Tools Menu TODO alter constant name to _TOOLS_
+define('BOX_CONFIGURATION_GOOGLE_MERCHANT_CENTER', 'Google Merchant Center');//Configuration Menu
+define('BOX_TOOLS_GOOGLE_MERCHANT_CENTER', BOX_CONFIGURATION_GOOGLE_MERCHANT_CENTER);//Tools Menu TODO alter constant name to _TOOLS_

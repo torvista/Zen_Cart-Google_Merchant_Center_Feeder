@@ -81,7 +81,7 @@ if (isset($_GET['action']) && ($_GET['action'] === 'delete')) {
     if (file_exists(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $_GET['file'])) {
         unlink(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $_GET['file']);
     }
-    zen_redirect(zen_href_link(FILENAME_GOOGLEFROOGLE));
+    zen_redirect(zen_href_link(FILENAME_GOOGLE_MERCHANT_CENTER));
 }
 // sticky limit: TODO not working yet, need to add parameters to the js reload after the form submission
 $limit = !empty($_GET['limit']) ? (int)$_GET['limit'] : (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
@@ -135,7 +135,7 @@ echo HTML_PARAMS; ?>>
         function loadFroogleXMLDoc(request, field, loading) {
 
             name = field;
-            var url = "<?= HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . '.php?'; ?>" + request;
+            var url = "<?= HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLE_MERCHANT_CENTER . '.php?'; ?>" + request;
             // Internet Explorer
             try {
                 req = new ActiveXObject("Msxml2.XMLHTTP");
@@ -250,7 +250,7 @@ require(DIR_WS_INCLUDES . 'header.php');
 
             // The form action executes the script in the shop root in a popup window, and also reloads the admin page after a delay so it can find the newly-created file and list it in the table
             ?>
-            <form method="get" action="<?= HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE . '.php'; ?>" name="google" target="googlefeed"
+            <form method="get" action="<?= HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLE_MERCHANT_CENTER . '.php'; ?>" name="google" target="googlefeed"
                   onsubmit="window.open('', 'googlefeed', 'resizable=1, statusbar=5, width=<?= $popup_width; ?>, height=<?= $popup_height; ?>, top=15, left=35, scrollbars=yes');setTimeout('location.reload();', 5000);">
                 <?php
                 echo zen_draw_hidden_field('feed', 'fy_un_tp'); //this replaces the original Products option
@@ -313,7 +313,7 @@ require(DIR_WS_INCLUDES . 'header.php');
                 //check output file location permissions
                 if ($handle = opendir(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY)) {
                     while (($file = readdir($handle)) !== false) {
-                        if (str_ends_with($file, '.xml')) {
+                             if (str_ends_with($file, '.xml')) {
                             $filetime = filemtime(DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file);
                             $date = date('d/m/Y H:i:s', $filetime);
                             ?>
@@ -321,9 +321,13 @@ require(DIR_WS_INCLUDES . 'header.php');
                                 <td><?= $date; ?></td>
                                 <td><a href="<?= HTTP_SERVER . DIR_WS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file; ?>" target="_blank"><?= $file; ?></a></td>
                                 <td>
-                                    <a href="<?= zen_href_link(FILENAME_GOOGLEFROOGLE, 'file=' . $file . '&action=delete'); ?>"><?= IMAGE_DELETE; ?></a>
+                                   <?php if ($file === 'example_feed_xml_rss.xml') { ?>
+                                       <a href="https://support.google.com/google-ads/answer/160567" target="_blank"><?= TEXT_GOOGLE_XML_EXAMPLE; ?></a>
+                                    <?php } else { ?>
+                                    <a href="<?= zen_href_link(FILENAME_GOOGLE_MERCHANT_CENTER, 'file=' . $file . '&action=delete'); ?>"><?= IMAGE_DELETE; ?></a>
                                     <a href="#"
-                                       onclick="window.open('<?= HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLEFROOGLE; ?>.php?feed=fn_uy_tp&upload_file=<?= $file; ?>&key=<?= GOOGLE_PRODUCTS_KEY; ?>', 'googlefrooglefeed', 'resizable=1, statusbar=5, width=600, height=400, top=5, left=50, scrollbars=yes'); return false;"><?= IMAGE_UPLOAD; ?></a>
+                                       onclick="window.open('<?= HTTP_SERVER . DIR_WS_CATALOG . FILENAME_GOOGLE_MERCHANT_CENTER; ?>.php?feed=fn_uy_tp&upload_file=<?= $file; ?>&key=<?= GOOGLE_PRODUCTS_KEY; ?>', 'googlefrooglefeed', 'resizable=1, statusbar=5, width=600, height=400, top=5, left=50, scrollbars=yes'); return false;"><?= IMAGE_UPLOAD; ?></a>
+                                     <?php } ?>
                                 </td>
                             </tr>
                             <?php
@@ -354,7 +358,7 @@ require(DIR_WS_INCLUDES . 'header.php');
                                 <td><?= $date; ?></td>
                                 <td><a href="<?= HTTP_SERVER . DIR_WS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file; ?>" target="_blank"><?= $file; ?></a></td>
                                 <td>
-                                    <a href="<?= zen_href_link(FILENAME_GOOGLEFROOGLE, 'file=' . $file . '&action=delete'); ?>"><?= IMAGE_DELETE; ?></a>
+                                    <a href="<?= zen_href_link(FILENAME_GOOGLE_MERCHANT_CENTER, 'file=' . $file . '&action=delete'); ?>"><?= IMAGE_DELETE; ?></a>
                                 </td>
                             </tr>
                             <?php

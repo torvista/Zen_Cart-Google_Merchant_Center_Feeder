@@ -15,6 +15,20 @@
 # GOOGLE_PRODUCTS_LINK_TYPE
 
 #UPDATE
+#update admin CONFIGURATION page
+UPDATE admin_pages SET 
+page_key = 'configGoogleMerchantCenter',
+language_key = 'BOX_CONFIGURATION_GOOGLE_MERCHANT_CENTER'
+WHERE page_key = 'configGoogleMerchantFeed';
+
+#update admin TOOLS page
+UPDATE admin_pages SET 
+language_key = 'BOX_TOOLS_GOOGLE_MERCHANT_CENTER',
+main_page = 'FILENAME_GOOGLE_MERCHANT_CENTER',
+page_key = 'toolsGoogleMerchantCenter'
+WHERE page_key = 'toolsGoogleMerchantFeed';
+
+#UPDATE
 #make GOOGLE_PRODUCTS_VERSION read-only (value is set by code)
 UPDATE configuration SET configuration_title = 'Google Merchant Center: Version', configuration_value = '', configuration_description = 'The Google Merchant Center version.', set_function = 'zen_cfg_read_only(' WHERE configuration_key = 'GOOGLE_PRODUCTS_VERSION';
 

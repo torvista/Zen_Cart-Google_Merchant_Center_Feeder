@@ -12,5 +12,4 @@ declare(strict_types=1);
  * @version 1.6.0
  */
 
-define('FILENAME_GOOGLEFROOGLE', 'plugin_google_mc');
-
+define('FILENAME_GOOGLE_MERCHANT_CENTER', 'plugin_google_mc');
