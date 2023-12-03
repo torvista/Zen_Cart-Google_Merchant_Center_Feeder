@@ -19,8 +19,6 @@ if (!class_exists('language')) {
 $languages = new language();
 require(DIR_FS_CATALOG . DIR_WS_CLASSES . 'plugin_google_mc.php');
 $google_mc = new google_mc();
-//mv_printVar($languages);
-//mv_printVar($languages->language);
 /**
  * @param $url
  * @param $login
@@ -90,19 +88,18 @@ $offset = !empty($_GET['offset']) ? (int)$_GET['offset'] : GOOGLE_PRODUCTS_START
 // sticky languages
 if (count($languages->catalog_languages) > 1) {
     $langsMultiple = $languages->catalog_languages;
-    $langSelected = isset($_GET['langSelected']) ? (int)$_GET['langSelected'] : $languages->catalog_languages[DEFAULT_LANGUAGE]['code'];
+    //$_GET['langSelected'] should come from the refresh after the popup. Uses the code en, es etc.
+    $langSelected = isset($_GET['langSelected']) ? zen_db_prepare_input($_GET['langSelected']): GOOGLE_PRODUCTS_LANGUAGE;
 } else {
-    $langSelected = $languages->catalog_languages[$_SESSION['languages_code']]['id'];
     $langsMultiple = false;
+    $langSelected = $languages->language['code'];//this is the default language
 }
 
 ?>
 <!doctype html>
-<html <?php
-echo HTML_PARAMS; ?>>
+<html <?php echo HTML_PARAMS; ?>>
 <head>
-    <?php
-    require DIR_WS_INCLUDES . 'admin_html_head.php'; ?>
+    <?php require DIR_WS_INCLUDES . 'admin_html_head.php'; ?>
     <script>
         <!--
         function init() {
@@ -283,18 +280,13 @@ require(DIR_WS_INCLUDES . 'header.php');
                 <div><p class="control-label"><?= TEXT_LANGUAGE_OPTIONS; ?></p>
                     <?php
                     foreach ($langsMultiple as $langCode => $langArray) { ?>
-                        <label class="control-label"><?= $langArray['name']; ?>: <?= zen_draw_radio_field('langSelected', $langArray['id'], $langArray['id'] = $langSelected, 'class="limiters input-group" id="langSelected"'); ?></label><br>
+                        <label class="control-label"><?= $langArray['name']; ?>: <?= zen_draw_radio_field('langSelected', $langArray['code'], $langArray['code'] === $langSelected, 'class="limiters input-group" id="langSelected"'); ?></label><br>
                         <?php
                     }
-                    //todo All languages
-                    //echo '<label class="control-label">TEXT_LANGUAGE_ALL:' . zen_draw_radio_field('langSelected', '0', $langSelect === '0', 'class="limiters form-control" id="langSelected"') . '</label></div>';
-                    }
-                    zen_draw_hidden_field('langSelected', $langSelected); ?>
-<?php /* todo some other time
-                    <div>
-                        <label class="control-label"><?= TEXT_GENERATE_MULTIPLE_FEEDS . zen_draw_checkbox_field('multipleFeeds', '1', false, 'class="form-control"'); ?></label><br>
-                    </div>
- */ ?>
+                } else {//only one language
+                        zen_draw_hidden_field('langSelected', $langSelected);
+                    } ?>
+
                     <button type="submit" class="btn btn-primary"><?= IMAGE_GO; ?></button>
                     <input type="hidden" name="key" value="<?= GOOGLE_PRODUCTS_KEY; ?>">
             </form>

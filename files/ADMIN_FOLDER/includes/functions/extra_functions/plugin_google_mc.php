@@ -80,3 +80,26 @@ if (!function_exists('google_cfg_pull_down_languages_list')){
 		return zen_draw_pull_down_menu($name, $languages_array, $languages_id);
 	}
 }
+if (!function_exists('google_cfg_pull_down_languages_list_code')){
+    /** dropdown used in the configuration, to select a default feed language
+     * original function above returns the language_id, this returns the language code
+     * @param $languages_id
+     * @param string $key
+     * @return string
+     */
+    function google_cfg_pull_down_languages_list_code($languages_id, string $key = ''): string
+    {
+        global $db;
+        $name = (($key) ? 'configuration[' . $key . ']' : 'configuration_value');
+        $languages = $db->Execute('SELECT code, name, languages_id FROM ' . TABLE_LANGUAGES);
+        $languages_array = [];
+        while (!$languages->EOF) {
+            $languages_array[] = [
+                'id' => $languages->fields['code'],
+                'text' => $languages->fields['name']
+            ];
+            $languages->MoveNext();
+        }
+        return zen_draw_pull_down_menu($name, $languages_array, $languages_id);
+    }
+}

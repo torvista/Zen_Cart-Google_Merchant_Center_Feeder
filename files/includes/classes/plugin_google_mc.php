@@ -627,6 +627,19 @@ class google_mc
      */
     public function add_gtin($dom, $item, $product, $attribute = false)
     {
+        global $excluded_gtin_pid, $excluded_gtin_model;
+
+        if (in_array($product['products_id'], $excluded_gtin_pid)) {
+            return $item;
+        }
+
+        foreach($excluded_gtin_model as $excluded_model) {
+            $excluded_model = str_replace('*', '', $excluded_model);
+            if (str_contains($product['products_model'], $excluded_model)){
+                return $item;
+            }
+        }
+
         $gtin = '';
         $variant_info_error = '';
         //this is a variant
@@ -634,8 +647,7 @@ class google_mc
             //a variant should have its own gtin, but this is not a core function and best added to whatever plugin is handling the stock
             global $db, $sniffer;
             switch (GOOGLE_PRODUCTS_SWITCH_STOCK_PLUGIN) {
-                case 'numinixproductvariants': //handled in legacy code...to be ported here
-                case 'stockbyattributes'://handled in legacy code...to be ported here
+
                 case 'posm': //ean is not a core feature of posm either, so this is custom code on a plugin!
                     if ($sniffer->field_exists('products_options_stock', 'pos_ean')) {
                         $hash = generate_pos_option_hash($product['products_id'], [$attribute['options_id'] => $attribute['options_values_id']]);
@@ -657,6 +669,8 @@ class google_mc
                         $gtin = empty($posm_record->fields['pos_ean']) ? '' : $posm_record->fields['pos_ean'];
                         $variant_info_error = empty($gtin) && isset($posm_record->fields['pos_mpn']) ? ' (for pos_mpn=' . $posm_record->fields['pos_mpn'] . ') ' : '';
                     }
+                case 'numinixproductvariants': //handled in legacy code...to be ported here by someone
+                case 'stockbyattributes'://handled in legacy code...to be ported here by someone
                 default : //none: no variant-stock handler...so suggest adding a field to the products_attributes table
             }
             //echo '$attribute[\'options_id\']=' . $attribute['options_id'] . ', $attribute[\'options_values_id\']=' . $attribute['options_values_id'] . ', $gtin=' . $gtin . '<br>';
@@ -923,14 +937,25 @@ class google_mc
             $price = $this->google_get_products_actual_price($product['products_id']);
         }
 
+       // echo __LINE__ . ': $price=' . $price . NL;
+       // echo __LINE__ . ': zen_get_products_base_price=' . zen_get_products_base_price($product['products_id']) . NL;
+       // echo __LINE__ . ': zen_get_products_actual_price=' . zen_get_products_actual_price($product['products_id']) . NL;
+       // echo __LINE__ . ': zen_get_attributes_price_final=' . zen_get_attributes_price_final($product['products_id']) . NL;
+
         // for a variant. A world of pain awaits for discounts...so here is only the base price + option price
         if ($attribute) {
+        $price = $product['products_price'];
+           // echo __LINE__ . ': $price=' . $price . NL;
+           // echo __LINE__ . ': $options_values_price=' . $attribute['options_values_price'] . NL;
             if ($attribute['price_prefix'] === '-') {
                 $price -= $attribute['options_values_price'];
+              //  echo __LINE__ . ': $price=' . $price . NL;
             } else {
                 $price += $attribute['options_values_price'];
+               // echo __LINE__ . ': $price=' . $price . NL;
             }
         }
+      //  echo __LINE__ . ': $price=' . $price . NL;
 
         if ($price === '') {
             $this->debug('ERROR: #' . $product['products_id'] . ' - ' . $product['products_model'] . ' - "' . $product['products_name'] . '": price field empty/zero PRODUCT SKIPPED');
@@ -2074,11 +2099,11 @@ class google_mc
 
         $show_display_price = '';
         $display_normal_price = $this->google_get_products_base_price($products_id);
-        //echo $display_normal_price . '<br />';
+        //echo __LINE__ .': $display_normal_price=' . $display_normal_price . '<br>';
         $display_special_price = $this->google_get_products_special_price($products_id, $display_normal_price, true);
-        //echo $display_special_price . '<br />';
+        //echo __LINE__ .': $display_special_price=' . $display_special_price . '<br>';
         $display_sale_price = $this->google_get_products_special_price($products_id, $display_normal_price, false);
-        //echo $display_sale_price . '<br />';
+        //echo __LINE__ .': $display_sale_price=' . $display_sale_price . '<br>';
         $products_actual_price = $display_normal_price;
 
         if ($display_special_price) {
@@ -2173,7 +2198,7 @@ class google_mc
         $specials = $db->Execute('SELECT specials_new_products_price FROM ' . TABLE_SPECIALS . ' WHERE products_id = ' . (int)$product_id . ' AND status = 1');
         if ($specials->RecordCount() > 0) {
 //      if ($product->fields['products_priced_by_attribute'] == 1) {
-            $special_price = $specials->fields['specials_new_products_price'];
+            $special_price = (float)$specials->fields['specials_new_products_price'];
         } else {
             $special_price = false;
         }

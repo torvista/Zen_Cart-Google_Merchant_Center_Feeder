@@ -4,7 +4,7 @@ declare(strict_types=1);
 /**
  * @package Google Merchant Center
  * @link https://github.com/torvista/Zen_Cart-Google_Merchant_Center_Feeder
- * @author: torvista 01 May 2023
+ * @author: torvista 16 June 2023
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
  * @copyright Copyright 2007 Numinix Technology http://www.numinix.com
  * @author original Numinix Technology
@@ -13,16 +13,20 @@ declare(strict_types=1);
  */
 
 require('includes/application_top.php');
-$langSelected = (int)$_GET['langSelected'];
+if (empty($_SESSION)){
+    return;
+}
 $languages = new language();
 $langsMultiple = (count($languages->catalog_languages) > 1);
-$lang_result = $db->Execute('SELECT code, directory FROM ' . TABLE_LANGUAGES . ' WHERE languages_id = ' . $langSelected . ' LIMIT 1');
-$langSelectedCode = $lang_result->fields['code'];
-//$_SESSION['language'] = $lang_result->fields['directory'];
-//$_SESSION['languages_code'] = 'es';
-$_SESSION['languages_id'] = $langSelected;
+$langSelectedCode = !empty($_GET['langSelected']) ? zen_db_prepare_input($_GET['langSelected']) : GOOGLE_PRODUCTS_LANGUAGE;
+$languages->set_language($langSelectedCode);
+$langSelected= $db->Execute('SELECT languages_id, code, directory FROM ' . TABLE_LANGUAGES . ' WHERE code = "' . $langSelectedCode . '" LIMIT 1');
+$_SESSION['language'] = $langSelected->fields['directory'];
+$_SESSION['languages_code'] = $langSelected->fields['code'];
+$_SESSION['languages_id'] = $langSelected->fields['languages_id'];
 
-require(DIR_WS_LANGUAGES . $_SESSION['language'] . '/plugin_google_mc.php');
+//use selected language for texts
+require(DIR_WS_LANGUAGES . $langSelected->fields['directory'] . '/plugin_google_mc.php');
 require(DIR_WS_CLASSES . 'plugin_google_mc.php');
 
 $google_mc = new google_mc();
@@ -219,12 +223,11 @@ if (isset($feed) && $feed === 'yes') {
 
     } else {
 
-       // apply normal user-defined filters
+       // apply normal user-defined filters defined in extra_datafiles
         if (count($excluded_products) > 0) {
             $excluded_products = implode(',', $excluded_products);
             $and_not_excluded_products = ' AND p.products_id NOT IN (' . $excluded_products . ')';
         }
-
         if (count($excluded_models) > 0) {
             foreach ($excluded_models as $excluded_model) {
                 $and_not_excluded_models .= "'" . $excluded_model . "', ";
@@ -232,7 +235,6 @@ if (isset($feed) && $feed === 'yes') {
             $and_not_excluded_models = rtrim($and_not_excluded_models, ', ');
             $and_not_excluded_models = ' AND p.products_model NOT IN (' . $and_not_excluded_models . ')';
         }
-
         if (count($excluded_model_ranges) > 0) {
             foreach ($excluded_model_ranges as $excluded_model_range) {
                 $and_not_excluded_model_range .= ' AND p.products_model NOT LIKE "' . $excluded_model_range . '%"' . " \n";
@@ -257,7 +259,7 @@ if (isset($feed) && $feed === 'yes') {
                              AND (p.products_image IS NOT NULL
                                 OR p.products_image != ""
                                 OR p.products_image != "' . PRODUCTS_IMAGE_NO_IMAGE . '")
-                             AND pd.language_id = ' . $langSelected .
+                             AND pd.language_id = ' . (int)$langSelected->fields['languages_id'] .
                              $and_single_productID .
                              $and_not_excluded_products .
                              $and_not_excluded_models .
@@ -308,7 +310,7 @@ if (isset($feed) && $feed === 'yes') {
             default:
                 $suffix = '';
         }
-        $lang_suffix = $langsMultiple ? '_' . $langSelectedCode : '';
+        $lang_suffix = $langsMultiple ? '_' . $langSelected->fields['code'] : '';
         $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . strtolower(STORE_NAME) . '_' . $type . $lang_suffix . $suffix;
     }
     $outfile .= '.xml';
@@ -360,7 +362,7 @@ if (isset($feed) && $feed === 'yes') {
                 $attributes_query_raw = 'SELECT pa.*
                                      FROM (' . TABLE_PRODUCTS_ATTRIBUTES . ' pa
                                      LEFT JOIN ' . TABLE_PRODUCTS_OPTIONS . ' po ON pa.options_id = po.products_options_id
-                                       AND po.language_id = ' . (int)$_SESSION['languages_id'] . ')
+                                       AND po.language_id = ' . (int)$langSelected->fields['languages_id'] . ')
                                      WHERE pa.products_id = ' . (int)$product['products_id'] . "
                                      AND pa.attributes_display_only = 0
                                      ORDER BY LPAD(po.products_options_sort_order,11,'0'),
@@ -375,26 +377,29 @@ if (isset($feed) && $feed === 'yes') {
                 // [price_prefix] +/-
 
                 foreach ($attributes as $attribute) {
+                    //echo '&nbsp;&nbsp;&nbsp;[products_attributes_id]=' . $attribute['products_attributes_id'] . ', [options_values_id]=' . $attribute['options_values_id'] . ', [options_values_price]=' . $attribute['options_values_price'] . NL;
                     // all products
                     $item = $google_mc->create_item($dom);
                     $item = $google_mc->add_common_attributes($dom, $item, $product); // 12 attributes
                     //variant-specific attributes
                     $item = $google_mc->add_title($dom, $item, $product, $attribute); // variant adds suffix ":option_name-option_value"
-                    $item = $google_mc->add_mpn($dom, $item, $product, $attribute); //attribute dependant CUSTOM ***************
-                    $item = $google_mc->add_gtin($dom, $item, $product, $attribute); //attribute dependant CUSTOM **************
-                    $item = $google_mc->add_price($dom, $item, $product, $attribute); //attribute dependant***************
-                    $item = $google_mc->add_shipping_weight($dom, $item, $product, $attribute); //attribute dependant ************
+                    $item = $google_mc->add_mpn($dom, $item, $product, $attribute); // attribute dependant CUSTOM ***************
+                    $item = $google_mc->add_gtin($dom, $item, $product, $attribute); // attribute dependant CUSTOM **************
+                    $item = $google_mc->add_price($dom, $item, $product, $attribute); // attribute dependant***************
+                    $item = $google_mc->add_shipping_weight($dom, $item, $product, $attribute); // attribute dependant ************
                     //only for variants
                     $item = $google_mc->add_item_group_id($dom, $item, $product); // same identifier for all variants
-                    $item = $google_mc->add_variant_attribute($dom, $item, $product, $attribute); //attribute dependant CUSTOM ************
+                    $item = $google_mc->add_variant_attribute($dom, $item, $product, $attribute); // attribute dependant CUSTOM ************
                     //color [color], pattern [pattern], material [material], age group [age_group], gender [gender], size[size].
+                    //add item to xml file
+                    $channel->appendChild($item);
                 }
             }
         } else {
             // simple product
-            // all products
+            //echo 'simple product #' . $product['products_id'] . ' - ' . $product['products_model'] . ' - "' . $product['products_name'] . '": HAS ATTRIBUTES' . NL;
             $item = $google_mc->create_item($dom);
-            $item = $google_mc->add_common_attributes($dom, $item, $product); // 12 atttributes
+            $item = $google_mc->add_common_attributes($dom, $item, $product); // 12 attributes
             $item = $google_mc->add_title($dom, $item, $product);
             //$item = $google_mc->add_id($dom, $item, $product); // common attribute
             //$item = $google_mc->add_brand($dom, $item, $product); // common attribute
@@ -413,13 +418,13 @@ if (isset($feed) && $feed === 'yes') {
             //$item = $google_mc->add_link($dom, $item, $product); // common attribute
             //$item = $google_mc->add_description($dom, $item, $product); // common attribute
             $item = $google_mc->add_is_bundle($dom, $item, $product);
+            //add item to xml file
+            $channel->appendChild($item);
         }
         if ($google_mc->skip_product) {
             echo '#' . $product['products_id'] . ' - ' . $product['products_model'] . ' - "' . $product['products_name'] . '": <span class="errorText">skipped due to an error in attribute creation</span>: see the <a target="_blank" href="' . $logfile_link . '">debug log</a>.' . NL;
             continue;
         }
-        //add item to xml file
-        $channel->appendChild($item);
         if (GOOGLE_PRODUCTS_DEBUG === '3') {
             echo '#' . $product['products_id'] . ' - ' . $product['products_model'] . ' - "' . $product['products_name'] . '": added' . NL;
         }
