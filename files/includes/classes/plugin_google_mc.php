@@ -18,6 +18,7 @@ class google_mc
     protected $debug;
     public $debug_log_file;
     public $skip_product = false;
+    public int $total_valid_products;
 
     public function __construct()
     {
@@ -41,6 +42,7 @@ class google_mc
                 error_log('GMC: custom shipping file not found: "' . $custom_datafile . '"');
             }
         }
+        $this->total_valid_products = $this->count_valid_products();
     }
 
     protected $image_files;

@@ -81,7 +81,10 @@ if (isset($_GET['action']) && ($_GET['action'] === 'delete')) {
     }
     zen_redirect(zen_href_link(FILENAME_GOOGLE_MERCHANT_CENTER));
 }
-// sticky limit: TODO not working yet, need to add parameters to the js reload after the form submission
+$num_files_required = ceil($google_mc->total_valid_products / (int)GOOGLE_PRODUCTS_MAX_PRODUCTS);
+// file_suffix:
+$suffix = !empty($_GET['suffix']) ? (int)$_GET['suffix'] : '';
+// sticky limit: TODO not working with respect to the javascript redirect yet, need to add parameters to the js reload after the form submission
 $limit = !empty($_GET['limit']) ? (int)$_GET['limit'] : (int)GOOGLE_PRODUCTS_MAX_PRODUCTS;
 // sticky offset
 $offset = !empty($_GET['offset']) ? (int)$_GET['offset'] : GOOGLE_PRODUCTS_START_PRODUCTS;
@@ -254,7 +257,11 @@ require(DIR_WS_INCLUDES . 'header.php');
                 echo zen_draw_hidden_field('languageAdmin', $_SESSION['language']); // pass the currently selected Admin language to the popup, but not affect the shopfront selected language
                 ?>
 
-                <label for="limit" class="control-label"><?= TEXT_ENTRY_LIMIT . zen_draw_input_field('limit', $limit, 'class="limiters" id="limit"'); ?></label> <span>(total valid products <?= $google_mc->count_valid_products(); ?>)</span><br>
+                <p>Total valid products=<?= $google_mc->total_valid_products; ?>, files required=<?= $num_files_required; ?></p>
+
+                <label for="suffix" class="control-label">File Suffix <?= zen_draw_input_field('suffix', $suffix, 'class="limiters" id="suffix"'); ?></label><br>
+
+                <label for="limit" class="control-label"><?= TEXT_ENTRY_LIMIT . zen_draw_input_field('limit', $limit, 'class="limiters" id="limit"'); ?></label><br>
 
                 <label for="offset" class="control-label"><?= TEXT_ENTRY_OFFSET . zen_draw_input_field('offset', $offset, 'class="limiters" id="offset"'); ?></label><br>
 
@@ -349,9 +356,7 @@ require(DIR_WS_INCLUDES . 'header.php');
                             <tr>
                                 <td><?= $date; ?></td>
                                 <td><a href="<?= HTTP_SERVER . DIR_WS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . $file; ?>" target="_blank"><?= $file; ?></a></td>
-                                <td>
-                                    <a href="<?= zen_href_link(FILENAME_GOOGLE_MERCHANT_CENTER, 'file=' . $file . '&action=delete'); ?>"><?= IMAGE_DELETE; ?></a>
-                                </td>
+                                <td><a href="<?= zen_href_link(FILENAME_GOOGLE_MERCHANT_CENTER, 'file=' . $file . '&action=delete'); ?>"><?= IMAGE_DELETE; ?></a></td>
                             </tr>
                             <?php
                         }

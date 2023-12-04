@@ -68,6 +68,9 @@ const NL = "<br>\n";
 $anti_timeout_counter = 0; //for timeout issues as well as counting number of products processed
 
 // process parameters: e.g.?feed=fn_uy_tp&upload_file=MYFILE_products_en.xml&key=eeb6cf1423
+if (empty($_GET['feed'])) {
+    die('no feed parameter!');
+}
 $parameters = explode('_', $_GET['feed']); // ?feed=fy_uy_tp
 $feed_parameter = $parameters[0]; // e.g. 'fn'
 $feed = $google_mc->get_feed($feed_parameter);
@@ -90,7 +93,7 @@ if (isset($_GET['upload_file'])) {
 
 //Query modifiers
 //constant GOOGLE_PRODUCTS_MAX_PRODUCTS is an empirical limit probably based on server memory: pre-filled on Admin page.
-
+$suffix = empty($_GET['suffix']) ? '' : (int)$_GET['suffix']; //file number 1,2 etc.
 $limit = empty($_GET['limit']) ? 0 : (int)$_GET['limit'];
 $offset = empty($_GET['offset']) ? 1 : (int)$_GET['offset'];
 $singleID = empty($_GET['singleID']) ? '' : (int)$_GET['singleID'];
@@ -280,6 +283,9 @@ if (isset($feed) && $feed === 'yes') {
         //create a suffix from the limit and offset...
         //echo '$limit='.$limit.', $offset='.$offset.', $products_count='.$products_count.NL;
         switch (true) {
+            case(!empty($suffix)):
+                $suffix = '_' . $suffix;
+                break;
             case($limit === 0 && $offset === 1):
             case($limit > $products_count_all && $offset === 1):
                 //all products
@@ -314,7 +320,7 @@ if (isset($feed) && $feed === 'yes') {
         $outfile = DIR_FS_CATALOG . GOOGLE_PRODUCTS_DIRECTORY . strtolower(STORE_NAME) . '_' . $type . $lang_suffix . $suffix;
     }
     $outfile .= '.xml';
-    echo '<p>' . TEXT_GOOGLE_PRODUCTS_FILE_LOCATION . NL . (($upload_file !== '') ? $upload_file : $outfile) . '</p>';
+    echo '<p>' . TEXT_GOOGLE_PRODUCTS_FILE_LOCATION . NL . str_replace(DIR_FS_CATALOG , '/', ($upload_file !== '') ? $upload_file : $outfile) . '</p>';
     echo '<p>' . TEXT_GOOGLE_PRODUCTS_PROCESSING . '</p>';
 
     $default_google_product_category = $google_mc->google_base_xml_sanitizer(GOOGLE_PRODUCTS_DEFAULT_PRODUCT_CATEGORY);
