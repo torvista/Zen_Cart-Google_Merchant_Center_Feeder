@@ -4,7 +4,7 @@ I found the previous version very difficult to understand and to so to modify...
 
 A spreadsheet is included in the docs: GMC Feed info.ods to provide more detail per attribute.
 
-## Current Status May 2023
+## March 2024
 Working, but liable to minor changes as per GMC complaints...
 
 This readme and the upgrade script are up to date, but NOT the install script: so this is usable for this who wish to try this out on their dev sever that already has a previous v15.
@@ -12,6 +12,7 @@ This readme and the upgrade script are up to date, but NOT the install script: s
 Tested on Zen Cart 158a, php 7.3-8.2.5.
 Do not install this OR ANY PLUGIN on a production server before testing on a development server.
 
+No further work will be carried out on this branch: development will be added to https://github.com/lat9/gpsf
 ## Upgrading
 1. In the Admin, copy the text from GOOGLE_PRODUCTS_DESCRIPTION to the storefront language file:
 define('GOOGLE_MC_PRODUCTS_FEED_DESCRIPTION', GOOGLE_PRODUCTS_DESCRIPTION);
